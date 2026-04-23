@@ -275,6 +275,12 @@ export interface Product {
   };
   priceInUSDEnabled?: boolean | null;
   priceInUSD?: number | null;
+  title: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
   eyebrow?: string | null;
   badges?:
     | {
@@ -1910,6 +1916,9 @@ export interface ProductsSelect<T extends boolean = true> {
   variants?: T;
   priceInUSDEnabled?: T;
   priceInUSD?: T;
+  title?: T;
+  generateSlug?: T;
+  slug?: T;
   eyebrow?: T;
   badges?:
     | T
