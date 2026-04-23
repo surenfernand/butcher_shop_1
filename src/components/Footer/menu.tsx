@@ -1,9 +1,10 @@
+// src/components/Footer/menu.tsx
+
+import React from 'react'
+import { CMSLink } from '@/components/Link'
 import type { Footer } from '@/payload-types'
 
-import { CMSLink } from '@/components/Link'
-import React from 'react'
-
-interface Props {
+type Props = {
   menu: Footer['navItems']
 }
 
@@ -11,16 +12,16 @@ export function FooterMenu({ menu }: Props) {
   if (!menu?.length) return null
 
   return (
-    <nav>
-      <ul>
-        {menu.map((item) => {
-          return (
-            <li key={item.id}>
-              <CMSLink appearance="link" {...item.link} />
-            </li>
-          )
-        })}
-      </ul>
-    </nav>
+    <ul className="flex flex-col gap-4">
+      {menu.map(({ id, link }) => (
+        <li key={id}>
+          <CMSLink
+            {...link}
+            appearance="inline"
+            className="text-xs uppercase tracking-[0.22em] text-[#8f8f8f] transition-colors hover:text-[#d4a63c]"
+          />
+        </li>
+      ))}
+    </ul>
   )
 }

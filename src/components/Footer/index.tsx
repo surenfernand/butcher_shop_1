@@ -1,65 +1,132 @@
-import type { Footer } from '@/payload-types'
+// src/components/Footer/index.tsx
 
+import type { Footer as FooterType } from '@/payload-types'
 import { FooterMenu } from '@/components/Footer/menu'
-import { ThemeSelector } from '@/providers/Theme/ThemeSelector'
+import { CMSLink } from '@/components/Link'
+import { LogoIcon } from '@/components/icons/logo'
 import { getCachedGlobal } from '@/utilities/getGlobals'
 import Link from 'next/link'
 import React, { Suspense } from 'react'
-import { LogoIcon } from '@/components/icons/logo'
-
-const { COMPANY_NAME, SITE_NAME } = process.env
 
 export async function Footer() {
-  const footer: Footer = await getCachedGlobal('footer', 1)()
+  const footer: FooterType = await getCachedGlobal('footer', 1)()
   const menu = footer.navItems || []
+  const socialLinks = footer.socialLinks || []
   const currentYear = new Date().getFullYear()
-  const copyrightDate = 2023 + (currentYear > 2023 ? `-${currentYear}` : '')
-  const skeleton = 'w-full h-6 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700'
-
-  const copyrightName = COMPANY_NAME || SITE_NAME || ''
 
   return (
-    <footer className="text-sm text-neutral-500 dark:text-neutral-400">
-      <div className="container">
-        <div className="flex w-full flex-col gap-6 border-t border-neutral-200 py-12 text-sm md:flex-row md:gap-12 dark:border-neutral-700">
-          <div>
-            <Link className="flex items-center gap-2 text-black md:pt-1 dark:text-white" href="/">
-              <LogoIcon className="w-6" />
-              <span className="sr-only">{SITE_NAME}</span>
+    <footer className="border-t border-[#1a1a1a] bg-black text-[#8f8f8f]">
+      <div className="mx-auto max-w-7xl px-6 py-16 md:px-10 lg:px-12">
+        <div className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr]">
+          {/* Brand / Description */}
+          <div className="max-w-md">
+            <Link
+              href="/"
+              className="mb-6 flex items-center gap-3 text-[#d4a63c] transition-opacity hover:opacity-80"
+            >
+              <LogoIcon className="w-6 text-[#d4a63c]" />
+              <span className="text-xl font-semibold uppercase tracking-wide">
+                {footer.brandName || 'Filet Gourmet Atelier'}
+              </span>
             </Link>
-          </div>
-          <Suspense
-            fallback={
-              <div className="flex h-[188px] w-[200px] flex-col gap-2">
-                <div className={skeleton} />
-                <div className={skeleton} />
-                <div className={skeleton} />
-                <div className={skeleton} />
-                <div className={skeleton} />
-                <div className={skeleton} />
+
+            {footer.description && (
+              <p className="mb-8 text-sm leading-7 text-[#9b9b9b]">
+                {footer.description}
+              </p>
+            )}
+
+            {(socialLinks?.length ?? 0) > 0 && (
+              <div className="flex items-center gap-3">
+                {socialLinks.map(({ id, link }) => (
+                  <CMSLink
+                    key={id}
+                    {...link}
+                    appearance="inline"
+                    className="flex h-10 w-10 items-center justify-center border border-[#2a2a2a] text-[#bdbdbd] transition-all hover:border-[#d4a63c] hover:text-[#d4a63c]"
+                  />
+                ))}
               </div>
-            }
-          >
-            <FooterMenu menu={menu} />
-          </Suspense>
-          <div className="md:ml-auto flex flex-col gap-4 items-end">
-            <ThemeSelector />
+            )}
+          </div>
+
+          {/* Explore */}
+          <div>
+            <h3 className="mb-6 text-xs uppercase tracking-[0.28em] text-[#d4a63c]">
+              Explore
+            </h3>
+
+            <Suspense fallback={null}>
+              <FooterMenu menu={menu} />
+            </Suspense>
+          </div>
+
+          {/* Concierge / Contact */}
+          <div>
+            <h3 className="mb-6 text-xs uppercase tracking-[0.28em] text-[#d4a63c]">
+              Concierge
+            </h3>
+
+            <div className="flex flex-col gap-3">
+              {footer.contactEmail && (
+                <a
+                  href={`mailto:${footer.contactEmail}`}
+                  className="text-xs uppercase tracking-[0.22em] text-[#8f8f8f] transition-colors hover:text-[#d4a63c]"
+                >
+                  {footer.contactEmail}
+                </a>
+              )}
+
+              {footer.contactPhone && (
+                <a
+                  href={`tel:${footer.contactPhone}`}
+                  className="text-xs uppercase tracking-[0.22em] text-[#8f8f8f] transition-colors hover:text-[#d4a63c]"
+                >
+                  {footer.contactPhone}
+                </a>
+              )}
+
+              {footer.address && (
+                <p className="whitespace-pre-line text-xs uppercase tracking-[0.18em] leading-6 text-[#8f8f8f]">
+                  {footer.address}
+                </p>
+              )}
+
+              {footer.bottomBar?.locationText && (
+                <p className="text-xs uppercase tracking-[0.22em] text-[#8f8f8f]">
+                  {footer.bottomBar.locationText}
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>
-      <div className="border-t border-neutral-200 py-6 text-sm dark:border-neutral-700">
-        <div className="container mx-auto flex w-full flex-col items-center gap-1 md:flex-row md:gap-0">
+
+      {/* Bottom bar */}
+      <div className="border-t border-[#1a1a1a]">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-6 text-[10px] uppercase tracking-[0.26em] text-[#5f5f5f] md:flex-row md:items-center md:justify-between md:px-10 lg:px-12">
           <p>
-            &copy; {copyrightDate} {copyrightName}
-            {copyrightName.length && !copyrightName.endsWith('.') ? '.' : ''} All rights reserved.
+            © {currentYear} {footer.brandName || 'Filet Gourmet Atelier'}. All rights reserved.
           </p>
-          <hr className="mx-4 hidden h-4 w-px border-l border-neutral-400 md:inline-block" />
-          <p>Designed in Michigan</p>
-          <p className="md:ml-auto">
-            <a className="text-black dark:text-white" href="https://payloadcms.com">
-              Crafted by Payload
-            </a>
-          </p>
+
+          {footer.bottomBar?.legalText && <p>{footer.bottomBar.legalText}</p>}
+
+          {footer.bottomBar?.creditLabel && (
+            <p>
+              {footer.bottomBar.creditUrl ? (
+                <a
+                  href={footer.bottomBar.creditUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-[#d4a63c]"
+                >
+                  {footer.bottomBar.creditLabel}
+                </a>
+              ) : (
+                <span>{footer.bottomBar.creditLabel}</span>
+              )}
+            </p>
+          )}
         </div>
       </div>
     </footer>

@@ -2295,6 +2295,11 @@ export interface Header {
  */
 export interface Footer {
   id: number;
+  brandName: string;
+  description?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  address?: string | null;
   navItems?:
     | {
         link: {
@@ -2310,6 +2315,27 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  socialLinks?:
+    | {
+        link: {
+          type?: ('reference' | 'custom') | null;
+          newTab?: boolean | null;
+          reference?: {
+            relationTo: 'pages';
+            value: number | Page;
+          } | null;
+          url?: string | null;
+          label: string;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  bottomBar?: {
+    legalText?: string | null;
+    locationText?: string | null;
+    creditLabel?: string | null;
+    creditUrl?: string | null;
+  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2374,6 +2400,11 @@ export interface HeaderSelect<T extends boolean = true> {
  * via the `definition` "footer_select".
  */
 export interface FooterSelect<T extends boolean = true> {
+  brandName?: T;
+  description?: T;
+  contactEmail?: T;
+  contactPhone?: T;
+  address?: T;
   navItems?:
     | T
     | {
@@ -2387,6 +2418,28 @@ export interface FooterSelect<T extends boolean = true> {
               label?: T;
             };
         id?: T;
+      };
+  socialLinks?:
+    | T
+    | {
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+            };
+        id?: T;
+      };
+  bottomBar?:
+    | T
+    | {
+        legalText?: T;
+        locationText?: T;
+        creditLabel?: T;
+        creditUrl?: T;
       };
   updatedAt?: T;
   createdAt?: T;

@@ -93,7 +93,7 @@ export const seed = async ({
       payload.updateGlobal({
         slug: global,
         data: {
-          navItems: [],
+          // navItems: [],
         },
         depth: 0,
         context: {
@@ -534,43 +534,68 @@ export const seed = async ({
         ],
       },
     }),
-    payload.updateGlobal({
+    // src/endpoints/seed/index.ts
+
+    await payload.updateGlobal({
       slug: 'footer',
       data: {
+        brandName: 'Butcher Shop',
+        description:
+          'Premium cuts, curated boxes, and neighborhood service for everyday cooking and special occasions.',
+        contactEmail: 'hello@butchershop.com',
+        contactPhone: '+1 (555) 123-4567',
+        address: '123 Market Street\nColombo, Sri Lanka',
         navItems: [
           {
             link: {
               type: 'custom',
-              label: 'Admin',
-              url: '/admin',
+              label: 'Shop',
+              url: '/shop',
             },
           },
           {
             link: {
               type: 'custom',
-              label: 'Find my order',
-              url: '/find-order',
+              label: 'Our Story',
+              url: '/our-story',
             },
           },
           {
             link: {
               type: 'custom',
-              label: 'Source Code',
-              newTab: true,
-              url: 'https://github.com/payloadcms/payload/tree/main/templates/website',
-            },
-          },
-          {
-            link: {
-              type: 'custom',
-              label: 'Payload',
-              newTab: true,
-              url: 'https://payloadcms.com/',
+              label: 'Contact',
+              url: '/contact',
             },
           },
         ],
+        socialLinks: [
+          {
+            link: {
+              type: 'custom',
+              label: 'Instagram',
+              url: 'https://instagram.com',
+            },
+          },
+          {
+            link: {
+              type: 'custom',
+              label: 'Facebook',
+              url: 'https://facebook.com',
+            },
+          },
+        ],
+        bottomBar: {
+          legalText: 'All rights reserved.',
+          locationText: 'Serving fresh cuts daily.',
+          creditLabel: 'Built by Empower Digital Data',
+          creditUrl: 'https://empowerdigitaldata.com',
+        },
       },
-    }),
+      depth: 0,
+      context: {
+        disableRevalidate: true,
+      },
+    })
   ])
 
   payload.logger.info('Seeded database successfully!')
