@@ -14,26 +14,24 @@ import { notFound } from 'next/navigation'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
+
   const pages = await payload.find({
     collection: 'pages',
-    draft: false,
     limit: 1000,
-    overrideAccess: false,
+    depth: 0,
     pagination: false,
-    select: {
-      slug: true,
+    where: {
+      _status: {
+        equals: 'published',
+      },
     },
   })
 
-  const params = pages.docs
-    ?.filter((doc) => {
-      return doc.slug !== 'home'
-    })
-    .map(({ slug }) => {
-      return { slug }
-    })
-
-  return params
+  return pages.docs
+    .filter((doc) => doc.slug && doc.slug !== 'home')
+    .map((doc) => ({
+      slug: doc.slug,
+    }))
 }
 
 type Args = {
@@ -62,9 +60,11 @@ export default async function Page({ params }: Args) {
   const { hero, layout } = page
 
   return (
-    <article className="pt-16 pb-24">
-      <RenderHero {...hero} />
-      <RenderBlocks blocks={layout} />
+    <article>
+      <div className="pt-20">
+        <RenderHero {...hero} />
+        <RenderBlocks blocks={layout} />
+      </div>
     </article>
   )
 }

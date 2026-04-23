@@ -39,48 +39,64 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
         collection: 'products',
         req,
       }),
-    useAsTitle: 'title',
   },
   defaultPopulate: {
     ...defaultCollection?.defaultPopulate,
     title: true,
     slug: true,
+    gallery: true,
+    categories: true,
+    meta: true,
     variantOptions: true,
     variants: true,
     enableVariants: true,
-    gallery: true,
     priceInUSD: true,
     inventory: true,
-    meta: true,
+    productGallery: true,
   },
   fields: [
-    { name: 'title', type: 'text', required: true },
+    ...(defaultCollection?.fields || []),
+
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+
+    slugField({
+      fieldToUse: 'title',
+    }),
+
     {
       type: 'tabs',
       tabs: [
         {
+          label: 'Luxury Product Content',
           fields: [
             {
-              name: 'description',
-              type: 'richText',
-              editor: lexicalEditor({
-                features: ({ rootFeatures }) => {
-                  return [
-                    ...rootFeatures,
-                    HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
-                    FixedToolbarFeature(),
-                    InlineToolbarFeature(),
-                    HorizontalRuleFeature(),
-                  ]
-                },
-              }),
-              label: false,
-              required: false,
+              name: 'eyebrow',
+              type: 'text',
+              label: 'Eyebrow',
+              defaultValue: 'Curated Collection',
             },
             {
-              name: 'gallery',
+              name: 'badges',
               type: 'array',
-              minRows: 1,
+              label: 'Badges',
+              maxRows: 4,
+              fields: [
+                {
+                  name: 'label',
+                  type: 'text',
+                  required: true,
+                },
+              ],
+            },
+            {
+              name: 'productGallery',
+              type: 'array',
+              label: 'Gallery Images',
+              maxRows: 6,
               fields: [
                 {
                   name: 'image',
@@ -88,125 +104,99 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
                   relationTo: 'media',
                   required: true,
                 },
+              ],
+            },
+            {
+              name: 'whatsInside',
+              type: 'array',
+              label: "What's Inside",
+              fields: [
                 {
-                  name: 'variantOption',
-                  type: 'relationship',
-                  relationTo: 'variantOptions',
-                  admin: {
-                    condition: (data) => {
-                      return data?.enableVariants === true && data?.variantTypes?.length > 0
-                    },
-                  },
-                  filterOptions: ({ data }) => {
-                    if (data?.enableVariants && data?.variantTypes?.length) {
-                      const variantTypeIDs = data.variantTypes.map((item: any) => {
-                        if (typeof item === 'object' && item?.id) {
-                          return item.id
-                        }
-                        return item
-                      }) as DefaultDocumentIDType[]
-
-                      if (variantTypeIDs.length === 0)
-                        return {
-                          variantType: {
-                            in: [],
-                          },
-                        }
-
-                      const query: Where = {
-                        variantType: {
-                          in: variantTypeIDs,
-                        },
-                      }
-
-                      return query
-                    }
-
-                    return {
-                      variantType: {
-                        in: [],
-                      },
-                    }
-                  },
+                  name: 'quantity',
+                  type: 'text',
+                  required: true,
+                },
+                {
+                  name: 'label',
+                  type: 'text',
+                  required: true,
                 },
               ],
             },
-
             {
-              name: 'layout',
-              type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock],
+              name: 'purchaseOptions',
+              type: 'array',
+              label: 'Purchase Options',
+              minRows: 1,
+              maxRows: 2,
+              fields: [
+                {
+                  name: 'label',
+                  type: 'text',
+                  required: true,
+                },
+                {
+                  name: 'price',
+                  type: 'text',
+                  required: true,
+                },
+                {
+                  name: 'subtext',
+                  type: 'text',
+                },
+                {
+                  name: 'highlighted',
+                  type: 'checkbox',
+                  defaultValue: false,
+                },
+              ],
             },
-          ],
-          label: 'Content',
-        },
-        {
-          fields: [
-            ...defaultCollection.fields,
             {
-              name: 'relatedProducts',
-              type: 'relationship',
-              filterOptions: ({ id }) => {
-                if (id) {
-                  return {
-                    id: {
-                      not_in: [id],
-                    },
-                  }
-                }
-
-                // ID comes back as undefined during seeding so we need to handle that case
-                return {
-                  id: {
-                    exists: true,
-                  },
-                }
-              },
-              hasMany: true,
-              relationTo: 'products',
+              name: 'primaryCTA',
+              type: 'group',
+              fields: [
+                { name: 'label', type: 'text', defaultValue: 'Subscribe Now' },
+                { name: 'url', type: 'text', defaultValue: '#' },
+              ],
             },
-          ],
-          label: 'Product Details',
-        },
-        {
-          name: 'meta',
-          label: 'SEO',
-          fields: [
-            OverviewField({
-              titlePath: 'meta.title',
-              descriptionPath: 'meta.description',
-              imagePath: 'meta.image',
-            }),
-            MetaTitleField({
-              hasGenerateFn: true,
-            }),
-            MetaImageField({
-              relationTo: 'media',
-            }),
-
-            MetaDescriptionField({}),
-            PreviewField({
-              // if the `generateUrl` function is configured
-              hasGenerateFn: true,
-
-              // field paths to match the target field for data
-              titlePath: 'meta.title',
-              descriptionPath: 'meta.description',
-            }),
+            {
+              name: 'secondaryCTA',
+              type: 'group',
+              fields: [
+                { name: 'label', type: 'text', defaultValue: 'One-Time Purchase' },
+                { name: 'url', type: 'text', defaultValue: '#' },
+              ],
+            },
+            {
+              name: 'reviewsHeading',
+              type: 'text',
+              defaultValue: 'Reviews',
+            },
+            {
+              name: 'reviewsSummary',
+              type: 'text',
+              defaultValue: '4.9 Based on 128 Reviews',
+            },
+            {
+              name: 'reviews',
+              type: 'array',
+              label: 'Reviews',
+              fields: [
+                { name: 'name', type: 'text', required: true },
+                { name: 'role', type: 'text' },
+                { name: 'body', type: 'textarea', required: true },
+                {
+                  name: 'rating',
+                  type: 'number',
+                  min: 1,
+                  max: 5,
+                  defaultValue: 5,
+                },
+              ],
+            },
           ],
         },
       ],
     },
-    {
-      name: 'categories',
-      type: 'relationship',
-      admin: {
-        position: 'sidebar',
-        sortOptions: 'title',
-      },
-      hasMany: true,
-      relationTo: 'categories',
-    },
-    slugField(),
   ],
 })

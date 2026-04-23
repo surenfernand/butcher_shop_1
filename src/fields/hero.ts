@@ -38,6 +38,32 @@ export const hero: Field = {
       ],
       required: true,
     },
+
+    {
+      name: 'eyebrow',
+      type: 'text',
+      label: 'Eyebrow',
+      admin: {
+        condition: (_, { type } = {}) => type === 'highImpact',
+      },
+    },
+    {
+      name: 'heading',
+      type: 'text',
+      label: 'Heading',
+      admin: {
+        condition: (_, { type } = {}) => type === 'highImpact',
+      },
+    },
+    {
+      name: 'description',
+      type: 'textarea',
+      label: 'Description',
+      admin: {
+        condition: (_, { type } = {}) => type === 'highImpact',
+      },
+    },
+
     {
       name: 'richText',
       type: 'richText',
@@ -52,12 +78,21 @@ export const hero: Field = {
         },
       }),
       label: false,
+      admin: {
+        condition: (_, { type } = {}) => type !== 'highImpact',
+      },
     },
+
     linkGroup({
       overrides: {
         maxRows: 2,
+        admin: {
+          condition: (_, { type } = {}) =>
+            ['highImpact', 'mediumImpact', 'lowImpact'].includes(type),
+        },
       },
     }),
+
     {
       name: 'media',
       type: 'upload',

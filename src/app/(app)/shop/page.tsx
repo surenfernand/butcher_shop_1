@@ -16,7 +16,7 @@ type Props = {
 }
 
 export default async function ShopPage({ searchParams }: Props) {
-  const { q: searchValue, sort, category } = await searchParams
+  const { q: searchValue, sort } = await searchParams
   const payload = await getPayload({ config: configPromise })
 
   const products = await payload.find({
@@ -27,50 +27,37 @@ export default async function ShopPage({ searchParams }: Props) {
       title: true,
       slug: true,
       gallery: true,
-      categories: true,
       priceInUSD: true,
+      meta: true,
     },
-    ...(sort ? { sort } : { sort: 'title' }),
-    ...(searchValue || category
-      ? {
-          where: {
-            and: [
-              {
-                _status: {
-                  equals: 'published',
-                },
-              },
-              ...(searchValue
-                ? [
-                    {
-                      or: [
-                        {
-                          title: {
-                            like: searchValue,
-                          },
-                        },
-                        {
-                          description: {
-                            like: searchValue,
-                          },
-                        },
-                      ],
-                    },
-                  ]
-                : []),
-              ...(category
-                ? [
-                    {
-                      categories: {
-                        contains: category,
-                      },
-                    },
-                  ]
-                : []),
-            ],
+    ...(sort ? { sort: String(sort) } : { sort: 'title' }),
+    where: {
+      and: [
+        {
+          _status: {
+            equals: 'published',
           },
-        }
-      : {}),
+        },
+        ...(searchValue
+          ? [
+              {
+                or: [
+                  {
+                    title: {
+                      like: String(searchValue),
+                    },
+                  },
+                  {
+                    description: {
+                      like: String(searchValue),
+                    },
+                  },
+                ],
+              },
+            ]
+          : []),
+      ],
+    },
   })
 
   const resultsText = products.docs.length > 1 ? 'results' : 'result'
@@ -82,7 +69,7 @@ export default async function ShopPage({ searchParams }: Props) {
           {products.docs?.length === 0
             ? 'There are no products that match '
             : `Showing ${products.docs.length} ${resultsText} for `}
-          <span className="font-bold">&quot;{searchValue}&quot;</span>
+          <span className="font-bold">&quot;{String(searchValue)}&quot;</span>
         </p>
       ) : null}
 

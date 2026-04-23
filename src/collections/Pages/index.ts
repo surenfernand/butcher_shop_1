@@ -1,8 +1,15 @@
 import type { CollectionConfig } from 'payload'
 
 import { Banner } from '@/blocks/Banner/config'
+import { FeaturedCuts } from '@/blocks/FeaturedCuts/config'
+import { InfoSection } from '@/blocks/InfoSection/config'
+import { Testimonials } from '@/blocks/Testimonials/config'
 import { Carousel } from '@/blocks/Carousel/config'
 import { ThreeItemGrid } from '@/blocks/ThreeItemGrid/config'
+import { AboutStory } from '@/blocks/AboutStory/config'
+import { ContactCards } from '@/blocks/ContactCards/config'
+import { VisitSection } from '@/blocks/VisitSection/config'
+import { SocialLinks } from '@/blocks/SocialLinks/config'
 import { generatePreviewPath } from '@/utilities/generatePreviewPath'
 import { adminOnly } from '@/access/adminOnly'
 import { Archive } from '@/blocks/ArchiveBlock/config'
@@ -10,6 +17,7 @@ import { CallToAction } from '@/blocks/CallToAction/config'
 import { Content } from '@/blocks/Content/config'
 import { FormBlock } from '@/blocks/Form/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
+import { ProductGrid } from '@/blocks/ProductGrid/config'
 import { hero } from '@/fields/hero'
 import { slugField } from 'payload'
 import { adminOrPublishedStatus } from '@/access/adminOrPublishedStatus'
@@ -96,6 +104,14 @@ export const Pages: CollectionConfig = {
                 ThreeItemGrid,
                 Banner,
                 FormBlock,
+                FeaturedCuts,
+                InfoSection,
+                Testimonials,
+                AboutStory,
+                ContactCards,
+                VisitSection,
+                SocialLinks,
+                ProductGrid,
               ],
               required: true,
             },
@@ -117,13 +133,9 @@ export const Pages: CollectionConfig = {
             MetaImageField({
               relationTo: 'media',
             }),
-
             MetaDescriptionField({}),
             PreviewField({
-              // if the `generateUrl` function is configured
               hasGenerateFn: true,
-
-              // field paths to match the target field for data
               titlePath: 'meta.title',
               descriptionPath: 'meta.description',
             }),

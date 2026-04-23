@@ -4,6 +4,10 @@
   "description": "Ecommerce template for Payload",
   "license": "MIT",
   "type": "module",
+  "imports": {
+    "@payload-config": "./src/payload.config.ts",
+    "@/*": "./src/*"
+  },
   "scripts": {
     "build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",

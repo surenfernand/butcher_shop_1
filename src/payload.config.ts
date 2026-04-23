@@ -16,11 +16,12 @@ import { fileURLToPath } from 'url'
 
 import { Categories } from '@/collections/Categories'
 import { Media } from '@/collections/Media'
-import { Pages } from '@/collections/Pages'
+import { Pages } from '@/collections/Pages/index'
 import { Users } from '@/collections/Users'
 import { Footer } from '@/globals/Footer'
 import { Header } from '@/globals/Header'
 import { plugins } from './plugins'
+// import { Products } from './collections/Products/Products'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
