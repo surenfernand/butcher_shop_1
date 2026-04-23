@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import ProductGallery from '@/components/product/ProductGallery'
 import ProductDetails from '@/components/product/ProductDetails'
 import ProductReviews from '@/components/product/ProductReviews'
+import Breadcrumbs from '@/components/Breadcrumbs/Breadcrumbs'
 
 type Args = {
   params: {
@@ -12,7 +13,7 @@ type Args = {
 }
 
 export default async function ProductPage({ params }: Args) {
-    const { slug } = await params 
+  const { slug } = await params
 
   if (!slug) return notFound()
 
@@ -37,6 +38,13 @@ export default async function ProductPage({ params }: Args) {
   return (
     <main className="bg-black pt-32 pb-20 text-white">
       <div className="container">
+        <Breadcrumbs
+          items={[
+            { label: 'Home', href: '/' },
+            { label: 'Shop', href: '/shop' },
+            { label: product.title || 'Product' },
+          ]}
+        />
         <div className="grid grid-cols-1 gap-16 lg:grid-cols-12">
           <div className="lg:col-span-7">
             <ProductGallery product={product} />

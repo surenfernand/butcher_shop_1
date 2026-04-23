@@ -18,7 +18,7 @@ async function List() {
 
   const categories = categoriesData.docs?.map((category) => {
     return {
-      href: `/shop/${category.slug}`,
+      href: `/shop?category=${category.slug}`,
       title: category.title,
     }
   })

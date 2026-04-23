@@ -21,10 +21,18 @@ import { Users } from '@/collections/Users'
 import { Footer } from '@/globals/Footer'
 import { Header } from '@/globals/Header'
 import { plugins } from './plugins'
-// import { Products } from './collections/Products/Products'
+import { ShopPage } from '@/globals/ShopPage'
+import { CutTypes } from './collections/ProductCategories/CutTypes'
+import { MeatTypes } from './collections/ProductCategories/MeatTypes'
+import { Qualities } from './collections/ProductCategories/Qualities'
+import { Flavors } from './collections/ProductCategories/Flavors'
+import { ShopLuxuryPage } from './globals/ShopLuxuryPage'
+
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+
 
 export default buildConfig({
   admin: {
@@ -38,7 +46,18 @@ export default buildConfig({
     },
     user: Users.slug,
   },
-  collections: [Users, Pages, Categories, Media],
+  collections: [
+    Users,
+    Pages,
+    Categories,
+    Media,
+
+    MeatTypes,
+    CutTypes,
+    Qualities,
+    Flavors,
+  ],
+
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
@@ -81,7 +100,7 @@ export default buildConfig({
   }),
   //email: nodemailerAdapter(),
   endpoints: [],
-  globals: [Header, Footer],
+  globals: [Header, Footer, ShopPage, ShopLuxuryPage],
   plugins,
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

@@ -1,30 +1,19 @@
-import { CallToAction } from '@/blocks/CallToAction/config'
-import { Content } from '@/blocks/Content/config'
-import { MediaBlock } from '@/blocks/MediaBlock/config'
 import { slugField } from 'payload'
 import { generatePreviewPath } from '@/utilities/generatePreviewPath'
 import { CollectionOverride } from '@payloadcms/plugin-ecommerce/types'
-import {
-  MetaDescriptionField,
-  MetaImageField,
-  MetaTitleField,
-  OverviewField,
-  PreviewField,
-} from '@payloadcms/plugin-seo/fields'
-import {
-  FixedToolbarFeature,
-  HeadingFeature,
-  HorizontalRuleFeature,
-  InlineToolbarFeature,
-  lexicalEditor,
-} from '@payloadcms/richtext-lexical'
-import { DefaultDocumentIDType, Where } from 'payload'
 
 export const ProductsCollection: CollectionOverride = ({ defaultCollection }) => ({
   ...defaultCollection,
   admin: {
     ...defaultCollection?.admin,
-    defaultColumns: ['title', 'enableVariants', '_status', 'variants.variants'],
+    defaultColumns: [
+      'title',
+      'cutType',
+      'agingProcess',
+      'origin',
+      'priceInUSD',
+      '_status',
+    ],
     livePreview: {
       url: ({ data, req }) =>
         generatePreviewPath({
@@ -53,6 +42,14 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
     priceInUSD: true,
     inventory: true,
     productGallery: true,
+    shopCardLabel: true,
+    shopCardShortDescription: true,
+    origin: true,
+    cutType: true,
+    agingProcess: true,
+    sortPriority: true,
+    cardButtonLabel: true,
+    featuredInShop: true,
   },
   fields: [
     ...(defaultCollection?.fields || []),
@@ -71,6 +68,176 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
       type: 'tabs',
       tabs: [
         {
+          label: 'Shop Card Content',
+          fields: [
+            {
+              name: 'shopCardLabel',
+              type: 'text',
+              label: 'Card Label',
+              defaultValue: 'Chef’s Selection',
+            },
+            {
+              name: 'shopCardShortDescription',
+              type: 'textarea',
+              label: 'Card Short Description',
+            },
+            {
+              name: 'cutType',
+              type: 'select',
+              required: true,
+              options: [
+                { label: 'Prime Rib', value: 'prime-rib' },
+                { label: 'Wagyu Strips', value: 'wagyu-strips' },
+                { label: 'Filet Mignon', value: 'filet-mignon' },
+                { label: 'Tomahawk', value: 'tomahawk' },
+              ],
+            },
+            {
+              name: 'agingProcess',
+              type: 'select',
+              required: true,
+              options: [
+                { label: 'Dry-Aged', value: 'dry-aged' },
+                { label: 'Wet-Aged', value: 'wet-aged' },
+              ],
+            },
+            {
+              name: 'origin',
+              type: 'select',
+              required: true,
+              options: [
+                { label: 'Japanese Heritage', value: 'japanese-heritage' },
+                { label: 'Black Angus Heritage', value: 'black-angus-heritage' },
+                { label: 'Midwest Corn-Fed', value: 'midwest-corn-fed' },
+              ],
+            },
+            {
+              name: 'sortPriority',
+              type: 'number',
+              defaultValue: 0,
+            },
+            {
+              name: 'featuredInShop',
+              type: 'checkbox',
+              defaultValue: true,
+            },
+            {
+              name: 'cardButtonLabel',
+              type: 'text',
+              defaultValue: 'Add to Atelier Box',
+            },
+            {
+              name: 'productGallery',
+              type: 'array',
+              label: 'Gallery Images',
+              maxRows: 6,
+              fields: [
+                {
+                  name: 'image',
+                  type: 'upload',
+                  relationTo: 'media',
+                  required: true,
+                },
+              ],
+            },
+
+            // 🥩 Meat Type (Primary filter)
+            {
+              name: 'meatType',
+              type: 'select',
+              options: [
+                { label: 'Beef', value: 'beef' },
+                { label: 'Chicken', value: 'chicken' },
+                { label: 'Pork', value: 'pork' },
+                { label: 'Lamb / Mutton', value: 'lamb' },
+                { label: 'Seafood', value: 'seafood' },
+                { label: 'Turkey', value: 'turkey' },
+                { label: 'Processed Meats', value: 'processed' },
+              ],
+            },
+
+            // ⚖️ Weight
+            {
+              name: 'weight',
+              type: 'number',
+            },
+
+            // 🌡️ Storage Type
+            {
+              name: 'storageType',
+              type: 'select',
+              options: [
+                { label: 'Fresh', value: 'fresh' },
+                { label: 'Frozen', value: 'frozen' },
+                { label: 'Chilled', value: 'chilled' },
+                { label: 'Marinated', value: 'marinated' },
+              ],
+            },
+
+            // 🍽️ Preparation Style
+            {
+              name: 'preparationStyle',
+              type: 'select',
+              options: [
+                { label: 'Curry Cut', value: 'curry-cut' },
+                { label: 'BBQ / Grill', value: 'bbq' },
+                { label: 'Stir Fry', value: 'stir-fry' },
+                { label: 'Soup Bones', value: 'soup' },
+                { label: 'Ready to Cook', value: 'ready' },
+              ],
+            },
+
+            // 🌱 Quality
+            {
+              name: 'quality',
+              type: 'select',
+              hasMany: true,
+              options: [
+                { label: 'Organic', value: 'organic' },
+                { label: 'Free Range', value: 'free-range' },
+                { label: 'Grass Fed', value: 'grass-fed' },
+                { label: 'Antibiotic Free', value: 'antibiotic-free' },
+                { label: 'Halal', value: 'halal' },
+              ],
+            },
+
+            // 🧂 Flavor
+            {
+              name: 'flavor',
+              type: 'select',
+              options: [
+                { label: 'Plain', value: 'plain' },
+                { label: 'Spicy', value: 'spicy' },
+                { label: 'BBQ', value: 'bbq' },
+                { label: 'Herb', value: 'herb' },
+              ],
+            },
+
+            // 🕒 Availability
+            {
+              name: 'inStock',
+              type: 'checkbox',
+              defaultValue: true,
+            },
+
+            // ⭐ Tags
+            {
+              name: 'tags',
+              type: 'select',
+              hasMany: true,
+              options: [
+                { label: 'Best Seller', value: 'best-seller' },
+                { label: 'Top Rated', value: 'top-rated' },
+                { label: 'New Arrival', value: 'new' },
+              ],
+            },
+
+
+
+
+          ],
+        },
+        {
           label: 'Luxury Product Content',
           fields: [
             {
@@ -88,20 +255,6 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
                 {
                   name: 'label',
                   type: 'text',
-                  required: true,
-                },
-              ],
-            },
-            {
-              name: 'productGallery',
-              type: 'array',
-              label: 'Gallery Images',
-              maxRows: 6,
-              fields: [
-                {
-                  name: 'image',
-                  type: 'upload',
-                  relationTo: 'media',
                   required: true,
                 },
               ],
@@ -196,7 +349,11 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
             },
           ],
         },
+
+
       ],
     },
+
+
   ],
 })

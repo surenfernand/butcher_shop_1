@@ -76,6 +76,10 @@ export interface Config {
     pages: Page;
     categories: Category;
     media: Media;
+    'meat-types': MeatType;
+    'cut-types': CutType;
+    qualities: Quality;
+    flavors: Flavor;
     forms: Form;
     'form-submissions': FormSubmission;
     addresses: Address;
@@ -109,6 +113,10 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'meat-types': MeatTypesSelect<false> | MeatTypesSelect<true>;
+    'cut-types': CutTypesSelect<false> | CutTypesSelect<true>;
+    qualities: QualitiesSelect<false> | QualitiesSelect<true>;
+    flavors: FlavorsSelect<false> | FlavorsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     addresses: AddressesSelect<false> | AddressesSelect<true>;
@@ -131,10 +139,14 @@ export interface Config {
   globals: {
     header: Header;
     footer: Footer;
+    'shop-page': ShopPage;
+    'shop-luxury-page': ShopLuxuryPage;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    'shop-page': ShopPageSelect<false> | ShopPageSelect<true>;
+    'shop-luxury-page': ShopLuxuryPageSelect<false> | ShopLuxuryPageSelect<true>;
   };
   locale: null;
   widgets: {
@@ -281,16 +293,32 @@ export interface Product {
    */
   generateSlug?: boolean | null;
   slug: string;
+  shopCardLabel?: string | null;
+  shopCardShortDescription?: string | null;
+  cutType: 'prime-rib' | 'wagyu-strips' | 'filet-mignon' | 'tomahawk';
+  agingProcess: 'dry-aged' | 'wet-aged';
+  origin: 'japanese-heritage' | 'black-angus-heritage' | 'midwest-corn-fed';
+  sortPriority?: number | null;
+  featuredInShop?: boolean | null;
+  cardButtonLabel?: string | null;
+  productGallery?:
+    | {
+        image: number | Media;
+        id?: string | null;
+      }[]
+    | null;
+  meatType?: ('beef' | 'chicken' | 'pork' | 'lamb' | 'seafood' | 'turkey' | 'processed') | null;
+  weight?: number | null;
+  storageType?: ('fresh' | 'frozen' | 'chilled' | 'marinated') | null;
+  preparationStyle?: ('curry-cut' | 'bbq' | 'stir-fry' | 'soup' | 'ready') | null;
+  quality?: ('organic' | 'free-range' | 'grass-fed' | 'antibiotic-free' | 'halal')[] | null;
+  flavor?: ('plain' | 'spicy' | 'bbq' | 'herb') | null;
+  inStock?: boolean | null;
+  tags?: ('best-seller' | 'top-rated' | 'new')[] | null;
   eyebrow?: string | null;
   badges?:
     | {
         label: string;
-        id?: string | null;
-      }[]
-    | null;
-  productGallery?:
-    | {
-        image: number | Media;
         id?: string | null;
       }[]
     | null;
@@ -1187,6 +1215,50 @@ export interface ProductGridBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "meat-types".
+ */
+export interface MeatType {
+  id: number;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cut-types".
+ */
+export interface CutType {
+  id: number;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "qualities".
+ */
+export interface Quality {
+  id: number;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "flavors".
+ */
+export interface Flavor {
+  id: number;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "form-submissions".
  */
 export interface FormSubmission {
@@ -1241,6 +1313,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'meat-types';
+        value: number | MeatType;
+      } | null)
+    | ({
+        relationTo: 'cut-types';
+        value: number | CutType;
+      } | null)
+    | ({
+        relationTo: 'qualities';
+        value: number | Quality;
+      } | null)
+    | ({
+        relationTo: 'flavors';
+        value: number | Flavor;
       } | null)
     | ({
         relationTo: 'forms';
@@ -1697,6 +1785,46 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "meat-types_select".
+ */
+export interface MeatTypesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cut-types_select".
+ */
+export interface CutTypesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "qualities_select".
+ */
+export interface QualitiesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "flavors_select".
+ */
+export interface FlavorsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "forms_select".
  */
 export interface FormsSelect<T extends boolean = true> {
@@ -1919,17 +2047,33 @@ export interface ProductsSelect<T extends boolean = true> {
   title?: T;
   generateSlug?: T;
   slug?: T;
+  shopCardLabel?: T;
+  shopCardShortDescription?: T;
+  cutType?: T;
+  agingProcess?: T;
+  origin?: T;
+  sortPriority?: T;
+  featuredInShop?: T;
+  cardButtonLabel?: T;
+  productGallery?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  meatType?: T;
+  weight?: T;
+  storageType?: T;
+  preparationStyle?: T;
+  quality?: T;
+  flavor?: T;
+  inStock?: T;
+  tags?: T;
   eyebrow?: T;
   badges?:
     | T
     | {
         label?: T;
-        id?: T;
-      };
-  productGallery?:
-    | T
-    | {
-        image?: T;
         id?: T;
       };
   whatsInside?:
@@ -2171,6 +2315,39 @@ export interface Footer {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "shop-page".
+ */
+export interface ShopPage {
+  id: number;
+  title?: string | null;
+  introText?: string | null;
+  emptyStateText?: string | null;
+  resultsLabelSingle?: string | null;
+  resultsLabelPlural?: string | null;
+  sortLabel?: string | null;
+  filters?: {
+    cutTypeLabel?: string | null;
+    agingProcessLabel?: string | null;
+    originLabel?: string | null;
+    priceRangeLabel?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "shop-luxury-page".
+ */
+export interface ShopLuxuryPage {
+  id: number;
+  eyebrow?: string | null;
+  title?: string | null;
+  sortLabel?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
@@ -2211,6 +2388,41 @@ export interface FooterSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "shop-page_select".
+ */
+export interface ShopPageSelect<T extends boolean = true> {
+  title?: T;
+  introText?: T;
+  emptyStateText?: T;
+  resultsLabelSingle?: T;
+  resultsLabelPlural?: T;
+  sortLabel?: T;
+  filters?:
+    | T
+    | {
+        cutTypeLabel?: T;
+        agingProcessLabel?: T;
+        originLabel?: T;
+        priceRangeLabel?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "shop-luxury-page_select".
+ */
+export interface ShopLuxuryPageSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  sortLabel?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
