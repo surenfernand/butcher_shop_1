@@ -10,7 +10,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
-import { ShoppingCart } from 'lucide-react'
+import { ShoppingCart, X } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -19,7 +19,6 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { DeleteItemButton } from './DeleteItemButton'
 import { EditItemQuantityButton } from './EditItemQuantityButton'
 import { OpenCartButton } from './OpenCart'
-import { Button } from '@/components/ui/button'
 import { Product } from '@/payload-types'
 
 export function CartModal() {
@@ -29,7 +28,6 @@ export function CartModal() {
   const pathname = usePathname()
 
   useEffect(() => {
-    // Close the cart modal when the pathname changes.
     setIsOpen(false)
   }, [pathname])
 
@@ -44,146 +42,222 @@ export function CartModal() {
         <OpenCartButton quantity={totalQuantity} />
       </SheetTrigger>
 
-      <SheetContent className="flex flex-col">
-        <SheetHeader>
-          <SheetTitle>My Cart</SheetTitle>
+      <SheetContent
+        side="right"
+        className="w-full max-w-[410px] border-r border-[#6f5620]/50 bg-[#0a0a0a] p-0 text-white"
+      >
+        <div className="flex h-full flex-col">
+          <SheetHeader className="border-b border-[#1d1d1d] px-7 py-8 text-left">
+            <div className="flex items-start justify-between">
+              <div>
+                <SheetTitle className="text-left text-[2.1rem] font-black uppercase tracking-[-0.02em] text-[#d4a63c]">
+                  Cart
+                </SheetTitle>
 
-          <SheetDescription>Manage your cart here, add items to view the total.</SheetDescription>
-        </SheetHeader>
+              </div>
 
-        {!cart || cart?.items?.length === 0 ? (
-          <div className="text-center flex flex-col items-center gap-2">
-            <ShoppingCart className="h-16" />
-            <p className="text-center text-2xl font-bold">Your cart is empty.</p>
-          </div>
-        ) : (
-          <div className="grow flex px-4">
-            <div className="flex flex-col justify-between w-full">
-              <ul className="grow overflow-auto py-4">
-                {cart?.items?.map((item, i) => {
-                  const product = item.product
-                  const variant = item.variant
+              
+            </div>
+          </SheetHeader>
 
-                  if (typeof product !== 'object' || !item || !product || !product.slug)
-                    return <React.Fragment key={i} />
+          {!cart || cart?.items?.length === 0 ? (
+            <div className="flex flex-1 flex-col items-center justify-center gap-4 px-8 text-center">
+              <ShoppingCart className="h-14 w-14 text-[#d4a63c]" />
+              <p className="text-xl font-bold uppercase tracking-wide text-white">
+                Your cart is empty
+              </p>
+              <p className="text-sm text-[#8a8a8a]">
+              Add Items to view in Cart
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="flex-1 overflow-y-auto px-6 py-4">
+                <ul className="space-y-6">
+                  {cart?.items?.map((item, i) => {
+                    const product = item.product
+                    const variant = item.variant
 
-                  const metaImage =
-                    product.meta?.image && typeof product.meta?.image === 'object'
-                      ? product.meta.image
-                      : undefined
+                    if (typeof product !== 'object' || !item || !product || !product.slug) {
+                      return <React.Fragment key={i} />
+                    }
 
-                  const firstGalleryImage =
-                    typeof product.gallery?.[0]?.image === 'object'
-                      ? product.gallery?.[0]?.image
-                      : undefined
+                    const metaImage =
+                      product.meta?.image && typeof product.meta?.image === 'object'
+                        ? product.meta.image
+                        : undefined
 
-                  let image = firstGalleryImage || metaImage
-                  let price = product.priceInUSD
+                    const firstGalleryImage =
+                      typeof product.gallery?.[0]?.image === 'object'
+                        ? product.gallery?.[0]?.image
+                        : undefined
 
-                  const isVariant = Boolean(variant) && typeof variant === 'object'
+                    let image = firstGalleryImage || metaImage
+                    let price = product.priceInUSD
 
-                  if (isVariant) {
-                    price = variant?.priceInUSD
+                    const isVariant = Boolean(variant) && typeof variant === 'object'
 
-                    const imageVariant = product.gallery?.find((item) => {
-                      if (!item.variantOption) return false
-                      const variantOptionID =
-                        typeof item.variantOption === 'object'
-                          ? item.variantOption.id
-                          : item.variantOption
+                    if (isVariant) {
+                      price = variant?.priceInUSD
 
-                      const hasMatch = variant?.options?.some((option) => {
-                        if (typeof option === 'object') return option.id === variantOptionID
-                        else return option === variantOptionID
+                      const imageVariant = product.gallery?.find((galleryItem) => {
+                        if (!galleryItem.variantOption) return false
+                        const variantOptionID =
+                          typeof galleryItem.variantOption === 'object'
+                            ? galleryItem.variantOption.id
+                            : galleryItem.variantOption
+
+                        return variant?.options?.some((option) => {
+                          if (typeof option === 'object') return option.id === variantOptionID
+                          return option === variantOptionID
+                        })
                       })
 
-                      return hasMatch
-                    })
-
-                    if (imageVariant && typeof imageVariant.image === 'object') {
-                      image = imageVariant.image
+                      if (imageVariant && typeof imageVariant.image === 'object') {
+                        image = imageVariant.image
+                      }
                     }
-                  }
 
-                  return (
-                    <li className="flex w-full flex-col" key={i}>
-                      <div className="relative flex w-full flex-row justify-between px-1 py-4">
-                        <div className="absolute z-40 -mt-2 ml-[55px]">
-                          <DeleteItemButton item={item} />
-                        </div>
+                    const variantText = isVariant
+                      ? variant?.options
+                        ?.map((option) => {
+                          if (typeof option === 'object') return option.label
+                          return null
+                        })
+                        .filter(Boolean)
+                        .join(' ')
+                      : ''
+
+                    return (
+                      <li key={i} className="flex items-start gap-4">
                         <Link
-                          className="z-30 flex flex-row space-x-4"
                           href={`/products/${(item.product as Product)?.slug}`}
+                          className="block shrink-0"
                         >
-                          <div className="relative h-16 w-16 cursor-pointer overflow-hidden rounded-md border border-neutral-300 bg-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800">
+                          <div className="relative h-[104px] w-[104px] overflow-hidden border border-[#2b2b2b] bg-[#121212]">
                             {image?.url && (
                               <Image
                                 alt={image?.alt || product?.title || ''}
                                 className="h-full w-full object-cover"
-                                height={94}
+                                height={120}
                                 src={image.url}
-                                width={94}
+                                width={120}
                               />
                             )}
                           </div>
-
-                          <div className="flex flex-1 flex-col text-base">
-                            <span className="leading-tight">{product?.title}</span>
-                            {isVariant && variant ? (
-                              <p className="text-sm text-neutral-500 dark:text-neutral-400 capitalize">
-                                {variant.options
-                                  ?.map((option) => {
-                                    if (typeof option === 'object') return option.label
-                                    return null
-                                  })
-                                  .join(', ')}
-                              </p>
-                            ) : null}
-                          </div>
                         </Link>
-                        <div className="flex h-16 flex-col justify-between">
-                          {typeof price === 'number' && (
-                            <Price
-                              amount={price}
-                              className="flex justify-end space-y-2 text-right text-sm"
-                            />
-                          )}
-                          <div className="ml-auto flex h-9 flex-row items-center rounded-lg border">
-                            <EditItemQuantityButton item={item} type="minus" />
-                            <p className="w-6 text-center">
-                              <span className="w-full text-sm">{item.quantity}</span>
-                            </p>
-                            <EditItemQuantityButton item={item} type="plus" />
+
+                        <div className="flex min-w-0 flex-1 flex-col">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <Link
+                                href={`/products/${(item.product as Product)?.slug}`}
+                                className="block"
+                              >
+                                <h3 className="line-clamp-2 text-[1.05rem] font-extrabold uppercase leading-tight tracking-[0.02em] text-[#f3f0ea]">
+                                  {product?.title}
+                                </h3>
+                              </Link>
+
+                              {(variantText || item.quantity) && (
+                                <p className="mt-2 text-[0.78rem] uppercase tracking-[0.08em] text-[#727272]">
+                                  {variantText ? `Weight: ${variantText}` : ''}
+                                </p>
+                              )}
+                            </div>
+
+                            <DeleteItemButton item={item} />
+                          </div>
+
+                          <div className="mt-5 flex items-end justify-between gap-3">
+                            <div className="flex h-8 items-center border border-[#3a3a3a] bg-transparent">
+                              <EditItemQuantityButton
+                                item={item}
+                                type="minus"
+                                className="h-8 w-8 border-r border-[#3a3a3a] text-[#bdbdbd] hover:bg-[#161616] hover:text-white"
+                              />
+
+                              <span className="flex h-8 w-9 items-center justify-center text-sm text-[#d7d7d7]">
+                                {item.quantity}
+                              </span>
+                              <EditItemQuantityButton
+                                item={item}
+                                type="plus"
+                                className="h-8 w-8 border-l border-[#3a3a3a] text-[#bdbdbd] hover:bg-[#161616] hover:text-white"
+                              />
+                            </div>
+
+                            {typeof price === 'number' && (
+                              <Price
+                                amount={price * (item.quantity || 1)}
+                                className="text-right text-[1.05rem] font-bold text-[#d4a63c]"
+                              />
+                            )}
                           </div>
                         </div>
-                      </div>
-                    </li>
-                  )
-                })}
-              </ul>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
 
-              <div className="px-4">
-                <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
-                  {typeof cart?.subtotal === 'number' && (
-                    <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
-                      <p>Total</p>
-                      <Price
-                        amount={cart?.subtotal}
-                        className="text-right text-base text-black dark:text-white"
-                      />
-                    </div>
-                  )}
+              <div className="border-t border-[#6f5620]/40 bg-[#111414] px-7 py-6">
+                <div className="space-y-3 text-sm uppercase tracking-[0.14em]">
+                  <div className="flex items-center justify-between text-[#a9a9a9]">
+                    <span>Subtotal</span>
+                    {typeof cart?.subtotal === 'number' && (
+                      <Price amount={cart.subtotal} className="text-base text-[#bcbcbc]" />
+                    )}
+                  </div>
 
-                  <Button asChild>
-                    <Link className="w-full" href="/checkout">
-                      Proceed to Checkout
+                  <div className="flex items-center justify-between text-[#a9a9a9]">
+                    <span>Shipping Est.</span>
+                    <span className="text-[#d4a63c]">Complimentary</span>
+                  </div>
+
+                  <div className="mt-5 flex items-center justify-between border-t border-[#262626] pt-4">
+                    <span className="text-lg font-extrabold tracking-[0.14em] text-[#f1f1f1]">
+                      Investment Total
+                    </span>
+                    {typeof cart?.subtotal === 'number' && (
+                      <Price amount={cart.subtotal} className="text-3xl font-black text-[#d4a63c]" />
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-7 space-y-5">
+                  <Link
+                    href="/checkout"
+                    className="flex h-14 w-full items-center justify-center bg-[#d4a63c] text-sm font-extrabold uppercase tracking-[0.18em] text-black transition-all hover:brightness-110"
+                  >
+                    Proceed to Checkout
+                  </Link>
+
+                  {/* <div className="text-center">
+                    <Link
+                      href="/cart"
+                      className="text-xs font-medium uppercase tracking-[0.32em] text-[#7f7f7f] transition-colors hover:text-white"
+                    >
+                      View Full Cart
                     </Link>
-                  </Button>
+                  </div> */}
+
+                  <div className="flex items-center justify-center gap-10 border-t border-[#1f1f1f] pt-5 text-[11px] uppercase tracking-[0.14em] text-[#555]">
+                    {/* <Link href="/cart" className="transition-colors hover:text-[#d4a63c]">
+                      View Cart
+                    </Link> */}
+                    <Link
+                      href="/shipping-information"
+                      className="transition-colors hover:text-[#d4a63c]"
+                    >
+                      Shipping Info
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
+            </>
+          )}
+        </div>
       </SheetContent>
     </Sheet>
   )
