@@ -23,23 +23,16 @@ const originLabels: Record<string, string> = {
 }
 
 export const LuxuryProductCard: React.FC<Props> = ({ product }) => {
-  const imageFromProductGallery =
-    product.productGallery?.[0]?.image && typeof product.productGallery?.[0]?.image !== 'string'
-      ? product.productGallery[0].image
-      : null
+  const firstImage = product.productGallery?.[0]?.image
+  const image = typeof firstImage === 'object' && firstImage !== null ? firstImage : null
 
-  const imageFromGallery =
-    product.gallery?.[0]?.image && typeof product.gallery?.[0]?.image !== 'string'
-      ? product.gallery[0].image
-      : null
-
-  const image = imageFromProductGallery || imageFromGallery
+  console.log(image);
 
   const originText = product.origin ? originLabels[product.origin] || product.origin : ''
 
   return (
     <article className="overflow-hidden border border-[#1f1f1f] bg-[#0a0a0a] text-white">
-      <Link className="group block h-full w-full" href={`/${product.slug}`}>
+      <Link className="group block h-full w-full" href={`/products/${product.slug}`}>
         <div className="relative">
           {product.shopCardLabel ? (
             <div className="absolute left-5 top-5 z-10 border border-[#c8a24d] bg-black/80 px-4 py-2 text-[11px] uppercase tracking-[0.24em] text-[#c8a24d]">
@@ -83,7 +76,7 @@ export const LuxuryProductCard: React.FC<Props> = ({ product }) => {
 
           <div className="pt-2">
             <div className="border border-[#c8a24d] bg-[#c8a24d] px-5 py-3 text-center text-[11px] uppercase tracking-[0.28em] text-black transition hover:opacity-90">
-              {product.cardButtonLabel || 'Add to Atelier Box'}
+              {product.cardButtonLabel || 'Add to Cart'}
             </div>
           </div>
         </div>

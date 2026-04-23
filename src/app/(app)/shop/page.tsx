@@ -19,9 +19,10 @@ export default async function ShopPage({ searchParams }: Props) {
   const {
     q: searchValue,
     sort,
-    cutType,
-    agingProcess,
-    origin,
+    meatType,
+    storageType,
+    preparationStyle,
+    inStock,
     minPrice,
     maxPrice,
     category,
@@ -71,30 +72,38 @@ export default async function ShopPage({ searchParams }: Props) {
       ],
     })
   }
-
-  if (cutType) {
+  if (meatType) {
     andConditions.push({
-      cutType: {
-        equals: String(cutType),
+      meatType: {
+        equals: String(meatType),
       },
     })
   }
 
-  if (agingProcess) {
+  if (storageType) {
     andConditions.push({
-      agingProcess: {
-        equals: String(agingProcess),
+      storageType: {
+        equals: String(storageType),
       },
     })
   }
 
-  if (origin) {
+  if (preparationStyle) {
     andConditions.push({
-      origin: {
-        equals: String(origin),
+      preparationStyle: {
+        equals: String(preparationStyle),
       },
     })
   }
+
+  if (inStock === 'true') {
+    andConditions.push({
+      inStock: {
+        equals: true,
+      },
+    })
+  }
+ 
 
   if (category) {
     andConditions.push({
@@ -136,6 +145,10 @@ export default async function ShopPage({ searchParams }: Props) {
       cutType: true,
       agingProcess: true,
       categories: true,
+      meatType: true,
+      storageType: true,
+      preparationStyle: true,
+      inStock: true,
     },
   })
 

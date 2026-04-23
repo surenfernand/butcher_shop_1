@@ -53,6 +53,7 @@ export const AboutStoryBlock: React.FC<Props> = ({
               src={imageUrl}
               alt={media?.alt || title || 'About story image'}
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover grayscale transition duration-700 hover:grayscale-0"
             />
           ) : (

@@ -17,7 +17,7 @@ export const ProductGridBlock = async () => {
   return (
     <section className="bg-black py-16 text-white">
       <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-10 px-8 md:grid-cols-4">
-        <div className="space-y-10">
+        {/* <div className="space-y-10">
           <div>
             <h3 className="mb-3 text-sm uppercase text-gray-400">Cut Type</h3>
             {['Prime Rib', 'Wagyu Strips', 'Filet Mignon', 'Tomahawk'].map((item) => (
@@ -44,9 +44,9 @@ export const ProductGridBlock = async () => {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
 
-        <div className="md:col-span-3">
+        <div className="md:col-span-4">
           <div className="mb-8 flex items-center justify-between">
             <div>
               <h2 className="text-2xl uppercase">The Shop</h2>
@@ -60,7 +60,7 @@ export const ProductGridBlock = async () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
             {products.docs.map((product: any) => {
               const image =
                 product.gallery?.[0]?.image && typeof product.gallery[0].image === 'object'

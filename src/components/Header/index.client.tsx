@@ -10,7 +10,7 @@ import type { Header } from 'src/payload-types'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/utilities/cn'
 import { LogoIcon } from '@/components/icons/logo'
-import { Search, User } from 'lucide-react'
+import { ShoppingCart, User, Search } from 'lucide-react'
 
 type Props = {
   header: Header
@@ -77,6 +77,7 @@ export function HeaderClient({ header }: Props) {
 
           <Suspense fallback={<OpenCartButton />}>
             <Cart />
+          
           </Suspense>
 
           <Link href="/account" className="hidden md:inline-flex transition hover:opacity-80">

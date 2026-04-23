@@ -52,6 +52,7 @@ export const VisitSectionBlock: React.FC<Props> = ({
               src={imageUrl}
               alt={media?.alt || locationLabel || 'Location image'}
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover opacity-60 transition duration-700 hover:opacity-100"
             />
           ) : (

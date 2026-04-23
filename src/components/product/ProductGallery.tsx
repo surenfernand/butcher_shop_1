@@ -6,9 +6,10 @@ type Props = {
 }
 
 export default function ProductGallery({ product }: Props) {
-  const gallery = ((product.productGallery || [])
+  const gallery = (product.productGallery || [])
     .map((item) => item.image)
-    .filter(Boolean) as Media[])
+    .filter((image): image is Media => typeof image === 'object' && image !== null)
+
 
   const featured = gallery[0]
 

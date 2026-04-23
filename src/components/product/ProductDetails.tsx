@@ -1,5 +1,9 @@
+'use client'
+
+import { useMemo, useState } from 'react'
 import type { Product } from '@/payload-types'
 import Link from 'next/link'
+import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 
 type ProductWithUIFields = Product & {
   title?: string
@@ -15,6 +19,39 @@ type Props = {
 }
 
 export default function ProductDetails({ product }: Props) {
+  const { addItem, isLoading } = useCart()
+
+  const defaultOptionIndex = useMemo(() => {
+    if (!Array.isArray(product.purchaseOptions) || product.purchaseOptions.length === 0) {
+      return null
+    }
+
+    const highlightedIndex = product.purchaseOptions.findIndex((option) => option.highlighted)
+    return highlightedIndex >= 0 ? highlightedIndex : 0
+  }, [product.purchaseOptions])
+
+  const [selectedOptionIndex, setSelectedOptionIndex] = useState<number | null>(
+    defaultOptionIndex,
+  )
+
+  const handleAddToCart = async () => {
+    try {
+      await addItem({
+        product: product.id,
+      })
+
+      console.log('Added to cart:', {
+        productId: product.id,
+        selectedOption:
+          selectedOptionIndex !== null && Array.isArray(product.purchaseOptions)
+            ? product.purchaseOptions[selectedOptionIndex]
+            : null,
+      })
+    } catch (error) {
+      console.error('Failed to add item to cart:', error)
+    }
+  }
+
   return (
     <div className="flex flex-col">
       {product.eyebrow && (
@@ -70,56 +107,61 @@ export default function ProductDetails({ product }: Props) {
           </span>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {product.purchaseOptions.map((option, i) => (
-              <button
-                key={i}
-                className={
-                  option.highlighted
-                    ? 'border border-[#d4a63c] bg-[#d4a63c]/5 p-5 text-left'
-                    : 'border border-white/10 p-5 text-left'
-                }
-                type="button"
-              >
-                <span
+            {product.purchaseOptions.map((option, i) => {
+              const isSelected = selectedOptionIndex === i
+
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setSelectedOptionIndex(i)}
                   className={
-                    option.highlighted
-                      ? 'mb-1 block text-xs uppercase tracking-[0.15em] text-[#d4a63c]'
-                      : 'mb-1 block text-xs uppercase tracking-[0.15em] text-[#8f8679]'
+                    isSelected
+                      ? 'border border-[#d4a63c] bg-[#d4a63c]/5 p-5 text-left'
+                      : 'border border-white/10 p-5 text-left'
                   }
                 >
-                  {option.label}
-                </span>
-
-                <span className="block text-3xl font-semibold text-white">
-                  {option.price}
-                </span>
-
-                {option.subtext && (
                   <span
                     className={
-                      option.highlighted
-                        ? 'mt-1 block text-[10px] uppercase tracking-[0.14em] text-[#b89e62]'
-                        : 'mt-1 block text-[10px] uppercase tracking-[0.14em] text-[#8f8679]'
+                      isSelected
+                        ? 'mb-1 block text-xs uppercase tracking-[0.15em] text-[#d4a63c]'
+                        : 'mb-1 block text-xs uppercase tracking-[0.15em] text-[#8f8679]'
                     }
                   >
-                    {option.subtext}
+                    {option.label}
                   </span>
-                )}
-              </button>
-            ))}
+
+                  <span className="block text-3xl font-semibold text-white">
+                    {option.price}
+                  </span>
+
+                  {option.subtext && (
+                    <span
+                      className={
+                        isSelected
+                          ? 'mt-1 block text-[10px] uppercase tracking-[0.14em] text-[#b89e62]'
+                          : 'mt-1 block text-[10px] uppercase tracking-[0.14em] text-[#8f8679]'
+                      }
+                    >
+                      {option.subtext}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
           </div>
         </div>
       )}
 
       <div className="flex flex-col gap-4">
-        {product.primaryCTA?.label && (
-          <Link
-            href={product.primaryCTA.url || '#'}
-            className="flex h-16 items-center justify-center bg-[#d4a63c] text-sm font-bold uppercase tracking-[0.2em] text-black"
-          >
-            {product.primaryCTA.label}
-          </Link>
-        )}
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          disabled={isLoading}
+          className="flex h-16 items-center justify-center bg-[#d4a63c] text-sm font-bold uppercase tracking-[0.2em] text-black disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isLoading ? 'Adding...' : product.primaryCTA?.label || 'Add To Cart'}
+        </button>
 
         {product.secondaryCTA?.label && (
           <Link

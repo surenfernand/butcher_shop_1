@@ -34,6 +34,7 @@ export const HighImpactHero: React.FC<Page['hero']> = ({
               src={imageUrl}
               alt={(media && typeof media === 'object' && media.alt) || 'Hero image'}
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               priority
               className="object-cover"
             />

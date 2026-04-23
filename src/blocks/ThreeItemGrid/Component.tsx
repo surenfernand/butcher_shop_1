@@ -18,8 +18,9 @@ type CardProps = {
 }
 
 const ProductCard: React.FC<CardProps> = ({ item }) => {
-  const image = item.meta?.image as Media | undefined
-  const imageUrl = image?.url
+  const image = item.productGallery?.[0]?.image
+  const media = typeof image === 'object' && image !== null ? image : undefined
+  const imageUrl = media?.url
 
   if (!item || !item.slug) return null
 
@@ -29,13 +30,18 @@ const ProductCard: React.FC<CardProps> = ({ item }) => {
       className="group block overflow-hidden bg-black"
     >
       <div className="relative aspect-[4/4] w-full">
-        {imageUrl && (
+        {imageUrl ? (
           <Image
             src={imageUrl}
-            alt={image?.alt || item.title || 'Product'}
+            alt={media?.alt || item.title || 'Product'}
             fill
+            sizes="(max-width: 768px) 100vw, 50vw"
             className="object-cover transition duration-500 group-hover:scale-105"
           />
+        ) : (
+          <div className="flex h-full items-center justify-center text-sm text-white/50">
+            No image
+          </div>
         )}
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
@@ -44,7 +50,7 @@ const ProductCard: React.FC<CardProps> = ({ item }) => {
       <div className="px-5 py-5 text-white">
         <h3 className="mb-2 text-sm font-medium">{item.title || 'Untitled product'}</h3>
         <p className="mb-4 text-sm text-white/70">
-          {item.meta?.description || 'Discover our curated selection.'}
+          {'Discover our curated selection.'}
         </p>
         <span className="text-[11px] uppercase tracking-[0.18em] text-[#d4a63c]">
           Explore →

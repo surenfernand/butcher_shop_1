@@ -5,36 +5,33 @@ import clsx from 'clsx'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import React from 'react'
 
-type ShopFiltersProps = {
-  labels?: {
-    cutTypeLabel?: string
-    agingProcessLabel?: string
-    originLabel?: string
-    priceRangeLabel?: string
-  }
-  sortLabel?: string
-}
-
-const cutTypes = [
-  { label: 'Prime Rib', value: 'prime-rib' },
-  { label: 'Wagyu Strips', value: 'wagyu-strips' },
-  { label: 'Filet Mignon', value: 'filet-mignon' },
-  { label: 'Tomahawk', value: 'tomahawk' },
+const meatTypes = [
+  { label: 'Beef', value: 'beef' },
+  { label: 'Chicken', value: 'chicken' },
+  { label: 'Pork', value: 'pork' },
+  { label: 'Lamb / Mutton', value: 'lamb' },
+  { label: 'Seafood', value: 'seafood' },
+  { label: 'Turkey', value: 'turkey' },
+  { label: 'Processed Meats', value: 'processed' },
 ]
 
-const agingProcesses = [
-  { label: 'Dry-Aged', value: 'dry-aged' },
-  { label: 'Wet-Aged', value: 'wet-aged' },
+const storageTypes = [
+  { label: 'Fresh', value: 'fresh' },
+  { label: 'Frozen', value: 'frozen' },
+  { label: 'Chilled', value: 'chilled' },
+  { label: 'Marinated', value: 'marinated' },
 ]
 
-const origins = [
-  { label: 'Japanese Heritage', value: 'japanese-heritage' },
-  { label: 'Black Angus Heritage', value: 'black-angus-heritage' },
-  { label: 'Midwest Corn-Fed', value: 'midwest-corn-fed' },
+const preparationStyles = [
+  { label: 'Curry Cut', value: 'curry-cut' },
+  { label: 'BBQ / Grill', value: 'bbq' },
+  { label: 'Stir Fry', value: 'stir-fry' },
+  { label: 'Soup Bones', value: 'soup' },
+  { label: 'Ready to Cook', value: 'ready' },
 ]
 
 const sorting = [
-  { label: 'Exclusivity', value: '-sortPriority' },
+  { label: 'Featured', value: '-sortPriority' },
   { label: 'Alphabetic A-Z', value: 'title' },
   { label: 'Latest arrivals', value: '-createdAt' },
   { label: 'Price: Low to high', value: 'priceInUSD' },
@@ -43,18 +40,21 @@ const sorting = [
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="mb-4 text-[11px] uppercase tracking-[0.24em] text-[#9f8650]">{children}</h3>
+    <h3 className="mb-4 text-[11px] uppercase tracking-[0.24em] text-[#9f8650]">
+      {children}
+    </h3>
   )
 }
 
-export const ShopFilters: React.FC<ShopFiltersProps> = ({ labels, sortLabel }) => {
+export const ShopFilters = () => {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const currentCutType = searchParams.get('cutType') || ''
-  const currentAgingProcess = searchParams.get('agingProcess') || ''
-  const currentOrigin = searchParams.get('origin') || ''
+  const currentMeatType = searchParams.get('meatType') || ''
+  const currentStorageType = searchParams.get('storageType') || ''
+  const currentPreparationStyle = searchParams.get('preparationStyle') || ''
+  const currentInStock = searchParams.get('inStock') || ''
   const currentSort = searchParams.get('sort') || '-sortPriority'
   const currentMinPrice = searchParams.get('minPrice') || ''
   const currentMaxPrice = searchParams.get('maxPrice') || ''
@@ -62,11 +62,8 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({ labels, sortLabel }) =
   const updateParam = (key: string, value?: string) => {
     const params = new URLSearchParams(searchParams.toString())
 
-    if (!value) {
-      params.delete(key)
-    } else {
-      params.set(key, value)
-    }
+    if (!value) params.delete(key)
+    else params.set(key, value)
 
     params.delete('page')
     router.push(createUrl(pathname, params))
@@ -88,43 +85,38 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({ labels, sortLabel }) =
     <aside className="w-full max-w-[260px] bg-black text-white">
       <div className="space-y-8">
         <div>
-          <SectionTitle>{labels?.cutTypeLabel || 'Cut Type'}</SectionTitle>
-          <div className="space-y-3">
-            {cutTypes.map((item) => {
-              const checked = currentCutType === item.value
-
-              return (
-                <label key={item.value} className="flex cursor-pointer items-center gap-3 text-sm">
-                  <input
-                    checked={checked}
-                    className="h-4 w-4 accent-[#c8a24d]"
-                    onChange={() => updateParam('cutType', checked ? '' : item.value)}
-                    type="checkbox"
-                  />
-                  <span>{item.label}</span>
-                </label>
-              )
-            })}
-          </div>
+          <SectionTitle>Meat Type</SectionTitle>
+          <select
+            className="w-full border border-[#2a2a2a] bg-[#111] px-4 py-3 text-sm text-white outline-none"
+            value={currentMeatType}
+            onChange={(e) => updateParam('meatType', e.target.value)}
+          >
+            <option value="">All</option>
+            {meatTypes.map((item) => (
+              <option key={item.value} value={item.value}>
+                {item.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>
-          <SectionTitle>{labels?.agingProcessLabel || 'Aging Process'}</SectionTitle>
-          <div className="flex gap-2">
-            {agingProcesses.map((item) => {
-              const active = currentAgingProcess === item.value
+          <SectionTitle>Storage Type</SectionTitle>
+          <div className="flex flex-wrap gap-2">
+            {storageTypes.map((item) => {
+              const active = currentStorageType === item.value
 
               return (
                 <button
                   key={item.value}
+                  type="button"
+                  onClick={() => updateParam('storageType', active ? '' : item.value)}
                   className={clsx(
                     'border px-4 py-2 text-xs uppercase tracking-[0.2em] transition',
                     active
                       ? 'border-[#c8a24d] bg-[#c8a24d] text-black'
                       : 'border-[#2a2a2a] text-white hover:border-[#c8a24d]',
                   )}
-                  onClick={() => updateParam('agingProcess', active ? '' : item.value)}
-                  type="button"
                 >
                   {item.label}
                 </button>
@@ -134,14 +126,14 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({ labels, sortLabel }) =
         </div>
 
         <div>
-          <SectionTitle>{labels?.originLabel || 'Origin'}</SectionTitle>
+          <SectionTitle>Preparation Style</SectionTitle>
           <select
             className="w-full border border-[#2a2a2a] bg-[#111] px-4 py-3 text-sm text-white outline-none"
-            onChange={(e) => updateParam('origin', e.target.value)}
-            value={currentOrigin}
+            value={currentPreparationStyle}
+            onChange={(e) => updateParam('preparationStyle', e.target.value)}
           >
-            <option value="">All Origins</option>
-            {origins.map((item) => (
+            <option value="">All</option>
+            {preparationStyles.map((item) => (
               <option key={item.value} value={item.value}>
                 {item.label}
               </option>
@@ -150,14 +142,27 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({ labels, sortLabel }) =
         </div>
 
         <div>
-          <SectionTitle>{labels?.priceRangeLabel || 'Price Range'}</SectionTitle>
+          <SectionTitle>Availability</SectionTitle>
+          <label className="flex cursor-pointer items-center gap-3 text-sm">
+            <input
+              type="checkbox"
+              checked={currentInStock === 'true'}
+              className="h-4 w-4 accent-[#c8a24d]"
+              onChange={(e) => updateParam('inStock', e.target.checked ? 'true' : '')}
+            />
+            <span>In Stock Only</span>
+          </label>
+        </div>
+
+        <div>
+          <SectionTitle>Price Range</SectionTitle>
           <div className="grid grid-cols-2 gap-3">
             <input
               className="border border-[#2a2a2a] bg-[#111] px-3 py-2 text-sm text-white outline-none"
-              defaultValue={currentMinPrice}
+              value={currentMinPrice}
               placeholder="Min"
               type="number"
-              onBlur={(e) =>
+              onChange={(e) =>
                 updateMany({
                   minPrice: e.target.value,
                   maxPrice: currentMaxPrice,
@@ -166,10 +171,10 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({ labels, sortLabel }) =
             />
             <input
               className="border border-[#2a2a2a] bg-[#111] px-3 py-2 text-sm text-white outline-none"
-              defaultValue={currentMaxPrice}
+              value={currentMaxPrice}
               placeholder="Max"
               type="number"
-              onBlur={(e) =>
+              onChange={(e) =>
                 updateMany({
                   minPrice: currentMinPrice,
                   maxPrice: e.target.value,
@@ -180,11 +185,11 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({ labels, sortLabel }) =
         </div>
 
         <div>
-          <SectionTitle>{sortLabel || 'Sort by'}</SectionTitle>
+          <SectionTitle>Sort by</SectionTitle>
           <select
             className="w-full border border-[#2a2a2a] bg-[#111] px-4 py-3 text-sm text-white outline-none"
-            onChange={(e) => updateParam('sort', e.target.value)}
             value={currentSort}
+            onChange={(e) => updateParam('sort', e.target.value)}
           >
             {sorting.map((item) => (
               <option key={item.value} value={item.value}>

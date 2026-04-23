@@ -33,6 +33,7 @@ export const InfoSectionBlock: React.FC<Props> = ({
               src={imageUrl}
               alt={media?.alt || title || 'Info section image'}
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover"
             />
           </div>
