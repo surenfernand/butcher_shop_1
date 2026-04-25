@@ -84,6 +84,11 @@ export default {
         success: 'hsl(var(--success))',
         error: 'hsl(var(--error))',
         warning: 'hsl(var(--warning))',
+        primary: '#C6A15B', // gold
+        background: '#0B0B0C',
+        surface: '#121316',
+        border: '#1F2125',
+        muted: '#A1A1AA',
       },
       typography: {
         DEFAULT: {

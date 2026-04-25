@@ -2,12 +2,11 @@ import type { Order } from '@/payload-types'
 import type { Metadata } from 'next'
 
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
-
-import { OrderItem } from '@/components/OrderItem'
 import { headers as getHeaders } from 'next/headers'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 
 export default async function Orders() {
   const headers = await getHeaders()
@@ -35,27 +34,92 @@ export default async function Orders() {
     })
 
     orders = ordersResult?.docs || []
-  } catch (error) {}
+  } catch (error) { }
 
   return (
-    <>
-      <div className="border p-8 rounded-lg bg-primary-foreground w-full">
-        <h1 className="text-3xl font-medium mb-8">Orders</h1>
-        {(!orders || !Array.isArray(orders) || orders?.length === 0) && (
-          <p className="">You have no orders.</p>
+    <div className="w-full space-y-12 text-white">
+      <div>
+        <h1 className="text-5xl font-bold tracking-tight">
+          Order History
+        </h1>
+        <p className="mt-3 text-white/55">
+          Manage your and order history.
+        </p>
+      </div>
+
+      <div className="overflow-hidden rounded-xl border border-white/10 bg-[#1A1C1C]">
+        {/* <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
+          <h2 className="text-2xl font-semibold">Order History</h2>
+
+        
+        </div> */}
+
+        {(!orders || !Array.isArray(orders) || orders.length === 0) && (
+          <div className="px-6 py-10 text-white/55">
+            You have no orders.
+          </div>
         )}
 
         {orders && orders.length > 0 && (
-          <ul className="flex flex-col gap-6">
-            {orders?.map((order, index) => (
-              <li key={order.id}>
-                <OrderItem order={order} />
-              </li>
-            ))}
-          </ul>
+          <div className="w-full overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-white/[0.03] text-xs uppercase tracking-[0.15em] text-white/45">
+                <tr>
+                  <th className="px-6 py-4 font-medium">Order #</th>
+                  <th className="px-6 py-4 font-medium">Date</th>
+                  <th className="px-6 py-4 font-medium">Status</th>
+                  <th className="px-6 py-4 text-right font-medium">
+                    Total Investment
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {orders.map((order: any) => (
+                  <tr
+                    key={order.id}
+                    className="border-t border-white/5 hover:bg-white/[0.03] transition"
+                  >
+                    <td className="px-6 py-5">
+                      <Link
+                        href={`/orders/${order.id}`}
+                        className="text-white hover:text-[#E2B84F]"
+                      >
+                        #{order.id}
+                      </Link>
+                    </td>
+
+                    <td className="px-6 py-5 text-white/55">
+                      {order.createdAt
+                        ? new Date(order.createdAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })
+                        : '—'}
+                    </td>
+
+                    <td className="px-6 py-5">
+                      <span className="rounded-full border border-[#E2B84F]/30 bg-[#E2B84F]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-[#E2B84F]">
+                        {order.status || 'Processing'}
+                      </span>
+                    </td>
+
+                    <td className="px-6 py-5 text-right font-semibold text-[#E2B84F]">
+                      {typeof order.total === 'number'
+                        ? `$${order.total.toFixed(2)}`
+                        : order.total || '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+        
+          </div>
         )}
       </div>
-    </>
+    </div>
   )
 }
 

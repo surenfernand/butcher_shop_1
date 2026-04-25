@@ -43,7 +43,8 @@ export const ConfirmOrder: React.FC = () => {
             }
 
             const queryString = queryParams.toString()
-            router.push(`/orders/${result.orderID}${queryString ? `?${queryString}` : ''}`)
+            // router.push(`/orders/${result.orderID}${queryString ? `?${queryString}` : ''}`)
+            router.push(`/thank-you/${result.orderID}${queryString ? `?${queryString}` : ''}`)
           }
         })
       }

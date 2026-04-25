@@ -7,7 +7,7 @@ import { CheckoutPage } from '@/components/checkout/CheckoutPage'
 
 export default function Checkout() {
   return (
-    <div className="container min-h-[90vh] flex">
+    <div className="">
       {!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY && (
         <div>
           <Fragment>

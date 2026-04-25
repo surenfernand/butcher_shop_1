@@ -15,6 +15,7 @@ import { adminOnlyFieldAccess } from '@/access/adminOnlyFieldAccess'
 import { customerOnlyFieldAccess } from '@/access/customerOnlyFieldAccess'
 import { isAdmin } from '@/access/isAdmin'
 import { isDocumentOwner } from '@/access/isDocumentOwner'
+import multiLocationPlugin from './payload-multi-location-plugin/src'
 
 const generateTitle: GenerateTitle<Product | Page> = ({ doc }) => {
   return doc?.title ? `${doc.title} | Payload Ecommerce Template` : 'Payload Ecommerce Template'
@@ -25,6 +26,8 @@ const generateURL: GenerateURL<Product | Page> = ({ doc }) => {
 
   return doc?.slug ? `${url}/${doc.slug}` : url
 }
+console.log('STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY)
+console.log('Stripe key length:', process.env.STRIPE_SECRET_KEY?.length)
 
 export const plugins: Plugin[] = [
   seoPlugin({
@@ -128,4 +131,9 @@ export const plugins: Plugin[] = [
       productsCollectionOverride: ProductsCollection,
     },
   }),
+  multiLocationPlugin({
+    productSlug: 'products',
+    orderSlug: 'orders',
+    adminGroup: 'Shop',
+  })
 ]

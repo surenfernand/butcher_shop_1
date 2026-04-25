@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import {
   BoldFeature,
@@ -31,7 +32,6 @@ import { ShopLuxuryPage } from './globals/ShopLuxuryPage'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-
 
 
 export default buildConfig({

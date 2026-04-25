@@ -90,6 +90,10 @@ export interface Config {
     carts: Cart;
     orders: Order;
     transactions: Transaction;
+    branches: Branch;
+    'branch-inventory': BranchInventory;
+    'fulfillment-schedules': FulfillmentSchedule;
+    'branch-holidays': BranchHoliday;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -127,6 +131,10 @@ export interface Config {
     carts: CartsSelect<false> | CartsSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
     transactions: TransactionsSelect<false> | TransactionsSelect<true>;
+    branches: BranchesSelect<false> | BranchesSelect<true>;
+    'branch-inventory': BranchInventorySelect<false> | BranchInventorySelect<true>;
+    'fulfillment-schedules': FulfillmentSchedulesSelect<false> | FulfillmentSchedulesSelect<true>;
+    'branch-holidays': BranchHolidaysSelect<false> | BranchHolidaysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -268,6 +276,14 @@ export interface Order {
   amount?: number | null;
   currency?: 'USD' | null;
   accessToken?: string | null;
+  fulfillment?: {
+    branch?: (number | null) | Branch;
+    serviceType?: ('pickup' | 'delivery') | null;
+    date?: string | null;
+    timeSlot?: string | null;
+    postalCode?: string | null;
+    notes?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -512,6 +528,44 @@ export interface Cart {
   status?: ('active' | 'purchased' | 'abandoned') | null;
   subtotal?: number | null;
   currency?: 'USD' | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "branches".
+ */
+export interface Branch {
+  id: number;
+  name: string;
+  code: string;
+  address?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  isActive?: boolean | null;
+  serviceTypes?: ('pickup' | 'delivery')[] | null;
+  /**
+   * Use full postal codes or prefixes such as M5V. Spaces/case are normalized by the API.
+   */
+  postalCodes?:
+    | {
+        code: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Example: {"monday":[{"open":"09:00","close":"18:00"}]}
+   */
+  openingHours?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  holidayMessage?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1276,6 +1330,73 @@ export interface FormSubmission {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "branch-inventory".
+ */
+export interface BranchInventory {
+  id: number;
+  branch: number | Branch;
+  product: number | Product;
+  price: number;
+  regularPrice?: number | null;
+  salePrice?: number | null;
+  sku?: string | null;
+  manageStock?: boolean | null;
+  stockQuantity?: number | null;
+  stockStatus?: ('instock' | 'outofstock' | 'backorder') | null;
+  allowBackorders?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fulfillment-schedules".
+ */
+export interface FulfillmentSchedule {
+  id: number;
+  name: string;
+  branch?: (number | null) | Branch;
+  products?: (number | Product)[] | null;
+  serviceType: 'delivery' | 'pickup';
+  postalCodes?:
+    | {
+        code: string;
+        id?: string | null;
+      }[]
+    | null;
+  availableDates?:
+    | {
+        date: string;
+        id?: string | null;
+      }[]
+    | null;
+  weeklyDays?: ('monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday')[] | null;
+  timeSlots?:
+    | {
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  maxOrdersPerDay?: number | null;
+  isActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "branch-holidays".
+ */
+export interface BranchHoliday {
+  id: number;
+  title: string;
+  branch: number | Branch;
+  date: string;
+  serviceTypes?: ('pickup' | 'delivery')[] | null;
+  message?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1369,6 +1490,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'transactions';
         value: number | Transaction;
+      } | null)
+    | ({
+        relationTo: 'branches';
+        value: number | Branch;
+      } | null)
+    | ({
+        relationTo: 'branch-inventory';
+        value: number | BranchInventory;
+      } | null)
+    | ({
+        relationTo: 'fulfillment-schedules';
+        value: number | FulfillmentSchedule;
+      } | null)
+    | ({
+        relationTo: 'branch-holidays';
+        value: number | BranchHoliday;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -2177,6 +2314,16 @@ export interface OrdersSelect<T extends boolean = true> {
   amount?: T;
   currency?: T;
   accessToken?: T;
+  fulfillment?:
+    | T
+    | {
+        branch?: T;
+        serviceType?: T;
+        date?: T;
+        timeSlot?: T;
+        postalCode?: T;
+        notes?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2222,6 +2369,93 @@ export interface TransactionsSelect<T extends boolean = true> {
   cart?: T;
   amount?: T;
   currency?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "branches_select".
+ */
+export interface BranchesSelect<T extends boolean = true> {
+  name?: T;
+  code?: T;
+  address?: T;
+  phone?: T;
+  email?: T;
+  isActive?: T;
+  serviceTypes?: T;
+  postalCodes?:
+    | T
+    | {
+        code?: T;
+        id?: T;
+      };
+  openingHours?: T;
+  holidayMessage?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "branch-inventory_select".
+ */
+export interface BranchInventorySelect<T extends boolean = true> {
+  branch?: T;
+  product?: T;
+  price?: T;
+  regularPrice?: T;
+  salePrice?: T;
+  sku?: T;
+  manageStock?: T;
+  stockQuantity?: T;
+  stockStatus?: T;
+  allowBackorders?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fulfillment-schedules_select".
+ */
+export interface FulfillmentSchedulesSelect<T extends boolean = true> {
+  name?: T;
+  branch?: T;
+  products?: T;
+  serviceType?: T;
+  postalCodes?:
+    | T
+    | {
+        code?: T;
+        id?: T;
+      };
+  availableDates?:
+    | T
+    | {
+        date?: T;
+        id?: T;
+      };
+  weeklyDays?: T;
+  timeSlots?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  maxOrdersPerDay?: T;
+  isActive?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "branch-holidays_select".
+ */
+export interface BranchHolidaysSelect<T extends boolean = true> {
+  title?: T;
+  branch?: T;
+  date?: T;
+  serviceTypes?: T;
+  message?: T;
   updatedAt?: T;
   createdAt?: T;
 }

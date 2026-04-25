@@ -87,7 +87,8 @@ export const CheckoutForm: React.FC<Props> = ({
                 }
 
                 const queryString = queryParams.toString()
-                const redirectUrl = `/orders/${confirmResult.orderID}${queryString ? `?${queryString}` : ''}`
+                // const redirectUrl = `/orders/${confirmResult.orderID}${queryString ? `?${queryString}` : ''}`
+                const redirectUrl = `/thank-you/${confirmResult.orderID}${queryString ? `?${queryString}` : ''}`
 
                 // Clear the cart after successful payment
                 clearCart()
