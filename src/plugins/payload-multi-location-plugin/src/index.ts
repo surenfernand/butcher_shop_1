@@ -1,4 +1,4 @@
-import type { Config, Plugin } from 'payload'
+import type { CollectionConfig, CollectionSlug, Config, Field, Plugin } from 'payload'
 import type { MultiLocationPluginOptions } from './types'
 import { createBranchesCollection } from './collections/Branches'
 import { createBranchInventoryCollection } from './collections/BranchInventory'
@@ -20,58 +20,58 @@ export const multiLocationPlugin = (options: MultiLocationPluginOptions = {}): P
     adminGroup = 'Shop',
   } = options
 
+  const typedProductSlug = productSlug as CollectionSlug
+  const typedOrderSlug = orderSlug as CollectionSlug
+
   return (incomingConfig: Config): Config => {
     if (!enabled) return incomingConfig
 
     const collections = incomingConfig.collections || []
 
-    const patchedCollections = collections.map((collection) => {
-      if (collection.slug !== orderSlug) return collection
+ 
+    const fulfillmentField: Field = {
+      name: 'fulfillment',
+      type: 'group',
+      admin: { position: 'sidebar' },
+      fields: [
+        { name: 'branch', type: 'relationship', relationTo: 'branches' },
+        {
+          name: 'serviceType',
+          type: 'select',
+          options: [
+            { label: 'Pickup', value: 'pickup' },
+            { label: 'Delivery', value: 'delivery' },
+          ],
+        },
+        { name: 'date', type: 'date' },
+        { name: 'timeSlot', type: 'text' },
+        { name: 'postalCode', type: 'text' },
+        {
+          name: 'shippingCharge',
+          type: 'number',
+          min: 0,
+          admin: {
+            description: 'Shipping charge stored in cents',
+          },
+        },
+        { name: 'notes', type: 'textarea' },
+      ],
+    }
+
+    const patchedCollections: CollectionConfig[] = collections.map((collection) => {
+      if (collection.slug !== typedOrderSlug) return collection
 
       return {
         ...collection,
-        fields: [
-          ...collection.fields,
-          {
-            name: 'fulfillment',
-            type: 'group',
-            admin: { position: 'sidebar' },
-            fields: [
-              { name: 'branch', type: 'relationship', relationTo: 'branches' },
-              {
-                name: 'serviceType',
-                type: 'select',
-                options: [
-                  { label: 'Pickup', value: 'pickup' },
-                  { label: 'Delivery', value: 'delivery' },
-                ],
-              },
-              { name: 'date', type: 'date' },
-              { name: 'timeSlot', type: 'text' },
-              { name: 'postalCode', type: 'text' },
-              {
-                name: 'shippingCharge',
-                type: 'number',
-                min: 0,
-                admin: {
-                  description: 'Shipping charge stored in cents',
-                },
-              },
-              { name: 'notes', type: 'textarea' },
-            ],
-          },
-        ],
+        fields: [...collection.fields, fulfillmentField],
         hooks: {
           ...collection.hooks,
           beforeValidate: [
             ...(collection.hooks?.beforeValidate || []),
-            validateBranchInventory({ orderSlug }),
-            validateMaxOrdersPerDay(orderSlug),
+            validateBranchInventory({ orderSlug: typedOrderSlug }),
+            validateMaxOrdersPerDay(typedOrderSlug),
           ],
-          afterChange: [
-            ...(collection.hooks?.afterChange || []),
-            reduceBranchInventory(),
-          ],
+          afterChange: [...(collection.hooks?.afterChange || []), reduceBranchInventory()],
         },
       }
     })
@@ -81,8 +81,8 @@ export const multiLocationPlugin = (options: MultiLocationPluginOptions = {}): P
       collections: [
         ...patchedCollections,
         createBranchesCollection(adminGroup),
-        createBranchInventoryCollection(productSlug, adminGroup),
-        createFulfillmentSchedulesCollection(productSlug, adminGroup),
+        createBranchInventoryCollection(typedProductSlug, adminGroup),
+        createFulfillmentSchedulesCollection(typedProductSlug, adminGroup),
         createBranchHolidaysCollection(adminGroup),
       ],
       endpoints: [

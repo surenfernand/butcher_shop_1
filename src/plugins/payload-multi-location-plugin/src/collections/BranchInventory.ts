@@ -1,7 +1,10 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, CollectionSlug } from 'payload'
 import { adminOnly, publicRead } from '../utilities/access'
 
-export const createBranchInventoryCollection = (productSlug = 'products', adminGroup = 'Shop'): CollectionConfig => ({
+export const createBranchInventoryCollection = (
+  productSlug: CollectionSlug = 'products',
+  adminGroup = 'Shop',
+): CollectionConfig => ({
   slug: 'branch-inventory',
   admin: {
     group: adminGroup,

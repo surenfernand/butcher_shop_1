@@ -37,18 +37,20 @@ export const ProductItem: React.FC<Props> = ({
   const isVariant = Boolean(variant) && typeof variant === 'object'
 
   if (isVariant) {
-    const imageVariant = product.gallery?.find((item) => {
-      if (!item.variantOption) return false
-      const variantOptionID =
-        typeof item.variantOption === 'object' ? item.variantOption.id : item.variantOption
+    const imageVariant = product.gallery?.find(
+      (item: NonNullable<Product['gallery']>[number]) => {
+        if (!item.variantOption) return false
+        const variantOptionID =
+          typeof item.variantOption === 'object' ? item.variantOption.id : item.variantOption
 
-      const hasMatch = variant?.options?.some((option) => {
-        if (typeof option === 'object') return option.id === variantOptionID
-        else return option === variantOptionID
+        const hasMatch = variant?.options?.some(
+          (option: NonNullable<Variant['options']>[number]) => {
+            if (typeof option === 'object') return option.id === variantOptionID
+            else return option === variantOptionID
+          })
+
+        return hasMatch
       })
-
-      return hasMatch
-    })
 
     if (imageVariant && typeof imageVariant.image !== 'string') {
       image = imageVariant.image

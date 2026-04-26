@@ -201,18 +201,22 @@ export function CartModal() {
                     if (isVariant) {
                       price = variant?.priceInUSD
 
-                      const imageVariant = product.gallery?.find((galleryItem) => {
-                        if (!galleryItem.variantOption) return false
-                        const variantOptionID =
-                          typeof galleryItem.variantOption === 'object'
-                            ? galleryItem.variantOption.id
-                            : galleryItem.variantOption
+                      const imageVariant = product.gallery?.find(
+                        (galleryItem: NonNullable<Product['gallery']>[number]) => {
+                          if (!galleryItem.variantOption) return false
 
-                        return variant?.options?.some((option) => {
-                          if (typeof option === 'object') return option.id === variantOptionID
-                          return option === variantOptionID
-                        })
-                      })
+                          const variantOptionID =
+                            typeof galleryItem.variantOption === 'object'
+                              ? galleryItem.variantOption.id
+                              : galleryItem.variantOption
+
+                          return variant?.options?.some(
+                            (option: NonNullable<typeof variant.options>[number]) => {
+                              if (typeof option === 'object') return option.id === variantOptionID
+                              return option === variantOptionID
+                            })
+                        },
+                      )
 
                       if (imageVariant && typeof imageVariant.image === 'object') {
                         image = imageVariant.image
@@ -221,7 +225,7 @@ export function CartModal() {
 
                     const variantText = isVariant
                       ? variant?.options
-                        ?.map((option) => {
+                        ?.map((option: NonNullable<typeof variant.options>[number]) => {
                           if (typeof option === 'object') return option.label
                           return null
                         })
@@ -318,7 +322,7 @@ export function CartModal() {
 
                   <div className="mt-5 flex items-center justify-between border-t border-[#262626] pt-4">
                     <span className="text-lg font-extrabold tracking-[0.14em] text-[#f1f1f1]">
-                       Total
+                      Total
                     </span>
                     {typeof cart?.subtotal === 'number' && (
                       <Price amount={cart.subtotal} className="text-3xl font-black text-[#d4a63c]" />

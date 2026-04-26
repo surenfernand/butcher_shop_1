@@ -128,7 +128,7 @@ export const CheckoutPage: React.FC = () => {
     setShowCalendar(false)
     setShippingCharge(0)
     setSelectedDate(undefined)
-    
+
   }
 
   const loadSchedules = async (
@@ -571,18 +571,25 @@ export const CheckoutPage: React.FC = () => {
                 if (isVariant) {
                   price = variant?.priceInUSD
 
-                  const imageVariant = product.gallery?.find((item) => {
-                    if (!item.variantOption) return false
-                    const variantOptionID =
-                      typeof item.variantOption === 'object' ? item.variantOption.id : item.variantOption
+                  const imageVariant = product.gallery?.find(
+                    (galleryItem: NonNullable<typeof product.gallery>[number]) => {
+                      if (!galleryItem.variantOption) return false
 
-                    const hasMatch = variant?.options?.some((option) => {
-                      if (typeof option === 'object') return option.id === variantOptionID
-                      return option === variantOptionID
-                    })
+                      const variantOptionID =
+                        typeof galleryItem.variantOption === 'object'
+                          ? galleryItem.variantOption.id
+                          : galleryItem.variantOption
 
-                    return hasMatch
-                  })
+                      const hasMatch = variant?.options?.some(
+                        (option: NonNullable<typeof variant.options>[number]) => {
+                          if (typeof option === 'object') return option.id === variantOptionID
+                          return option === variantOptionID
+                        },
+                      )
+
+                      return hasMatch
+                    },
+                  )
 
                   if (imageVariant && typeof imageVariant.image !== 'string') {
                     image = imageVariant.image
@@ -601,7 +608,7 @@ export const CheckoutPage: React.FC = () => {
                       {variant && typeof variant === 'object' && (
                         <p className="mt-1 font-sans text-xs italic text-stone-400">
                           {variant.options
-                            ?.map((option) => {
+                            ?.map((option: NonNullable<typeof variant.options>[number]) => {
                               if (typeof option === 'object') return option.label
                               return null
                             })

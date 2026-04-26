@@ -1,12 +1,16 @@
-import type { CollectionBeforeValidateHook } from 'payload'
+import type { CollectionBeforeValidateHook, CollectionSlug } from 'payload'
 
-const getProductId = (value: any) => {
+type RelationshipValue = number | string | { id?: number | string } | null | undefined
+
+const getProductId = (value: RelationshipValue) => {
   if (!value) return null
-  if (typeof value === 'object') return value.id
+  if (typeof value === 'object') return value.id ?? null
   return value
 }
 
-export const validateMaxOrdersPerDay = (orderSlug = 'orders'): CollectionBeforeValidateHook => {
+export const validateMaxOrdersPerDay = (
+  orderSlug: CollectionSlug = 'orders',
+): CollectionBeforeValidateHook => {
   return async ({ data, req, operation }) => {
     if (!data || operation !== 'create') return data
 
@@ -19,10 +23,10 @@ export const validateMaxOrdersPerDay = (orderSlug = 'orders'): CollectionBeforeV
 
     const start = new Date(requestedDate)
     start.setHours(0, 0, 0, 0)
+
     const end = new Date(start)
     end.setDate(end.getDate() + 1)
 
-    // Optional total order limit from the schedule.
     const schedules = await req.payload.find({
       collection: 'fulfillment-schedules',
       depth: 0,
@@ -56,8 +60,7 @@ export const validateMaxOrdersPerDay = (orderSlug = 'orders'): CollectionBeforeV
       throw new Error('This delivery/pickup date is fully booked. Please select another date.')
     }
 
-    // Per-product limits from branch inventory.
-    for (const item of items) {
+    for (const item of items as any[]) {
       const productId = getProductId(item.product)
       if (!productId) continue
 
@@ -66,10 +69,7 @@ export const validateMaxOrdersPerDay = (orderSlug = 'orders'): CollectionBeforeV
         depth: 0,
         limit: 1,
         where: {
-          and: [
-            { branch: { equals: branch } },
-            { product: { equals: productId } },
-          ],
+          and: [{ branch: { equals: branch } }, { product: { equals: productId } }],
         },
       })
 
@@ -86,16 +86,23 @@ export const validateMaxOrdersPerDay = (orderSlug = 'orders'): CollectionBeforeV
 
       const existingQty = existing.docs.reduce((sum: number, order: any) => {
         const orderItems = order.items || []
-        return sum + orderItems.reduce((itemSum: number, existingItem: any) => {
-          return getProductId(existingItem.product) === productId
-            ? itemSum + Number(existingItem.quantity || 1)
-            : itemSum
-        }, 0)
+
+        return (
+          sum +
+          orderItems.reduce((itemSum: number, existingItem: any) => {
+            return getProductId(existingItem.product) === productId
+              ? itemSum + Number(existingItem.quantity || 1)
+              : itemSum
+          }, 0)
+        )
       }, 0)
 
       const requestedQty = Number(item.quantity || 1)
+
       if (existingQty + requestedQty > max) {
-        throw new Error(`The selected date is fully booked for this product. Please select another date or lower the quantity.`)
+        throw new Error(
+          'The selected date is fully booked for this product. Please select another date or lower the quantity.',
+        )
       }
     }
 

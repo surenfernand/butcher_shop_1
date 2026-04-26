@@ -298,7 +298,10 @@ export interface Order {
  * via the `definition` "products".
  */
 export interface Product {
+  description: any;
+  meta: any;
   id: number;
+  gallery : any;
   inventory?: number | null;
   enableVariants?: boolean | null;
   variantTypes?: (number | VariantType)[] | null;
@@ -2609,7 +2612,7 @@ export interface ShopPage {
  * via the `definition` "shop-luxury-page".
  */
 export interface ShopLuxuryPage {
-  filterSections: any;
+  filterSections: { title: string; options?: { label: string; }[] | undefined; }[];
   itemsPerPage: number;
   id: number;
   eyebrow?: string | null;

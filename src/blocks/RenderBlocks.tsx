@@ -16,11 +16,12 @@ import { SocialLinksBlock } from '@/blocks/SocialLinks/Component'
 import { toKebabCase } from '@/utilities/toKebabCase'
 import React, { Fragment } from 'react'
 import { ProductGridBlock } from '@/blocks/ProductGrid/Component'
+import type { ComponentType } from 'react'
 
 
 import type { Page } from '../payload-types'
 
-const blockComponents = {
+const blockComponents: Record<string, ComponentType<any>> = {
   aboutStory: AboutStoryBlock,
   archive: ArchiveBlock,
   banner: BannerBlock,
@@ -58,6 +59,8 @@ export const RenderBlocks: React.FC<{
           const { blockName, blockType } = block
 
           if (blockType && blockType in blockComponents) {
+         
+
             const Block = blockComponents[blockType]
 
             if (Block) {

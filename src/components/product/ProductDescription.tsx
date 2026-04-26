@@ -10,7 +10,7 @@ import { VariantSelector } from './VariantSelector'
 import { useCurrency } from '@payloadcms/plugin-ecommerce/client/react'
 import { StockIndicator } from '@/components/product/StockIndicator'
 
-export function ProductDescription({ product }: { product: Product }) {
+export function ProductshopCardShortDescription({ product }: { product: Product }) {
   const { currency } = useCurrency()
   let amount = 0,
     lowestAmount = 0,
@@ -63,8 +63,10 @@ export function ProductDescription({ product }: { product: Product }) {
           )}
         </div>
       </div>
-      {product.description ? (
-        <RichText className="" data={product.description} enableGutter={false} />
+      {product.shopCardShortDescription ? (
+        <p className="text-sm leading-6 text-[#b7b7b7]">
+          {product.shopCardShortDescription}
+        </p>
       ) : null}
       <hr />
       {hasVariants && (

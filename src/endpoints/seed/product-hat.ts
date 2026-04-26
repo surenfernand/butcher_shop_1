@@ -10,11 +10,11 @@ type ProductArgs = {
   relatedProducts: Product[]
 }
 
+
 export const productHatData: (args: ProductArgs) => RequiredDataFromCollectionSlug<'products'> = ({
   galleryImage,
   relatedProducts,
   metaImage,
-  variantTypes,
   categories,
 }) => {
   return {
@@ -22,47 +22,46 @@ export const productHatData: (args: ProductArgs) => RequiredDataFromCollectionSl
       title: 'Hat | Payload Ecommerce Template',
       image: metaImage,
       description:
-        'Top off your look with our classic hat, crafted for style and comfort. Made with breathable, high-quality materials and an adjustable strap for the perfect fit.',
+        'Top off your look with our classic hat, crafted for style and comfort.',
     },
     _status: 'published',
-    layout: [],
-    categories: categories,
+
+    title: 'Hat',
+    slug: 'hat',
+
+    cutType: 'prime-rib',
+    agingProcess: 'dry-aged',
+    origin: 'japanese-heritage',
+
     description: {
       root: {
+        type: 'root',
         children: [
           {
-            children: [
-              {
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-                text: 'Top off your look with our classic hat, crafted for style and comfort. Made with breathable, high-quality materials and an adjustable strap for the perfect fit, it’s ideal for everyday wear or outdoor adventures. Available in a range of colors to match any outfit.',
-                type: 'text',
-                version: 1,
-              },
-            ],
-            direction: 'ltr',
-            format: '',
-            indent: 0,
             type: 'paragraph',
             version: 1,
-            textFormat: 0,
-            textStyle: '',
+            children: [
+              {
+                type: 'text',
+                version: 1,
+                text: 'Top off your look with our classic hat, crafted for style and comfort.',
+              },
+            ],
           },
         ],
         direction: 'ltr',
         format: '',
         indent: 0,
-        type: 'root',
         version: 1,
       },
     },
+
+    categories,
     gallery: [{ image: galleryImage }],
-    title: 'Hat',
-    slug: 'hat',
+
     priceInUSDEnabled: true,
     priceInUSD: 2500,
-    relatedProducts: relatedProducts,
+
+    relatedProducts,
   }
 }

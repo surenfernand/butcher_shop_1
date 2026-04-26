@@ -29,14 +29,16 @@ export const Gallery: React.FC<Props> = ({ gallery }) => {
     const values = Array.from(searchParams.values())
 
     if (values && api) {
-      const index = gallery.findIndex((item) => {
+      const index = gallery.findIndex((item: NonNullable<Product['gallery']>[number]) => {
         if (!item.variantOption) return false
 
         let variantID: DefaultDocumentIDType
 
         if (typeof item.variantOption === 'object') {
           variantID = item.variantOption.id
-        } else variantID = item.variantOption
+        } else {
+          variantID = item.variantOption
+        }
 
         return Boolean(values.find((value) => value === String(variantID)))
       })
@@ -59,7 +61,7 @@ export const Gallery: React.FC<Props> = ({ gallery }) => {
 
       <Carousel setApi={setApi} className="w-full" opts={{ align: 'start', loop: false }}>
         <CarouselContent>
-          {gallery.map((item, i) => {
+          {gallery.map((item: NonNullable<Product['gallery']>[number], i: number) => {
             if (typeof item.image !== 'object') return null
 
             return (
