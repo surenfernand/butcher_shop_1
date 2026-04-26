@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 
 type Props = {
   product: Product
+  className?: string
 }
 
 type BranchStock = {
@@ -18,7 +19,7 @@ type BranchStock = {
   stockStatus: string
 }
 
-export function AddToCart({ product }: Props) {
+export function AddToCart({ product, className }: Props) {
   const { addItem, cart, isLoading } = useCart()
   const searchParams = useSearchParams()
 
@@ -61,7 +62,7 @@ export function AddToCart({ product }: Props) {
         return
       }
 
-      const productId = product.enableVariants && selectedVariant ? selectedVariant.id : product.id
+      const productId = product.id
 
       const res = await fetch(
         `/api/multi-location/product-price?product=${productId}&branch=${branchId}`,
@@ -99,7 +100,7 @@ export function AddToCart({ product }: Props) {
       e.preventDefault()
 
       if (branchStock.stockStatus === 'outofstock' || branchStock.stockQuantity <= 0) {
-        toast.error('This item is out of stock at the selected branch.')
+        toast.error('This item is out of stock.')
         return
       }
 
@@ -158,15 +159,14 @@ export function AddToCart({ product }: Props) {
   return (
     <Button
       aria-label="Add to cart"
-      variant="outline"
-      className={clsx({
-        'hover:opacity-90': true,
-      })}
-      disabled={disabled || isLoading}
+      // variant="outline"
+      className={className}
+      disabled={false}
       onClick={addToCart}
       type="submit"
+      style={{borderRadius: "0px", }}
     >
-      Add To Cart
+      {isLoading ? 'Adding...' : product.primaryCTA?.label || 'Add To Cart'}
     </Button>
   )
 }

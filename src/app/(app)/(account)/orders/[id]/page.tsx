@@ -85,6 +85,7 @@ export default async function Order({ params, searchParams }: PageProps) {
         createdAt: true,
         updatedAt: true,
         shippingAddress: true,
+        fulfillment: true, // ✅ ADD THIS
       },
     })
 
@@ -128,9 +129,11 @@ export default async function Order({ params, searchParams }: PageProps) {
       return total + price * quantity
     }, 0) || 0
 
+  const fulfillment = (order as any).fulfillment
+
   const shippingTotal =
-    typeof order.amount === 'number' && order.amount > itemsSubtotal
-      ? order.amount - itemsSubtotal
+    fulfillment?.serviceType === 'delivery'
+      ? Number(fulfillment?.shippingCharge || 0)
       : 0
 
   return (
@@ -269,44 +272,7 @@ export default async function Order({ params, searchParams }: PageProps) {
               </section>
             )}
 
-            <section className="border border-[#222] bg-[#111] px-6 py-6 shadow-[0_0_0_1px_rgba(255,255,255,0.03)]">
-              <h2 className="mb-6 text-2xl font-black uppercase tracking-tight text-neutral-100">
-                Billing Details
-              </h2>
-
-              <div className="space-y-4 text-sm">
-                <div className="flex justify-between gap-4">
-                  <span className="text-neutral-600">Email</span>
-                  <span className="text-right text-neutral-300">
-                    {order.customerEmail || email || 'Not available'}
-                  </span>
-                </div>
-
-                <div className="flex justify-between gap-4">
-                  <span className="text-neutral-600">Status</span>
-                  <span className="font-mono uppercase tracking-[0.12em] text-[#f5a400]">
-                    {order.status}
-                  </span>
-                </div>
-
-                <div className="flex justify-between gap-4">
-                  <span className="text-neutral-600">Currency</span>
-                  <span className="font-mono uppercase tracking-[0.12em] text-neutral-300">
-                    {order.currency}
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-8 border-t border-[#222] pt-5">
-                <p className="font-mono text-xs uppercase tracking-[0.18em] text-[#f5a400]">
-                  Cold-chain verified
-                </p>
-
-                <p className="mt-3 text-xs leading-relaxed text-neutral-500">
-                  Your order is being handled under strict temperature-controlled protocols.
-                </p>
-              </div>
-            </section>
+            
 
 
           </aside>

@@ -92,42 +92,7 @@ export default async function AccountPage() {
         </div>
       </section>
 
-      {/* PREFERRED FULFILLMENT */}
-      <section className="space-y-6">
-        <h2 className="text-xl font-bold uppercase tracking-wide text-[#E2B84F]">
-          Preferred Fulfillment
-        </h2>
-
-        <div className="grid gap-6 md:grid-cols-[260px_1fr]">
-          <div className="min-h-[180px] bg-[#1A1C1C] border border-[#3A3325] overflow-hidden">
-            <div className="h-full min-h-[180px] bg-[linear-gradient(135deg,rgba(226,184,79,0.25),rgba(0,0,0,0.75)),url('/media/shop-interior.jpg')] bg-cover bg-center" />
-          </div>
-
-          <div className="border border-[#3A3325] bg-[#1A1C1C] p-8">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#E2B84F]">
-              Default Selection
-            </p>
-
-            <h3 className="mt-3 text-2xl font-semibold">
-              {user?.defaultFulfillmentLocation?.title || 'Pickup Location'}
-            </h3>
-
-            <p className="mt-2 text-sm text-white/60">
-              {user?.defaultFulfillmentLocation?.address || 'No preferred fulfillment location selected.'}
-            </p>
-
-            <div className="mt-10 border-t border-white/10 pt-6 flex justify-end gap-8">
-              <button className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 hover:text-white">
-                Change Location
-              </button>
-
-              <button className="text-xs font-bold uppercase tracking-[0.2em] text-[#E2B84F] hover:text-[#F3CA66]">
-                View Hours
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+    
 
 
     </div>

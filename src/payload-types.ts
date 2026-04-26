@@ -284,6 +284,10 @@ export interface Order {
     date?: string | null;
     timeSlot?: string | null;
     postalCode?: string | null;
+    /**
+     * Shipping charge stored in cents
+     */
+    shippingCharge?: number | null;
     notes?: string | null;
   };
   updatedAt: string;
@@ -2333,6 +2337,7 @@ export interface OrdersSelect<T extends boolean = true> {
         date?: T;
         timeSlot?: T;
         postalCode?: T;
+        shippingCharge?: T;
         notes?: T;
       };
   updatedAt?: T;

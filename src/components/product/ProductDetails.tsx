@@ -5,7 +5,7 @@ import type { Product } from '@/payload-types'
 import Link from 'next/link'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import { showCartErrorToast, showCartSuccessToast } from '../Cart/CartToastAlert'
-
+import { AddToCart } from '@/components/Cart/AddToCart'
 
 type ProductWithUIFields = Product & {
   title?: string
@@ -160,14 +160,19 @@ export default function ProductDetails({ product }: Props) {
       )}
 
       <div className="flex flex-col gap-4">
-        <button
+        {/* <button
           type="button"
           onClick={handleAddToCart}
           disabled={isLoading}
           className="flex h-16 items-center justify-center bg-[#d4a63c] text-sm font-bold uppercase tracking-[0.2em] text-black disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isLoading ? 'Adding...' : product.primaryCTA?.label || 'Add To Cart'}
-        </button>
+        </button> */}
+
+        <AddToCart
+          product={product}
+          className="flex h-16 items-center justify-center bg-[#d4a63c] text-sm font-bold uppercase tracking-[0.2em] text-black"
+        />
 
         {product.secondaryCTA?.label && (
           <Link

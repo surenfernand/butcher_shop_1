@@ -49,6 +49,14 @@ export const multiLocationPlugin = (options: MultiLocationPluginOptions = {}): P
               { name: 'date', type: 'date' },
               { name: 'timeSlot', type: 'text' },
               { name: 'postalCode', type: 'text' },
+              {
+                name: 'shippingCharge',
+                type: 'number',
+                min: 0,
+                admin: {
+                  description: 'Shipping charge stored in cents',
+                },
+              },
               { name: 'notes', type: 'textarea' },
             ],
           },

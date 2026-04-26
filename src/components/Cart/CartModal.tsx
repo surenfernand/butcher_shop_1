@@ -311,14 +311,14 @@ export function CartModal() {
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between text-[#a9a9a9]">
+                  {/* <div className="flex items-center justify-between text-[#a9a9a9]">
                     <span>Shipping Est.</span>
                     <span className="text-[#d4a63c]">Complimentary</span>
-                  </div>
+                  </div> */}
 
                   <div className="mt-5 flex items-center justify-between border-t border-[#262626] pt-4">
                     <span className="text-lg font-extrabold tracking-[0.14em] text-[#f1f1f1]">
-                      Investment Total
+                       Total
                     </span>
                     {typeof cart?.subtotal === 'number' && (
                       <Price amount={cart.subtotal} className="text-3xl font-black text-[#d4a63c]" />
@@ -338,12 +338,12 @@ export function CartModal() {
 
                   <div className="flex items-center justify-center gap-10 border-t border-[#1f1f1f] pt-5 text-[11px] uppercase tracking-[0.14em] text-[#555]">
 
-                    <Link
+                    {/* <Link
                       href="/shipping-information"
                       className="transition-colors hover:text-[#d4a63c]"
                     >
                       Shipping Info
-                    </Link>
+                    </Link> */}
                   </div>
                 </div>
               </div>

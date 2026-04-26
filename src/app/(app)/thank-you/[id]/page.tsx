@@ -117,7 +117,7 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
 
   const shippingTotal =
     fulfillment?.serviceType === 'delivery'
-      ? Number(fulfillment?.shippingCharge || 0) * 100
+      ? Number(fulfillment?.shippingCharge || 0)
       : 0
 
   const address = typedOrder.shippingAddress

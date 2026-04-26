@@ -24,7 +24,7 @@ export const AccountNav: React.FC<Props> = ({ className }) => {
   return (
     <div
       className={clsx(
-        'flex min-h-full flex-col justify-between bg-[#070707] text-white',
+        'flex min-h-full flex-col justify-between text-white',
         className,
       )}
     >
