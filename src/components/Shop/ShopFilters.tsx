@@ -5,6 +5,16 @@ import clsx from 'clsx'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import React from 'react'
 
+type ShopFiltersProps = {
+  labels?: {
+    cutTypeLabel?: string
+    agingProcessLabel?: string
+    originLabel?: string
+    priceRangeLabel?: string
+  }
+  sortLabel?: string
+}
+
 const meatTypes = [
   { label: 'Beef', value: 'beef' },
   { label: 'Chicken', value: 'chicken' },
@@ -46,7 +56,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   )
 }
 
-export const ShopFilters = () => {
+export const ShopFilters = ({ labels, sortLabel }: ShopFiltersProps) => {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -85,7 +95,7 @@ export const ShopFilters = () => {
     <aside className="w-full max-w-[260px] bg-black text-white">
       <div className="space-y-8">
         <div>
-          <SectionTitle>Meat Type</SectionTitle>
+          <SectionTitle>{labels?.cutTypeLabel || 'Meat Type'}</SectionTitle>
           <select
             className="w-full border border-[#2a2a2a] bg-[#111] px-4 py-3 text-sm text-white outline-none"
             value={currentMeatType}
@@ -101,7 +111,7 @@ export const ShopFilters = () => {
         </div>
 
         <div>
-          <SectionTitle>Storage Type</SectionTitle>
+          <SectionTitle>{labels?.agingProcessLabel || 'Storage Type'}</SectionTitle>
           <div className="flex flex-wrap gap-2">
             {storageTypes.map((item) => {
               const active = currentStorageType === item.value
@@ -126,7 +136,7 @@ export const ShopFilters = () => {
         </div>
 
         <div>
-          <SectionTitle>Preparation Style</SectionTitle>
+          <SectionTitle>{labels?.originLabel || 'Preparation Style'}</SectionTitle>
           <select
             className="w-full border border-[#2a2a2a] bg-[#111] px-4 py-3 text-sm text-white outline-none"
             value={currentPreparationStyle}
@@ -155,7 +165,7 @@ export const ShopFilters = () => {
         </div>
 
         <div>
-          <SectionTitle>Price Range</SectionTitle>
+          <SectionTitle>{labels?.priceRangeLabel || 'Price Range'}</SectionTitle>
           <div className="grid grid-cols-2 gap-3">
             <input
               className="border border-[#2a2a2a] bg-[#111] px-3 py-2 text-sm text-white outline-none"
@@ -185,7 +195,7 @@ export const ShopFilters = () => {
         </div>
 
         <div>
-          <SectionTitle>Sort by</SectionTitle>
+          <SectionTitle>{sortLabel || 'Sort by'}</SectionTitle>
           <select
             className="w-full border border-[#2a2a2a] bg-[#111] px-4 py-3 text-sm text-white outline-none"
             value={currentSort}

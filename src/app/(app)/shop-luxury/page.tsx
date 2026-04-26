@@ -13,7 +13,7 @@ export default async function ShopLuxuryPage() {
   const products = await payload.find({
     collection: 'products',
     depth: 2,
-    limit: pageData.itemsPerPage || 6,
+    limit: pageData.itemsPerPage ?? 6,
     where: {
       featuredInShop: {
         equals: true,
@@ -21,8 +21,13 @@ export default async function ShopLuxuryPage() {
     },
   })
 
+  const filterSections = pageData.filterSections as {
+    title: string
+    options?: { label: string }[]
+  }[]
+
   return (
-    
+
     <main className="min-h-screen bg-black px-8 py-10 text-white mb-10">
       <br>
       </br>
@@ -42,7 +47,7 @@ export default async function ShopLuxuryPage() {
         <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
           <aside className="border-r border-[#1f1f1f] pr-8">
             <div className="space-y-8">
-              {pageData.filterSections?.map((section, i) => (
+             {filterSections?.map((section, i) => (
                 <div key={i}>
                   <h2 className="mb-4 text-xs uppercase tracking-[0.2em] text-[#c8a24d]">
                     {section.title}

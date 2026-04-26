@@ -100,7 +100,7 @@ export function AddToCart({ product, className }: Props) {
       e.preventDefault()
 
       if (branchStock.stockStatus === 'outofstock' || branchStock.stockQuantity <= 0) {
-        toast.error('This item is out of stock.')
+        toast.error('This item is out of stock at the selected branch.')
         return
       }
 
@@ -159,12 +159,12 @@ export function AddToCart({ product, className }: Props) {
   return (
     <Button
       aria-label="Add to cart"
-      // variant="outline"
+      variant="outline"
       className={className}
-      disabled={false}
+      disabled={disabled || isLoading}
       onClick={addToCart}
       type="submit"
-      style={{borderRadius: "0px", }}
+      style={{ borderRadius: "0px", }}
     >
       {isLoading ? 'Adding...' : product.primaryCTA?.label || 'Add To Cart'}
     </Button>

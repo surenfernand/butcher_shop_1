@@ -2609,6 +2609,8 @@ export interface ShopPage {
  * via the `definition` "shop-luxury-page".
  */
 export interface ShopLuxuryPage {
+  filterSections: any;
+  itemsPerPage: number;
   id: number;
   eyebrow?: string | null;
   title?: string | null;
