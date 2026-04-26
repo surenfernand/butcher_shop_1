@@ -22,7 +22,9 @@ export function BranchSelector({ onBranchSelected }: Props) {
     const res = await fetch('/api/multi-location/find-branch', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ postalCode }),
+      body: JSON.stringify({
+        postalCode: postalCode.trim().toUpperCase().replace(/\s+/g, ''),
+      }),
     })
 
     const json = await res.json()

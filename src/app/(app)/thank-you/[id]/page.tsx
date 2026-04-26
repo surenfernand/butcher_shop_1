@@ -16,18 +16,18 @@ type PageProps = {
 const formatMoney = (amount?: number | null) =>
   typeof amount === 'number'
     ? new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      }).format(amount)
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount / 100)
     : ''
 
 const formatDate = (date?: string | null) =>
   date
     ? new Intl.DateTimeFormat('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      }).format(new Date(date))
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    }).format(new Date(date))
     : ''
 
 const getProductImage = (product: Product): Media | undefined => {
@@ -65,28 +65,28 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
         },
         ...(user
           ? [
-              {
-                customer: {
-                  equals: user.id,
-                },
+            {
+              customer: {
+                equals: user.id,
               },
-            ]
+            },
+          ]
           : [
-              {
-                accessToken: {
-                  equals: accessToken,
-                },
+            {
+              accessToken: {
+                equals: accessToken,
               },
-              ...(email
-                ? [
-                    {
-                      customerEmail: {
-                        equals: email,
-                      },
-                    },
-                  ]
-                : []),
-            ]),
+            },
+            ...(email
+              ? [
+                {
+                  customerEmail: {
+                    equals: email,
+                  },
+                },
+              ]
+              : []),
+          ]),
       ],
     },
   })
@@ -113,9 +113,11 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
       return total + price * quantity
     }, 0) || 0
 
+  const fulfillment = typedOrder.fulfillment as any
+
   const shippingTotal =
-    typeof typedOrder.amount === 'number' && typedOrder.amount > itemsSubtotal
-      ? typedOrder.amount - itemsSubtotal
+    fulfillment?.serviceType === 'delivery'
+      ? Number(fulfillment?.shippingCharge || 0) * 100
       : 0
 
   const address = typedOrder.shippingAddress
@@ -204,12 +206,10 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
                 <span>{formatMoney(itemsSubtotal)}</span>
               </div>
 
-              {shippingTotal > 0 ? (
-                <div className="flex justify-between text-sm uppercase tracking-[0.12em] text-[#d2c5b1]">
-                  <span>Shipping</span>
-                  <span>{formatMoney(shippingTotal)}</span>
-                </div>
-              ) : null}
+              <div className="flex justify-between text-sm uppercase tracking-[0.12em] text-[#d2c5b1]">
+                <span>Shipping</span>
+                <span>{shippingTotal > 0 ? formatMoney(shippingTotal) : 'Free'}</span>
+              </div>
 
               <div className="flex justify-between border-t border-[#333535] pt-4 text-2xl font-black">
                 <span className="uppercase text-[#D3A84B]">Total Investment</span>
@@ -237,7 +237,7 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
 
         <aside className="space-y-6 lg:col-span-4">
           <div className="border border-[#333535] bg-[#282a2b] p-7">
-            
+
             {typedOrder.fulfillment?.date ? (
               <div className="mb-6">
                 <p className="text-xs uppercase tracking-[0.18em] text-[#9a8f7e]">
@@ -288,7 +288,7 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
             </div>
           </div>
 
-          
+
         </aside>
       </section>
     </main>

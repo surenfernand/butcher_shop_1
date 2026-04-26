@@ -31,7 +31,7 @@ export const AccountNav: React.FC<Props> = ({ className }) => {
       <div>
         <div className="border-b border-white/5 px-5 py-6">
           <p className="text-lg font-bold uppercase tracking-[0.18em] text-[#E2B84F]">
-            The Atelier
+            THE BUTCHER'S CRAFT
           </p>
           <p className="mt-1 text-xs text-white/45">Artisan Butchery</p>
         </div>

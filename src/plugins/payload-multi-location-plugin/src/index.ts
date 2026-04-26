@@ -7,6 +7,7 @@ import { createBranchHolidaysCollection } from './collections/BranchHolidays'
 import { findBranchEndpoint } from './endpoints/findBranch'
 import { getFulfillmentOptionsEndpoint } from './endpoints/getFulfillmentOptions'
 import { getProductBranchPriceEndpoint } from './endpoints/getProductBranchPrice'
+import { listBranchesEndpoint } from './endpoints/listBranches'
 import { reduceBranchInventory } from './hooks/reduceBranchInventory'
 import { validateBranchInventory } from './hooks/validateBranchInventory'
 import { validateMaxOrdersPerDay } from './hooks/validateMaxOrdersPerDay'
@@ -78,6 +79,7 @@ export const multiLocationPlugin = (options: MultiLocationPluginOptions = {}): P
       ],
       endpoints: [
         ...(incomingConfig.endpoints || []),
+        listBranchesEndpoint,
         findBranchEndpoint,
         getProductBranchPriceEndpoint,
         getFulfillmentOptionsEndpoint,

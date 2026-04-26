@@ -39,10 +39,15 @@ const blockComponents = {
   productGrid: ProductGridBlock,
 }
 
+
+
+type SearchParams = { [key: string]: string | string[] | undefined }
+
 export const RenderBlocks: React.FC<{
   blocks: Page['layout'][0][]
+  searchParams?: SearchParams
 }> = (props) => {
-  const { blocks } = props
+  const { blocks, searchParams } = props
 
   const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0
 
@@ -60,7 +65,11 @@ export const RenderBlocks: React.FC<{
                 <div className="my-16" key={index}>
                   {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
                   {/* @ts-ignore */}
-                  <Block id={toKebabCase(blockName!)} {...block} />
+                  <Block
+                    id={toKebabCase(blockName!)}
+                    searchParams={searchParams}
+                    {...block}
+                  />
                 </div>
               )
             }

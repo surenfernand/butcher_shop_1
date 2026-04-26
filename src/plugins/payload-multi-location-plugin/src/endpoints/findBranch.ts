@@ -6,28 +6,48 @@ export const findBranchEndpoint: Endpoint = {
   method: 'post',
   handler: async (req) => {
     const body = await req.json?.().catch(() => ({}))
+
+    const branch = body?.branch
+    const serviceType = body?.serviceType || 'delivery'
     const postalCode = normalizePostalCode(body?.postalCode)
     const prefix = getPostalPrefix(postalCode)
 
-    if (!postalCode) {
-      return Response.json({ error: 'postalCode is required' }, { status: 400 })
+    if (!branch) {
+      return Response.json({ error: 'branch is required' }, { status: 400 })
     }
 
-    const branches = await req.payload.find({
-      collection: 'branches',
-      depth: 0,
+    if (serviceType === 'delivery' && !postalCode) {
+      return Response.json({ error: 'postalCode is required for delivery' }, { status: 400 })
+    }
+
+    const schedules = await req.payload.find({
+      collection: 'fulfillment-schedules',
+      depth: 1,
       limit: 100,
-      where: { isActive: { equals: true } },
+      where: {
+        and: [
+          { branch: { equals: branch } },
+          { isActive: { equals: true } },
+          { serviceType: { equals: serviceType } },
+        ],
+      },
     })
 
-    const branch = branches.docs.find((candidate: any) => {
-      const codes = candidate.postalCodes || []
+    const matchingSchedules = schedules.docs.filter((schedule: any) => {
+      if (serviceType === 'pickup') return true
+
+      const codes = schedule.postalCodes || []
       return codes.some((entry: any) => {
         const code = normalizePostalCode(entry?.code || entry)
         return code === postalCode || code === prefix || postalCode.startsWith(code)
       })
     })
 
-    return Response.json({ branch: branch || null })
+    const selectedBranch = matchingSchedules[0]?.branch || null
+
+    return Response.json({
+      branch: selectedBranch,
+      schedules: matchingSchedules,
+    })
   },
 }

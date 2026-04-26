@@ -43,7 +43,7 @@ export const ContactCards: Block = {
       defaultValue: [
         {
           icon: 'map-pin',
-          title: 'The Atelier',
+          title: "THE BUTCHER'S CRAFT",
           line1: '1245 Gourmet Boulevard',
           line2: 'Culinary District, NY 10012',
         },

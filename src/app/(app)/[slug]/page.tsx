@@ -34,21 +34,26 @@ export async function generateStaticParams() {
     }))
 }
 
+type SearchParams = { [key: string]: string | string[] | undefined }
+
 type Args = {
   params: Promise<{
     slug?: string
   }>
+  searchParams: Promise<SearchParams>
 }
 
-export default async function Page({ params }: Args) {
+
+export default async function Page({ params, searchParams }: Args) {
   const { slug = 'home' } = await params
+  const resolvedSearchParams = await searchParams
+
   const url = '/' + slug
 
   let page = await queryPageBySlug({
     slug,
   })
 
-  // Remove this code once your website is seeded
   if (!page && slug === 'home') {
     page = homeStaticData() as Page
   }
@@ -63,7 +68,7 @@ export default async function Page({ params }: Args) {
     <article>
       <div className="pt-20">
         <RenderHero {...hero} />
-        <RenderBlocks blocks={layout} />
+        <RenderBlocks blocks={layout} searchParams={resolvedSearchParams} />
       </div>
     </article>
   )
@@ -101,6 +106,8 @@ const queryPageBySlug = async ({ slug }: { slug: string }) => {
       ],
     },
   })
+
+
 
   return result.docs?.[0] || null
 }

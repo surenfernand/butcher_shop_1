@@ -1,14 +1,39 @@
 import type { CollectionConfig } from 'payload'
 import { adminOnly, publicRead } from '../utilities/access'
 
-export const createFulfillmentSchedulesCollection = (productSlug = 'products', adminGroup = 'Shop'): CollectionConfig => ({
+const weeklyDayOptions = [
+  { label: 'Monday', value: 'monday' },
+  { label: 'Tuesday', value: 'tuesday' },
+  { label: 'Wednesday', value: 'wednesday' },
+  { label: 'Thursday', value: 'thursday' },
+  { label: 'Friday', value: 'friday' },
+  { label: 'Saturday', value: 'saturday' },
+  { label: 'Sunday', value: 'sunday' },
+]
+
+export const createFulfillmentSchedulesCollection = (
+  productSlug = 'products',
+  adminGroup = 'Shop',
+): CollectionConfig => ({
   slug: 'fulfillment-schedules',
   admin: { useAsTitle: 'name', group: adminGroup },
-  access: { read: publicRead, create: adminOnly, update: adminOnly, delete: adminOnly },
+  access: {
+    read: publicRead,
+    create: adminOnly,
+    update: adminOnly,
+    delete: adminOnly,
+  },
   fields: [
     { name: 'name', type: 'text', required: true },
-    { name: 'branch', type: 'relationship', relationTo: 'branches', index: true },
-    { name: 'products', type: 'relationship', relationTo: productSlug, hasMany: true },
+
+    {
+      name: 'branch',
+      type: 'relationship',
+      relationTo: 'branches',
+      required: true,
+      index: true,
+    },
+
     {
       name: 'serviceType',
       type: 'select',
@@ -18,29 +43,67 @@ export const createFulfillmentSchedulesCollection = (productSlug = 'products', a
         { label: 'Pickup', value: 'pickup' },
       ],
       required: true,
+      index: true,
+      admin: {
+        description:
+          'Create one schedule for Pickup and another schedule for Delivery if they have different days or dates.',
+      },
     },
-    { name: 'postalCodes', type: 'array', fields: [{ name: 'code', type: 'text', required: true }] },
+
+    {
+      name: 'postalCodes',
+      label: 'Delivery postal codes / FSA prefixes',
+      type: 'array',
+      admin: {
+        condition: (_data, siblingData) => siblingData?.serviceType === 'delivery',
+        description:
+          'Only used for delivery schedules. Use full postal codes or prefixes such as M5V.',
+      },
+      fields: [{ name: 'code', type: 'text', required: true }],
+    },
+
+    {
+      name: 'weeklyDays',
+      label: 'Weekly Days',
+      type: 'select',
+      hasMany: true,
+      required: true,
+      options: weeklyDayOptions,
+      admin: {
+        description:
+          'Only these days will be selectable in the checkout calendar for this branch and service type.',
+      },
+    },
+
     {
       name: 'availableDates',
+      label: 'Extra available dates',
       type: 'array',
       fields: [{ name: 'date', type: 'date', required: true }],
     },
     {
-      name: 'weeklyDays',
-      type: 'select',
-      hasMany: true,
-      options: [
-        { label: 'Monday', value: 'monday' },
-        { label: 'Tuesday', value: 'tuesday' },
-        { label: 'Wednesday', value: 'wednesday' },
-        { label: 'Thursday', value: 'thursday' },
-        { label: 'Friday', value: 'friday' },
-        { label: 'Saturday', value: 'saturday' },
-        { label: 'Sunday', value: 'sunday' },
-      ],
+      name: 'shippingCharge',
+      label: 'Shipping Charge',
+      type: 'number',
+      min: 0,
+      defaultValue: 0,
+      admin: {
+        condition: (_data, siblingData) => siblingData?.serviceType === 'delivery',
+        description: 'Applies only to delivery orders.',
+      },
     },
-    { name: 'timeSlots', type: 'array', fields: [{ name: 'label', type: 'text', required: true }] },
-    { name: 'maxOrdersPerDay', type: 'number', min: 0 },
-    { name: 'isActive', type: 'checkbox', defaultValue: true },
+
+    {
+      name: 'timeSlots',
+      type: 'array',
+      fields: [{ name: 'label', type: 'text', required: true }],
+    },
+
+    {
+      name: 'isActive',
+      type: 'checkbox',
+      defaultValue: true,
+      index: true,
+    },
   ],
 })

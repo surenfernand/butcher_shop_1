@@ -28,6 +28,7 @@ import { MeatTypes } from './collections/ProductCategories/MeatTypes'
 import { Qualities } from './collections/ProductCategories/Qualities'
 import { Flavors } from './collections/ProductCategories/Flavors'
 import { ShopLuxuryPage } from './globals/ShopLuxuryPage'
+import { CartSettings } from './globals/CartSettings'
 
 
 const filename = fileURLToPath(import.meta.url)
@@ -100,7 +101,7 @@ export default buildConfig({
   }),
   //email: nodemailerAdapter(),
   endpoints: [],
-  globals: [Header, Footer, ShopPage, ShopLuxuryPage],
+  globals: [Header, Footer, ShopPage, ShopLuxuryPage, CartSettings],
   plugins,
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

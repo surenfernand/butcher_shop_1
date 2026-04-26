@@ -33,5 +33,19 @@ export const createBranchInventoryCollection = (productSlug = 'products', adminG
       ],
     },
     { name: 'allowBackorders', type: 'checkbox', defaultValue: false },
+    {
+      name: 'maxPickupOrdersPerDay',
+      label: 'Maximum pickup orders per day for this product',
+      type: 'number',
+      min: 0,
+      admin: { description: '0 or empty means no per-product pickup limit.' },
+    },
+    {
+      name: 'maxDeliveryOrdersPerDay',
+      label: 'Maximum delivery orders per day for this product',
+      type: 'number',
+      min: 0,
+      admin: { description: '0 or empty means no per-product delivery limit.' },
+    },
   ],
 })

@@ -32,6 +32,8 @@ export default async function Order({ params, searchParams }: PageProps) {
 
   let order: Order | null = null
 
+
+
   try {
     const {
       docs: [orderResult],
@@ -49,28 +51,28 @@ export default async function Order({ params, searchParams }: PageProps) {
           },
           ...(user
             ? [
-                {
-                  customer: {
-                    equals: user.id,
-                  },
+              {
+                customer: {
+                  equals: user.id,
                 },
-              ]
+              },
+            ]
             : [
-                {
-                  accessToken: {
-                    equals: accessToken,
-                  },
+              {
+                accessToken: {
+                  equals: accessToken,
                 },
-                ...(email
-                  ? [
-                      {
-                        customerEmail: {
-                          equals: email,
-                        },
-                      },
-                    ]
-                  : []),
-              ]),
+              },
+              ...(email
+                ? [
+                  {
+                    customerEmail: {
+                      equals: email,
+                    },
+                  },
+                ]
+                : []),
+            ]),
         ],
       },
       select: {
@@ -93,6 +95,7 @@ export default async function Order({ params, searchParams }: PageProps) {
       orderResult &&
       orderResult.customerEmail &&
       orderResult.customerEmail === email
+
     const canAccessAsUser =
       user &&
       orderResult &&
@@ -112,89 +115,202 @@ export default async function Order({ params, searchParams }: PageProps) {
     notFound()
   }
 
+  const itemsSubtotal =
+    order.items?.reduce((total, item) => {
+      const product =
+        typeof item.product === 'object' ? item.product : undefined
+      const variant =
+        typeof item.variant === 'object' ? item.variant : undefined
+
+      const price = variant?.priceInUSD || product?.priceInUSD || 0
+      const quantity = item.quantity || 0
+
+      return total + price * quantity
+    }, 0) || 0
+
+  const shippingTotal =
+    typeof order.amount === 'number' && order.amount > itemsSubtotal
+      ? order.amount - itemsSubtotal
+      : 0
+
   return (
-    <div className="">
-      <div className="flex gap-8 justify-between items-center mb-6">
-        {user ? (
-          <div className="flex gap-4">
-            <Button asChild variant="ghost">
+    <div className="min-h-screen text-neutral-200 px-6 py-10">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-10 flex items-center justify-between gap-8">
+          {user ? (
+            <Button
+              asChild
+              variant="ghost"
+              className="px-0 font-mono text-xs uppercase tracking-[0.16em] text-neutral-500 hover:bg-transparent hover:text-[#f5a400]"
+            >
               <Link href="/orders">
-                <ChevronLeftIcon />
+                <ChevronLeftIcon className="size-4" />
                 All orders
               </Link>
             </Button>
-          </div>
-        ) : (
-          <div></div>
-        )}
-
-        <h1 className="text-sm uppercase font-mono px-2 bg-primary/10 rounded tracking-[0.07em]">
-          <span className="">{`Order #${order.id}`}</span>
-        </h1>
-      </div>
-
-      <div className="bg-card border rounded-lg px-6 py-4 flex flex-col gap-12">
-        <div className="flex flex-col gap-6 lg:flex-row lg:justify-between">
-          <div className="">
-            <p className="font-mono uppercase text-primary/50 mb-1 text-sm">Order Date</p>
-            <p className="text-lg">
-              <time dateTime={order.createdAt}>
-                {formatDateTime({ date: order.createdAt, format: 'MMMM dd, yyyy' })}
-              </time>
-            </p>
-          </div>
-
-          <div className="">
-            <p className="font-mono uppercase text-primary/50 mb-1 text-sm">Total</p>
-            {order.amount && <Price className="text-lg" amount={order.amount} />}
-          </div>
-
-          {order.status && (
-            <div className="grow max-w-1/3">
-              <p className="font-mono uppercase text-primary/50 mb-1 text-sm">Status</p>
-              <OrderStatus className="text-sm" status={order.status} />
-            </div>
+          ) : (
+            <div />
           )}
+
+          <div className="flex items-center gap-3">
+            {order.status && (
+              <OrderStatus
+                className="border border-[#f5a400]/50 bg-[#f5a400]/10 px-3 py-1 font-mono text-xs uppercase tracking-[0.16em] text-[#f5a400]"
+                status={order.status}
+              />
+            )}
+          </div>
         </div>
 
-        {order.items && (
-          <div>
-            <h2 className="font-mono text-primary/50 mb-4 uppercase text-sm">Items</h2>
-            <ul className="flex flex-col gap-6">
-              {order.items?.map((item, index) => {
-                if (typeof item.product === 'string') {
-                  return null
-                }
+        <div className="mb-10">
+          <h1 className="mb-3 text-5xl font-black uppercase tracking-tight text-neutral-100">
+            Order #{order.id}
+          </h1>
 
-                if (!item.product || typeof item.product !== 'object') {
-                  return <div key={index}>This item is no longer available.</div>
-                }
+          <p className="text-neutral-500">
+            Placed on{' '}
+            <time dateTime={order.createdAt}>
+              {formatDateTime({ date: order.createdAt, format: 'MMMM dd, yyyy' })}
+            </time>
+          </p>
+        </div>
 
-                const variant =
-                  item.variant && typeof item.variant === 'object' ? item.variant : undefined
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
+          <div className="space-y-6">
+            <section className="border border-[#222] bg-[#111] px-6 py-6 shadow-[0_0_0_1px_rgba(255,255,255,0.03)]">
+              <h2 className="mb-6 text-2xl font-black uppercase tracking-tight text-neutral-100">
+                Order Items
+              </h2>
 
-                return (
-                  <li key={item.id}>
-                    <ProductItem
-                      product={item.product}
-                      quantity={item.quantity}
-                      variant={variant}
+              {order.items && (
+                <ul className="flex flex-col gap-6">
+                  {order.items.map((item, index) => {
+                    if (typeof item.product === 'string') {
+                      return null
+                    }
+
+                    if (!item.product || typeof item.product !== 'object') {
+                      return (
+                        <li key={index} className="text-neutral-500">
+                          This item is no longer available.
+                        </li>
+                      )
+                    }
+
+                    const variant =
+                      item.variant && typeof item.variant === 'object'
+                        ? item.variant
+                        : undefined
+
+                    return (
+                      <li
+                        key={item.id}
+                        className="border-b border-[#222] pb-6 last:border-b-0 last:pb-0"
+                      >
+                        <ProductItem
+                          product={item.product}
+                          quantity={item.quantity}
+                          variant={variant}
+                        />
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+
+              <div className="mt-8 border-t border-[#222] pt-6">
+                <div className="mb-3 flex justify-between text-neutral-400">
+                  <span>Subtotal</span>
+                  {order.amount && <Price amount={order.amount} />}
+                </div>
+
+                <div className="mb-5 flex justify-between text-neutral-400">
+                  <span>Shipping</span>
+                  <Price amount={shippingTotal} />
+                </div>
+
+                <div className="flex justify-between border-t border-[#222] pt-5">
+                  <span className="font-mono text-2xl font-bold uppercase tracking-[0.14em] text-[#f5a400]">
+                    Total
+                  </span>
+
+                  {order.amount && (
+                    <Price
+                      className="text-2xl font-bold text-[#f5a400]"
+                      amount={order.amount}
                     />
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
-        )}
+                  )}
+                </div>
+              </div>
+            </section>
 
-        {order.shippingAddress && (
-          <div>
-            <h2 className="font-mono text-primary/50 mb-4 uppercase text-sm">Shipping Address</h2>
+            <section className="border border-[#222] bg-[#111] px-6 py-6 shadow-[0_0_0_1px_rgba(255,255,255,0.03)]">
+              <h2 className="mb-6 text-2xl font-black uppercase tracking-tight text-neutral-100">
+                Order Progress
+              </h2>
 
-            {/* @ts-expect-error - some kind of type hell */}
-            <AddressItem address={order.shippingAddress} hideActions />
+              <div>
+                {order.status && <OrderStatus className="text-sm" status={order.status} />}
+              </div>
+            </section>
           </div>
-        )}
+
+          <aside className="space-y-6">
+            {order.shippingAddress && (
+              <section className="border border-[#222] bg-[#111] px-6 py-6 shadow-[0_0_0_1px_rgba(255,255,255,0.03)]">
+                <h2 className="mb-6 text-2xl font-black uppercase tracking-tight text-neutral-100">
+                  Shipping Address
+                </h2>
+
+                <div className="text-neutral-400">
+                  {/* @ts-expect-error - some kind of type hell */}
+                  <AddressItem address={order.shippingAddress} hideActions />
+                </div>
+              </section>
+            )}
+
+            <section className="border border-[#222] bg-[#111] px-6 py-6 shadow-[0_0_0_1px_rgba(255,255,255,0.03)]">
+              <h2 className="mb-6 text-2xl font-black uppercase tracking-tight text-neutral-100">
+                Billing Details
+              </h2>
+
+              <div className="space-y-4 text-sm">
+                <div className="flex justify-between gap-4">
+                  <span className="text-neutral-600">Email</span>
+                  <span className="text-right text-neutral-300">
+                    {order.customerEmail || email || 'Not available'}
+                  </span>
+                </div>
+
+                <div className="flex justify-between gap-4">
+                  <span className="text-neutral-600">Status</span>
+                  <span className="font-mono uppercase tracking-[0.12em] text-[#f5a400]">
+                    {order.status}
+                  </span>
+                </div>
+
+                <div className="flex justify-between gap-4">
+                  <span className="text-neutral-600">Currency</span>
+                  <span className="font-mono uppercase tracking-[0.12em] text-neutral-300">
+                    {order.currency}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-8 border-t border-[#222] pt-5">
+                <p className="font-mono text-xs uppercase tracking-[0.18em] text-[#f5a400]">
+                  Cold-chain verified
+                </p>
+
+                <p className="mt-3 text-xs leading-relaxed text-neutral-500">
+                  Your order is being handled under strict temperature-controlled protocols.
+                </p>
+              </div>
+            </section>
+
+
+          </aside>
+        </div>
       </div>
     </div>
   )

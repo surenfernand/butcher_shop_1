@@ -1,7 +1,6 @@
 'use client'
 
 import { Message } from '@/components/Message'
-import { Button } from '@/components/ui/button'
 import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, FormEvent } from 'react'
@@ -11,14 +10,15 @@ import { Address } from '@/payload-types'
 type Props = {
   customerEmail?: string
   billingAddress?: Partial<Address>
-  shippingAddress?: Partial<Address>
   setProcessingPayment: React.Dispatch<React.SetStateAction<boolean>>
+  setPaymentElementComplete: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 export const CheckoutForm: React.FC<Props> = ({
   customerEmail,
   billingAddress,
   setProcessingPayment,
+  setPaymentElementComplete,
 }) => {
   const stripe = useStripe()
   const elements = useElements()
@@ -34,114 +34,118 @@ export const CheckoutForm: React.FC<Props> = ({
       setIsLoading(true)
       setProcessingPayment(true)
 
-      if (stripe && elements) {
-        try {
-          const returnUrl = `${process.env.NEXT_PUBLIC_SERVER_URL}/checkout/confirm-order${customerEmail ? `?email=${customerEmail}` : ''}`
+      if (!stripe || !elements) {
+        setError('Payment form is not ready yet.')
+        setIsLoading(false)
+        setProcessingPayment(false)
+        return
+      }
 
-          const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
-            confirmParams: {
-              return_url: returnUrl,
-              payment_method_data: {
-                billing_details: {
-                  email: customerEmail,
-                  phone: billingAddress?.phone,
-                  address: {
-                    line1: billingAddress?.addressLine1,
-                    line2: billingAddress?.addressLine2,
-                    city: billingAddress?.city,
-                    state: billingAddress?.state,
-                    postal_code: billingAddress?.postalCode,
-                    country: billingAddress?.country,
-                  },
+      const { error: submitError } = await elements.submit()
+
+      if (submitError) {
+        setError(submitError.message || 'Please complete your card details.')
+        setIsLoading(false)
+        setProcessingPayment(false)
+        setPaymentElementComplete(false)
+        return
+      }
+
+      try {
+        const returnUrl = `${process.env.NEXT_PUBLIC_SERVER_URL}/checkout/confirm-order${
+          customerEmail ? `?email=${customerEmail}` : ''
+        }`
+
+        const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
+          confirmParams: {
+            return_url: returnUrl,
+            payment_method_data: {
+              billing_details: {
+                email: customerEmail,
+                phone: billingAddress?.phone,
+                address: {
+                  line1: billingAddress?.addressLine1,
+                  line2: billingAddress?.addressLine2,
+                  city: billingAddress?.city,
+                  state: billingAddress?.state,
+                  postal_code: billingAddress?.postalCode,
+                  country: billingAddress?.country,
                 },
               },
             },
-            elements,
-            redirect: 'if_required',
+          },
+          elements,
+          redirect: 'if_required',
+        })
+
+        if (paymentIntent && paymentIntent.status === 'succeeded') {
+          const confirmResult = await confirmOrder('stripe', {
+            additionalData: {
+              paymentIntentID: paymentIntent.id,
+              ...(customerEmail ? { customerEmail } : {}),
+            },
           })
 
-          if (paymentIntent && paymentIntent.status === 'succeeded') {
-            try {
-              const confirmResult = await confirmOrder('stripe', {
-                additionalData: {
-                  paymentIntentID: paymentIntent.id,
-                  ...(customerEmail ? { customerEmail } : {}),
-                },
-              })
+          if (
+            confirmResult &&
+            typeof confirmResult === 'object' &&
+            'orderID' in confirmResult &&
+            confirmResult.orderID
+          ) {
+            const accessToken =
+              'accessToken' in confirmResult ? (confirmResult.accessToken as string) : ''
 
-              if (
-                confirmResult &&
-                typeof confirmResult === 'object' &&
-                'orderID' in confirmResult &&
-                confirmResult.orderID
-              ) {
-                const accessToken =
-                  'accessToken' in confirmResult ? (confirmResult.accessToken as string) : ''
-                const queryParams = new URLSearchParams()
+            const queryParams = new URLSearchParams()
 
-                if (customerEmail) {
-                  queryParams.set('email', customerEmail)
-                }
-                if (accessToken) {
-                  queryParams.set('accessToken', accessToken)
-                }
+            if (customerEmail) queryParams.set('email', customerEmail)
+            if (accessToken) queryParams.set('accessToken', accessToken)
 
-                const queryString = queryParams.toString()
-                // const redirectUrl = `/orders/${confirmResult.orderID}${queryString ? `?${queryString}` : ''}`
-                const redirectUrl = `/thank-you/${confirmResult.orderID}${queryString ? `?${queryString}` : ''}`
+            clearCart()
 
-                // Clear the cart after successful payment
-                clearCart()
-
-                // Redirect to order confirmation page
-                router.push(redirectUrl)
-              }
-            } catch (err) {
-              console.log({ err })
-              const msg = err instanceof Error ? err.message : 'Something went wrong.'
-              setError(`Error while confirming order: ${msg}`)
-              setIsLoading(false)
-            }
+            router.push(
+              `/thank-you/${confirmResult.orderID}${
+                queryParams.toString() ? `?${queryParams.toString()}` : ''
+              }`,
+            )
           }
-          if (stripeError?.message) {
-            setError(stripeError.message)
-            setIsLoading(false)
-          }
-        } catch (err) {
-          const msg = err instanceof Error ? err.message : 'Something went wrong.'
-          setError(`Error while submitting payment: ${msg}`)
+        }
+
+        if (stripeError?.message) {
+          setError(stripeError.message)
           setIsLoading(false)
           setProcessingPayment(false)
         }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Something went wrong.'
+        setError(`Error while submitting payment: ${msg}`)
+        setIsLoading(false)
+        setProcessingPayment(false)
       }
     },
     [
-      setProcessingPayment,
       stripe,
       elements,
       customerEmail,
-      billingAddress?.phone,
-      billingAddress?.addressLine1,
-      billingAddress?.addressLine2,
-      billingAddress?.city,
-      billingAddress?.state,
-      billingAddress?.postalCode,
-      billingAddress?.country,
+      billingAddress,
       confirmOrder,
       clearCart,
       router,
+      setProcessingPayment,
+      setPaymentElementComplete,
     ],
   )
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form id="checkout-payment-form" onSubmit={handleSubmit}>
       {error && <Message error={error} />}
-      <PaymentElement />
-      <div className="mt-8 flex gap-4">
-        <Button disabled={!stripe || isLoading} type="submit" variant="default">
-          {isLoading ? 'Loading...' : 'Pay now'}
-        </Button>
-      </div>
+
+      <PaymentElement onChange={(event) => setPaymentElementComplete(event.complete)} />
+
+      {isLoading && (
+        <p className="mt-4 font-sans text-sm uppercase tracking-[0.16em] text-stone-400">
+          Processing payment...
+        </p>
+      )}
     </form>
   )
 }

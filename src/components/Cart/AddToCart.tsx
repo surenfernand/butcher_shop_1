@@ -6,15 +6,26 @@ import type { Product, Variant } from '@/payload-types'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import clsx from 'clsx'
 import { useSearchParams } from 'next/navigation'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+
 type Props = {
   product: Product
+}
+
+type BranchStock = {
+  stockQuantity: number
+  stockStatus: string
 }
 
 export function AddToCart({ product }: Props) {
   const { addItem, cart, isLoading } = useCart()
   const searchParams = useSearchParams()
+
+  const [branchStock, setBranchStock] = useState<BranchStock>({
+    stockQuantity: 0,
+    stockStatus: 'outofstock',
+  })
 
   const variants = product.variants?.docs || []
 
@@ -37,9 +48,60 @@ export function AddToCart({ product }: Props) {
     return undefined
   }, [product.enableVariants, searchParams, variants])
 
+  useEffect(() => {
+    const loadBranchStock = async () => {
+      const fulfillment = JSON.parse(localStorage.getItem('fulfillment') || '{}')
+      const branchId = fulfillment.branch
+
+      if (!branchId) {
+        setBranchStock({
+          stockQuantity: 0,
+          stockStatus: 'outofstock',
+        })
+        return
+      }
+
+      const productId = product.enableVariants && selectedVariant ? selectedVariant.id : product.id
+
+      const res = await fetch(
+        `/api/multi-location/product-price?product=${productId}&branch=${branchId}`,
+      )
+
+      if (!res.ok) {
+        setBranchStock({
+          stockQuantity: 0,
+          stockStatus: 'outofstock',
+        })
+        return
+      }
+
+      const data = await res.json()
+
+      setBranchStock({
+        stockQuantity: data.stockQuantity || 0,
+        stockStatus: data.stockStatus || 'outofstock',
+      })
+    }
+
+    if (product.enableVariants && !selectedVariant) {
+      setBranchStock({
+        stockQuantity: 0,
+        stockStatus: 'outofstock',
+      })
+      return
+    }
+
+    loadBranchStock()
+  }, [product.id, product.enableVariants, selectedVariant])
+
   const addToCart = useCallback(
     (e: React.FormEvent<HTMLButtonElement>) => {
       e.preventDefault()
+
+      if (branchStock.stockStatus === 'outofstock' || branchStock.stockQuantity <= 0) {
+        toast.error('This item is out of stock at the selected branch.')
+        return
+      }
 
       addItem({
         product: product.id,
@@ -48,10 +110,18 @@ export function AddToCart({ product }: Props) {
         toast.success('Item added to cart.')
       })
     },
-    [addItem, product, selectedVariant],
+    [addItem, product.id, selectedVariant?.id, branchStock],
   )
 
   const disabled = useMemo<boolean>(() => {
+    if (product.enableVariants && !selectedVariant) {
+      return true
+    }
+
+    if (branchStock.stockStatus === 'outofstock' || branchStock.stockQuantity <= 0) {
+      return true
+    }
+
     const existingItem = cart?.items?.find((item) => {
       const productID = typeof item.product === 'object' ? item.product?.id : item.product
       const variantID = item.variant
@@ -64,40 +134,31 @@ export function AddToCart({ product }: Props) {
         if (product.enableVariants) {
           return variantID === selectedVariant?.id
         }
+
         return true
       }
+
+      return false
     })
 
     if (existingItem) {
-      const existingQuantity = existingItem.quantity
-
-      if (product.enableVariants) {
-        return existingQuantity >= (selectedVariant?.inventory || 0)
-      }
-      return existingQuantity >= (product.inventory || 0)
-    }
-
-    if (product.enableVariants) {
-      if (!selectedVariant) {
-        return true
-      }
-
-      if (selectedVariant.inventory === 0) {
-        return true
-      }
-    } else {
-      if (product.inventory === 0) {
-        return true
-      }
+      return existingItem.quantity >= branchStock.stockQuantity
     }
 
     return false
-  }, [selectedVariant, cart?.items, product])
+  }, [
+    selectedVariant,
+    cart?.items,
+    product.id,
+    product.enableVariants,
+    branchStock.stockQuantity,
+    branchStock.stockStatus,
+  ])
 
   return (
     <Button
       aria-label="Add to cart"
-      variant={'outline'}
+      variant="outline"
       className={clsx({
         'hover:opacity-90': true,
       })}

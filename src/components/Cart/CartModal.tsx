@@ -14,27 +14,128 @@ import { ShoppingCart, X } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { DeleteItemButton } from './DeleteItemButton'
 import { EditItemQuantityButton } from './EditItemQuantityButton'
 import { OpenCartButton } from './OpenCart'
 import { Product } from '@/payload-types'
+import { CartTimerModal } from './CartTimerModal'
 
 export function CartModal() {
-  const { cart } = useCart()
+  const { cart, clearCart } = useCart()
   const [isOpen, setIsOpen] = useState(false)
 
   const pathname = usePathname()
+
+  const hasAcknowledgedWarningRef = useRef(false)
+  const isResettingTimerRef = useRef(false)
+
+  const [settings, setSettings] = useState<any>(null)
+  const [secondsLeft, setSecondsLeft] = useState<number | null>(null)
+  const [showTimerModal, setShowTimerModal] = useState(false)
+
+  const timerSeconds = Number(settings?.timerSeconds || 120)
+  const warningSeconds = Math.min(Number(settings?.warningSeconds || 10), 10, timerSeconds - 1)
+
+  useEffect(() => {
+    fetch('/api/globals/cart-settings')
+      .then((res) => res.json())
+      .then(setSettings)
+      .catch(() => {
+        setSettings({
+          enabled: true,
+          timerSeconds: 120,
+          warningSeconds: 30,
+          extendSeconds: 30,
+          modalTitle: 'Preserving Freshness',
+          modalMessage:
+            'Our artisanal selections are limited. Your cart is about to be cleared to ensure other patrons can enjoy these prime cuts.',
+          confirmButtonLabel: 'OK',
+          extendButtonLabel: 'Add 30 sec more',
+          footerText: "The Butcher's Craft — Est. 1982",
+        })
+      })
+  }, [])
+
+  const totalQuantity = useMemo(() => {
+    if (!cart || !cart.items || !cart.items.length) return 0
+    return cart.items.reduce((quantity, item) => (item.quantity || 0) + quantity, 0)
+  }, [cart])
+
+  useEffect(() => {
+    if (!settings?.enabled || totalQuantity === 0) {
+      hasAcknowledgedWarningRef.current = false
+      isResettingTimerRef.current = false
+      setSecondsLeft(null)
+      setShowTimerModal(false)
+      return
+    }
+
+    const timerSeconds = Number(settings?.timerSeconds || 120)
+
+    isResettingTimerRef.current = true
+    hasAcknowledgedWarningRef.current = false
+
+    setSecondsLeft(timerSeconds)
+    setShowTimerModal(false)
+
+    const interval = window.setInterval(() => {
+      setSecondsLeft((current) => {
+        if (current === null) return timerSeconds
+        return Math.max(current - 1, 0)
+      })
+    }, 1000)
+
+    return () => window.clearInterval(interval)
+  }, [totalQuantity, settings?.enabled, settings?.timerSeconds])
+
+  useEffect(() => {
+    if (!settings?.enabled || totalQuantity === 0 || secondsLeft === null) return
+
+    if (secondsLeft === 0) {
+      setShowTimerModal(false)
+      setSecondsLeft(null)
+      hasAcknowledgedWarningRef.current = false
+      isResettingTimerRef.current = false
+
+      void clearCart()
+      return
+    }
+
+    if (isResettingTimerRef.current) {
+      isResettingTimerRef.current = false
+      return
+    }
+
+    const timerSeconds = Number(settings?.timerSeconds || 120)
+    const warningSeconds = Math.min(
+      Number(settings?.warningSeconds || 10),
+      10,
+      timerSeconds - 1,
+    )
+
+    if (
+      secondsLeft > 0 &&
+      secondsLeft <= warningSeconds &&
+      !hasAcknowledgedWarningRef.current
+    ) {
+      setShowTimerModal(true)
+    }
+  }, [
+    secondsLeft,
+    settings?.enabled,
+    settings?.timerSeconds,
+    settings?.warningSeconds,
+    totalQuantity,
+    clearCart,
+  ])
 
   useEffect(() => {
     setIsOpen(false)
   }, [pathname])
 
-  const totalQuantity = useMemo(() => {
-    if (!cart || !cart.items || !cart.items.length) return undefined
-    return cart.items.reduce((quantity, item) => (item.quantity || 0) + quantity, 0)
-  }, [cart])
+
 
   return (
     <Sheet onOpenChange={setIsOpen} open={isOpen}>
@@ -56,7 +157,7 @@ export function CartModal() {
 
               </div>
 
-              
+
             </div>
           </SheetHeader>
 
@@ -67,7 +168,7 @@ export function CartModal() {
                 Your cart is empty
               </p>
               <p className="text-sm text-[#8a8a8a]">
-              Add Items to view in Cart
+                Add Items to view in Cart
               </p>
             </div>
           ) : (
@@ -233,19 +334,10 @@ export function CartModal() {
                     Proceed to Checkout
                   </Link>
 
-                  {/* <div className="text-center">
-                    <Link
-                      href="/cart"
-                      className="text-xs font-medium uppercase tracking-[0.32em] text-[#7f7f7f] transition-colors hover:text-white"
-                    >
-                      View Full Cart
-                    </Link>
-                  </div> */}
+
 
                   <div className="flex items-center justify-center gap-10 border-t border-[#1f1f1f] pt-5 text-[11px] uppercase tracking-[0.14em] text-[#555]">
-                    {/* <Link href="/cart" className="transition-colors hover:text-[#d4a63c]">
-                      View Cart
-                    </Link> */}
+
                     <Link
                       href="/shipping-information"
                       className="transition-colors hover:text-[#d4a63c]"
@@ -259,6 +351,27 @@ export function CartModal() {
           )}
         </div>
       </SheetContent>
+
+      <CartTimerModal
+        open={showTimerModal}
+        secondsLeft={secondsLeft || 0}
+        title={settings?.modalTitle || 'Preserving Freshness'}
+        message={settings?.modalMessage || ''}
+        confirmLabel={settings?.confirmButtonLabel || 'OK'}
+        extendLabel={settings?.extendButtonLabel || 'Add 30 sec more'}
+        footerText={settings?.footerText}
+        onConfirm={() => {
+          hasAcknowledgedWarningRef.current = true
+          setShowTimerModal(false)
+        }}
+        onExtend={() => {
+          hasAcknowledgedWarningRef.current = false
+          setSecondsLeft((current) =>
+            (current ?? 0) + Number(settings?.extendSeconds || 30),
+          )
+          setShowTimerModal(false)
+        }}
+      />
     </Sheet>
   )
 }

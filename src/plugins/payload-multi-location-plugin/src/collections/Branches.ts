@@ -22,28 +22,9 @@ export const createBranchesCollection = (adminGroup = 'Shop'): CollectionConfig 
     { name: 'email', type: 'email' },
     { name: 'isActive', type: 'checkbox', defaultValue: true, index: true },
     {
-      name: 'serviceTypes',
-      type: 'select',
-      hasMany: true,
-      defaultValue: ['pickup', 'delivery'],
-      options: [
-        { label: 'Pickup', value: 'pickup' },
-        { label: 'Delivery', value: 'delivery' },
-      ],
-    },
-    {
-      name: 'postalCodes',
-      label: 'Postal codes / FSA prefixes served',
-      type: 'array',
-      fields: [{ name: 'code', type: 'text', required: true }],
-      admin: {
-        description: 'Use full postal codes or prefixes such as M5V. Spaces/case are normalized by the API.',
-      },
-    },
-    {
       name: 'openingHours',
       type: 'json',
-      admin: { description: 'Example: {"monday":[{"open":"09:00","close":"18:00"}]}' },
+      admin: { description: 'Optional branch opening hours. Example: {"monday":[{"open":"09:00","close":"18:00"}]}' },
     },
     {
       name: 'holidayMessage',

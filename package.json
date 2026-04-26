@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@payloadcms/admin-bar": "3.83.0",
+    "@payloadcms/db-postgres": "3.83.0",
     "@payloadcms/email-nodemailer": "3.83.0",
     "@payloadcms/live-preview-react": "3.83.0",
     "@payloadcms/next": "3.83.0",
@@ -61,13 +62,13 @@
     "prism-react-renderer": "^2.3.1",
     "qs-esm": "8.0.1",
     "react": "19.2.4",
+    "react-day-picker": "^9.14.0",
     "react-dom": "19.2.4",
     "react-hook-form": "7.71.1",
     "sharp": "0.34.2",
     "sonner": "^1.7.2",
     "stripe": "18.5.0",
-    "tailwind-merge": "^3.4.0",
-    "@payloadcms/db-postgres": "3.83.0"
+    "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

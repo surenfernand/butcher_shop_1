@@ -26,9 +26,7 @@ const generateURL: GenerateURL<Product | Page> = ({ doc }) => {
 
   return doc?.slug ? `${url}/${doc.slug}` : url
 }
-console.log('STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY)
-console.log('Stripe key length:', process.env.STRIPE_SECRET_KEY?.length)
-
+  
 export const plugins: Plugin[] = [
   seoPlugin({
     generateTitle,

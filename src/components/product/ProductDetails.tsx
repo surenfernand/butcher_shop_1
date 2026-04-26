@@ -4,6 +4,8 @@ import { useMemo, useState } from 'react'
 import type { Product } from '@/payload-types'
 import Link from 'next/link'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
+import { showCartErrorToast, showCartSuccessToast } from '../Cart/CartToastAlert'
+
 
 type ProductWithUIFields = Product & {
   title?: string
@@ -47,7 +49,11 @@ export default function ProductDetails({ product }: Props) {
             ? product.purchaseOptions[selectedOptionIndex]
             : null,
       })
+
+      showCartSuccessToast(product.title)
+
     } catch (error) {
+      showCartErrorToast()
       console.error('Failed to add item to cart:', error)
     }
   }

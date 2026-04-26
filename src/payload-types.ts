@@ -149,12 +149,14 @@ export interface Config {
     footer: Footer;
     'shop-page': ShopPage;
     'shop-luxury-page': ShopLuxuryPage;
+    'cart-settings': CartSetting;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     'shop-page': ShopPageSelect<false> | ShopPageSelect<true>;
     'shop-luxury-page': ShopLuxuryPageSelect<false> | ShopLuxuryPageSelect<true>;
+    'cart-settings': CartSettingsSelect<false> | CartSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -543,18 +545,8 @@ export interface Branch {
   phone?: string | null;
   email?: string | null;
   isActive?: boolean | null;
-  serviceTypes?: ('pickup' | 'delivery')[] | null;
   /**
-   * Use full postal codes or prefixes such as M5V. Spaces/case are normalized by the API.
-   */
-  postalCodes?:
-    | {
-        code: string;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Example: {"monday":[{"open":"09:00","close":"18:00"}]}
+   * Optional branch opening hours. Example: {"monday":[{"open":"09:00","close":"18:00"}]}
    */
   openingHours?:
     | {
@@ -1344,6 +1336,14 @@ export interface BranchInventory {
   stockQuantity?: number | null;
   stockStatus?: ('instock' | 'outofstock' | 'backorder') | null;
   allowBackorders?: boolean | null;
+  /**
+   * 0 or empty means no per-product pickup limit.
+   */
+  maxPickupOrdersPerDay?: number | null;
+  /**
+   * 0 or empty means no per-product delivery limit.
+   */
+  maxDeliveryOrdersPerDay?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1354,29 +1354,40 @@ export interface BranchInventory {
 export interface FulfillmentSchedule {
   id: number;
   name: string;
-  branch?: (number | null) | Branch;
-  products?: (number | Product)[] | null;
+  branch: number | Branch;
+  /**
+   * Create one schedule for Pickup and another schedule for Delivery if they have different days or dates.
+   */
   serviceType: 'delivery' | 'pickup';
+  /**
+   * Only used for delivery schedules. Use full postal codes or prefixes such as M5V.
+   */
   postalCodes?:
     | {
         code: string;
         id?: string | null;
       }[]
     | null;
+  /**
+   * Only these days will be selectable in the checkout calendar for this branch and service type.
+   */
+  weeklyDays: ('monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday')[];
   availableDates?:
     | {
         date: string;
         id?: string | null;
       }[]
     | null;
-  weeklyDays?: ('monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday')[] | null;
+  /**
+   * Applies only to delivery orders.
+   */
+  shippingCharge?: number | null;
   timeSlots?:
     | {
         label: string;
         id?: string | null;
       }[]
     | null;
-  maxOrdersPerDay?: number | null;
   isActive?: boolean | null;
   updatedAt: string;
   createdAt: string;
@@ -2383,13 +2394,6 @@ export interface BranchesSelect<T extends boolean = true> {
   phone?: T;
   email?: T;
   isActive?: T;
-  serviceTypes?: T;
-  postalCodes?:
-    | T
-    | {
-        code?: T;
-        id?: T;
-      };
   openingHours?: T;
   holidayMessage?: T;
   updatedAt?: T;
@@ -2410,6 +2414,8 @@ export interface BranchInventorySelect<T extends boolean = true> {
   stockQuantity?: T;
   stockStatus?: T;
   allowBackorders?: T;
+  maxPickupOrdersPerDay?: T;
+  maxDeliveryOrdersPerDay?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2420,7 +2426,6 @@ export interface BranchInventorySelect<T extends boolean = true> {
 export interface FulfillmentSchedulesSelect<T extends boolean = true> {
   name?: T;
   branch?: T;
-  products?: T;
   serviceType?: T;
   postalCodes?:
     | T
@@ -2428,20 +2433,20 @@ export interface FulfillmentSchedulesSelect<T extends boolean = true> {
         code?: T;
         id?: T;
       };
+  weeklyDays?: T;
   availableDates?:
     | T
     | {
         date?: T;
         id?: T;
       };
-  weeklyDays?: T;
+  shippingCharge?: T;
   timeSlots?:
     | T
     | {
         label?: T;
         id?: T;
       };
-  maxOrdersPerDay?: T;
   isActive?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2608,6 +2613,24 @@ export interface ShopLuxuryPage {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cart-settings".
+ */
+export interface CartSetting {
+  id: number;
+  enabled?: boolean | null;
+  timerSeconds: number;
+  warningSeconds: number;
+  extendSeconds: number;
+  modalTitle: string;
+  modalMessage: string;
+  confirmButtonLabel: string;
+  extendButtonLabel: string;
+  footerText?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
@@ -2710,6 +2733,24 @@ export interface ShopLuxuryPageSelect<T extends boolean = true> {
   eyebrow?: T;
   title?: T;
   sortLabel?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cart-settings_select".
+ */
+export interface CartSettingsSelect<T extends boolean = true> {
+  enabled?: T;
+  timerSeconds?: T;
+  warningSeconds?: T;
+  extendSeconds?: T;
+  modalTitle?: T;
+  modalMessage?: T;
+  confirmButtonLabel?: T;
+  extendButtonLabel?: T;
+  footerText?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
