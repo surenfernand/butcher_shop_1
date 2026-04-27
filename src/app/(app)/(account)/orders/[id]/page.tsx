@@ -15,6 +15,10 @@ import { getPayload } from 'payload'
 import { OrderStatus } from '@/components/OrderStatus'
 import { AddressItem } from '@/components/addresses/AddressItem'
 import { getPurchaseUnitPriceInCents } from '@/utilities/purchasePricing'
+import {
+  resolveOrderLineProductForPricing,
+  resolveOrderLineVariantForPricing,
+} from '@/utilities/resolveOrderLinePricingDocs'
 
 export const dynamic = 'force-dynamic'
 
@@ -118,6 +122,22 @@ export default async function Order({ params, searchParams }: PageProps) {
     notFound()
   }
 
+  const linePricingDocs = await Promise.all(
+    (order.items || []).map(async (item) => {
+      const pricingProduct = await resolveOrderLineProductForPricing(payload, item.product)
+      const pricingVariant = await resolveOrderLineVariantForPricing(payload, item.variant)
+
+      const embeddedProduct = typeof item.product === 'object' ? item.product : undefined
+      const embeddedVariant = typeof item.variant === 'object' ? item.variant : undefined
+
+      return {
+        item,
+        product: pricingProduct ?? embeddedProduct,
+        variant: pricingVariant ?? embeddedVariant,
+      }
+    }),
+  )
+
   const purchaseTypeForPricing =
     order.purchaseType === 'weekly' ||
     order.purchaseType === 'monthly' ||
@@ -126,11 +146,8 @@ export default async function Order({ params, searchParams }: PageProps) {
       : 'one_time'
 
   const itemsSubtotal =
-    order.items?.reduce((total, item) => {
-      const product =
-        typeof item.product === 'object' ? item.product : undefined
-      const variant =
-        typeof item.variant === 'object' ? item.variant : undefined
+    linePricingDocs.reduce((total, row) => {
+      const { item, product, variant } = row
 
       if (!product) return total
 
@@ -196,14 +213,14 @@ export default async function Order({ params, searchParams }: PageProps) {
                 Order Items
               </h2>
 
-              {order.items && (
+              {linePricingDocs.length > 0 && (
                 <ul className="flex flex-col gap-6">
-                  {order.items.map((item, index) => {
+                  {linePricingDocs.map(({ item, product, variant }, index) => {
                     if (typeof item.product === 'string') {
                       return null
                     }
 
-                    if (!item.product || typeof item.product !== 'object') {
+                    if (!product) {
                       return (
                         <li key={index} className="text-neutral-500">
                           This item is no longer available.
@@ -211,14 +228,9 @@ export default async function Order({ params, searchParams }: PageProps) {
                       )
                     }
 
-                    const variant =
-                      item.variant && typeof item.variant === 'object'
-                        ? item.variant
-                        : undefined
-
                     const lineSubtotalInCents =
                       getPurchaseUnitPriceInCents(
-                        item.product,
+                        product,
                         variant,
                         purchaseTypeForPricing,
                       ) * (item.quantity || 1)
@@ -229,7 +241,7 @@ export default async function Order({ params, searchParams }: PageProps) {
                         className="border-b border-[#222] pb-6 last:border-b-0 last:pb-0"
                       >
                         <ProductItem
-                          product={item.product}
+                          product={product}
                           quantity={item.quantity}
                           variant={variant}
                           lineSubtotalInCents={lineSubtotalInCents}

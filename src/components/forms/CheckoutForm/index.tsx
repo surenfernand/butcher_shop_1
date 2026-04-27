@@ -5,6 +5,7 @@ import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, FormEvent } from 'react'
 import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
+import { getPurchaseTypeForConfirmationFromCart } from '@/utilities/localStoragePurchaseType'
 import { Address } from '@/payload-types'
 
 type Props = {
@@ -25,7 +26,7 @@ export const CheckoutForm: React.FC<Props> = ({
   const [error, setError] = React.useState<null | string>(null)
   const [isLoading, setIsLoading] = React.useState(false)
   const router = useRouter()
-  const { clearCart } = useCart()
+  const { clearCart, cart } = useCart()
   const { confirmOrder } = usePayments()
 
   const handleSubmit = useCallback(
@@ -86,16 +87,7 @@ export const CheckoutForm: React.FC<Props> = ({
 
 
 
-          const purchaseType =
-            typeof window !== 'undefined'
-              ? Object.keys(localStorage)
-                .filter((key) => key.startsWith('purchaseType:') && !key.endsWith(':price'))
-                .map((key) => localStorage.getItem(key))
-                .find((value) => value === 'monthly' || value === 'weekly') || 'one_time'
-              : 'one_time'
-
-          console.log('confirm fulfillment', fulfillment)
-          console.log('confirm purchaseType', purchaseType)
+          const purchaseType = getPurchaseTypeForConfirmationFromCart(cart?.items)
 
           const confirmResult = await confirmOrder('stripe', {
             additionalData: {
@@ -125,25 +117,23 @@ export const CheckoutForm: React.FC<Props> = ({
                 ? JSON.parse(localStorage.getItem('fulfillment') || '{}')
                 : {}
 
-            const purchaseType =
-              typeof window !== 'undefined'
-                ? Object.keys(localStorage)
-                  .filter((key) => key.startsWith('purchaseType:') && !key.endsWith(':price'))
-                  .map((key) => localStorage.getItem(key))
-                  .find((value) => value === 'monthly' || value === 'weekly') || 'one_time'
-                : 'one_time'
+            const purchaseTypeForOrder = getPurchaseTypeForConfirmationFromCart(cart?.items)
 
-            fetch('/api/order-extra-data', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                orderID: confirmResult.orderID,
-                fulfillment,
-                purchaseType,
-              }),
-            }).catch(console.error)
+            try {
+              await fetch('/api/order-extra-data', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  orderID: confirmResult.orderID,
+                  fulfillment,
+                  purchaseType: purchaseTypeForOrder,
+                }),
+              })
+            } catch (e) {
+              console.error(e)
+            }
 
             clearCart()
 
@@ -172,6 +162,7 @@ export const CheckoutForm: React.FC<Props> = ({
       customerEmail,
       billingAddress,
       confirmOrder,
+      cart?.items,
       clearCart,
       router,
       setProcessingPayment,

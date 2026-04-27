@@ -1,6 +1,10 @@
 import type { Media, Order, Product } from '@/payload-types'
 
 import { getPurchaseUnitPriceInCents } from '@/utilities/purchasePricing'
+import {
+  resolveOrderLineProductForPricing,
+  resolveOrderLineVariantForPricing,
+} from '@/utilities/resolveOrderLinePricingDocs'
 import configPromise from '@payload-config'
 import { headers as getHeaders } from 'next/headers'
 import Link from 'next/link'
@@ -98,6 +102,22 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
 
   const typedOrder = order as Order
 
+  const linePricingDocs = await Promise.all(
+    (typedOrder.items || []).map(async (item) => {
+      const pricingProduct = await resolveOrderLineProductForPricing(payload, item.product)
+      const pricingVariant = await resolveOrderLineVariantForPricing(payload, item.variant)
+
+      const embeddedProduct = typeof item.product === 'object' ? item.product : undefined
+      const embeddedVariant = typeof item.variant === 'object' ? item.variant : undefined
+
+      return {
+        item,
+        product: pricingProduct ?? embeddedProduct,
+        variant: pricingVariant ?? embeddedVariant,
+      }
+    }),
+  )
+
   const orderUrl = `/orders/${id}?${new URLSearchParams({
     ...(email ? { email } : {}),
     ...(accessToken ? { accessToken } : {}),
@@ -111,9 +131,8 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
       : 'one_time'
 
   const itemsSubtotal =
-    typedOrder.items?.reduce((total, item) => {
-      const product = typeof item.product === 'object' ? item.product : undefined
-      const variant = typeof item.variant === 'object' ? item.variant : undefined
+    linePricingDocs.reduce((total, row) => {
+      const { item, product, variant } = row
 
       if (!product) return total
 
@@ -168,10 +187,7 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
             </div>
 
             <div className="space-y-6">
-              {typedOrder.items?.map((item, index) => {
-                const product = typeof item.product === 'object' ? item.product : undefined
-                const variant = typeof item.variant === 'object' ? item.variant : undefined
-
+              {linePricingDocs.map(({ item, product, variant }, index) => {
                 if (!product) return null
 
                 const image = getProductImage(product)

@@ -2,6 +2,7 @@
 
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
+import { getPurchaseTypeForConfirmationFromCart } from '@/utilities/localStoragePurchaseType'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 
@@ -32,17 +33,7 @@ export const ConfirmOrder: React.FC = () => {
             ? JSON.parse(localStorage.getItem('fulfillment') || '{}')
             : {}
 
-        const purchaseType =
-          typeof window !== 'undefined'
-            ? Object.keys(localStorage)
-              .filter((key) => key.startsWith('purchaseType:') && !key.endsWith(':price'))
-              .map((key) => localStorage.getItem(key))
-              .find((value) => value === 'monthly' || value === 'weekly') || 'one_time'
-            : 'one_time'
-
-
-        console.log('redirect confirm fulfillment', fulfillment)
-        console.log('redirect confirm purchaseType', purchaseType)
+        const purchaseType = getPurchaseTypeForConfirmationFromCart(cart?.items)
 
         confirmOrder('stripe', {
           additionalData: {
@@ -51,7 +42,7 @@ export const ConfirmOrder: React.FC = () => {
             fulfillment,
             purchaseType,
           },
-        }).then((result) => {
+        }).then(async (result) => {
           if (result && typeof result === 'object' && 'orderID' in result && result.orderID) {
             const accessToken = 'accessToken' in result ? (result.accessToken as string) : ''
             const queryParams = new URLSearchParams()
@@ -63,8 +54,21 @@ export const ConfirmOrder: React.FC = () => {
               queryParams.set('accessToken', accessToken)
             }
 
+            try {
+              fetch('/api/order-extra-data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  orderID: result.orderID,
+                  fulfillment,
+                  purchaseType,
+                }),
+              })
+            } catch (e) {
+              console.error(e)
+            }
+
             const queryString = queryParams.toString()
-            // router.push(`/orders/${result.orderID}${queryString ? `?${queryString}` : ''}`)
             router.push(`/thank-you/${result.orderID}${queryString ? `?${queryString}` : ''}`)
           }
         })
