@@ -27,13 +27,15 @@ import { toast } from 'sonner'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { DayPicker } from 'react-day-picker'
 import 'react-day-picker/dist/style.css'
+import {
+  getPurchaseUnitPriceInCents,
+  type PurchaseType,
+} from '@/utilities/purchasePricing'
 
 const apiKey = `${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`
 const stripe = loadStripe(apiKey)
 
 const formatMoney = (amount = 0) => `$${(amount / 100).toFixed(2)}`
-
-type PurchaseType = 'one_time' | 'weekly' | 'monthly'
 
 const getPurchaseTypeLabel = (purchaseType: PurchaseType) => {
   if (purchaseType === 'weekly') return 'Weekly subscription'
@@ -45,37 +47,11 @@ const getPurchaseTypeKey = (productID: string, variantID?: string) => {
   return variantID ? `purchaseType:${productID}:${variantID}` : `purchaseType:${productID}`
 }
 
-const parsePriceOverride = (value?: string | null) => {
-  if (!value) return undefined
-
-  const numericValue = Number(value.replace(/[^0-9.]/g, ''))
-
-  if (Number.isNaN(numericValue)) return undefined
-
-  return Math.round(numericValue * 100)
-}
-
 const getPurchasePrice = (
   product: any,
   variant: any,
   purchaseType: PurchaseType,
-) => {
-  let price = variant?.priceInUSD || product.priceInUSD || 0
-
-  if (purchaseType === 'monthly') {
-    price =
-      parsePriceOverride(product.purchaseFrequencies?.monthly?.priceOverride) ||
-      price
-  }
-
-  if (purchaseType === 'one_time') {
-    price =
-      parsePriceOverride(product.purchaseFrequencies?.oneTime?.priceOverride) ||
-      price
-  }
-
-  return price
-}
+) => getPurchaseUnitPriceInCents(product, variant, purchaseType)
 
 export const CheckoutPage: React.FC = () => {
   const { user } = useAuth()

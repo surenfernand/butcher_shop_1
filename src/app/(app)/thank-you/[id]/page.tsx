@@ -1,5 +1,6 @@
 import type { Media, Order, Product } from '@/payload-types'
 
+import { getPurchaseUnitPriceInCents } from '@/utilities/purchasePricing'
 import configPromise from '@payload-config'
 import { headers as getHeaders } from 'next/headers'
 import Link from 'next/link'
@@ -102,21 +103,27 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
     ...(accessToken ? { accessToken } : {}),
   }).toString()}`
 
+  const purchaseTypeForPricing =
+    typedOrder.purchaseType === 'weekly' ||
+    typedOrder.purchaseType === 'monthly' ||
+    typedOrder.purchaseType === 'one_time'
+      ? typedOrder.purchaseType
+      : 'one_time'
+
   const itemsSubtotal =
     typedOrder.items?.reduce((total, item) => {
       const product = typeof item.product === 'object' ? item.product : undefined
       const variant = typeof item.variant === 'object' ? item.variant : undefined
 
-      const price = variant?.priceInUSD || product?.priceInUSD || 0
+      if (!product) return total
+
+      const unitPrice = getPurchaseUnitPriceInCents(product, variant, purchaseTypeForPricing)
       const quantity = item.quantity || 0
 
-      return total + price * quantity
+      return total + unitPrice * quantity
     }, 0) || 0
 
   const fulfillment = typedOrder.fulfillment as any
-
-  console.log("fulfillment")
-  console.log(fulfillment)
 
   const shippingTotal =
     fulfillment?.serviceType === 'delivery'
@@ -168,7 +175,11 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
                 if (!product) return null
 
                 const image = getProductImage(product)
-                const unitPrice = variant?.priceInUSD || product.priceInUSD || 0
+                const unitPrice = getPurchaseUnitPriceInCents(
+                  product,
+                  variant,
+                  purchaseTypeForPricing,
+                )
                 const quantity = item.quantity || 1
                 const lineTotal = unitPrice * quantity
 

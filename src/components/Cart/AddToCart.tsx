@@ -7,6 +7,7 @@ import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import { useSearchParams } from 'next/navigation'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { getPurchaseUnitPriceInCents } from '@/utilities/purchasePricing'
 
 type PurchaseType = 'one_time' | 'weekly' | 'monthly'
 
@@ -122,24 +123,11 @@ export function AddToCart({
         return
       }
 
-      const parsePriceOverride = (value?: string | null) => {
-        if (!value) return undefined
-        const numericValue = Number(value.replace(/[^0-9.]/g, ''))
-        if (Number.isNaN(numericValue)) return undefined
-        return Math.round(numericValue * 100)
-      }
-
-      let selectedPrice = selectedVariant?.priceInUSD || product.priceInUSD || 0
-
-      if (purchaseType === 'monthly') {
-        const monthly = parsePriceOverride(product.purchaseFrequencies?.monthly?.priceOverride)
-        if (monthly) selectedPrice = monthly
-      }
-
-      if (purchaseType === 'one_time') {
-        const oneTime = parsePriceOverride(product.purchaseFrequencies?.oneTime?.priceOverride)
-        if (oneTime) selectedPrice = oneTime
-      }
+      const selectedPrice = getPurchaseUnitPriceInCents(
+        product,
+        selectedVariant,
+        purchaseType,
+      )
 
       localStorage.setItem(cartItemKey, purchaseType)
       localStorage.setItem(`${cartItemKey}:price`, String(selectedPrice))

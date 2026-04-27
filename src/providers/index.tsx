@@ -24,11 +24,14 @@ export const Providers: React.FC<{
                   products: {
                     slug: true,
                     title: true,
+                    priceInUSD: true,
+                    purchaseFrequencies: true,
                     productGallery: true,
                     // inventory: true,
                   },
                   variants: {
                     title: true,
+                    priceInUSD: true,
                     inventory: true,
                   },
                 },

@@ -21,6 +21,7 @@ import { EditItemQuantityButton } from './EditItemQuantityButton'
 import { OpenCartButton } from './OpenCart'
 import { Product } from '@/payload-types'
 import { CartTimerModal } from './CartTimerModal'
+import { getPurchaseUnitPriceInCents } from '@/utilities/purchasePricing'
 
 export function CartModal() {
   const { cart, clearCart } = useCart()
@@ -49,16 +50,6 @@ export function CartModal() {
 
   type PurchaseType = 'one_time' | 'weekly' | 'monthly'
 
-  const parsePriceOverride = (value?: string | null) => {
-    if (!value) return undefined
-
-    const numericValue = Number(value.replace(/[^0-9.]/g, ''))
-
-    if (Number.isNaN(numericValue)) return undefined
-
-    return Math.round(numericValue * 100)
-  }
-
   const getPurchaseTypeKey = (productID: string, variantID?: string) => {
     return variantID ? `purchaseType:${productID}:${variantID}` : `purchaseType:${productID}`
   }
@@ -83,10 +74,7 @@ export function CartModal() {
       }
     }
 
-    // fallback (only if not saved)
-    let price = variant?.priceInUSD || product.priceInUSD || 0
-
-    return price
+    return getPurchaseUnitPriceInCents(product, variant, purchaseType)
   }
   useEffect(() => {
     fetch('/api/globals/cart-settings')

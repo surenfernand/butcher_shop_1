@@ -14,6 +14,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { OrderStatus } from '@/components/OrderStatus'
 import { AddressItem } from '@/components/addresses/AddressItem'
+import { getPurchaseUnitPriceInCents } from '@/utilities/purchasePricing'
 
 export const dynamic = 'force-dynamic'
 
@@ -79,6 +80,7 @@ export default async function Order({ params, searchParams }: PageProps) {
         amount: true,
         currency: true,
         items: true,
+        purchaseType: true,
         customerEmail: true,
         customer: true,
         status: true,
@@ -116,6 +118,13 @@ export default async function Order({ params, searchParams }: PageProps) {
     notFound()
   }
 
+  const purchaseTypeForPricing =
+    order.purchaseType === 'weekly' ||
+    order.purchaseType === 'monthly' ||
+    order.purchaseType === 'one_time'
+      ? order.purchaseType
+      : 'one_time'
+
   const itemsSubtotal =
     order.items?.reduce((total, item) => {
       const product =
@@ -123,10 +132,12 @@ export default async function Order({ params, searchParams }: PageProps) {
       const variant =
         typeof item.variant === 'object' ? item.variant : undefined
 
-      const price = variant?.priceInUSD || product?.priceInUSD || 0
+      if (!product) return total
+
+      const unitPrice = getPurchaseUnitPriceInCents(product, variant, purchaseTypeForPricing)
       const quantity = item.quantity || 0
 
-      return total + price * quantity
+      return total + unitPrice * quantity
     }, 0) || 0
 
   const fulfillment = (order as any).fulfillment
@@ -205,6 +216,13 @@ export default async function Order({ params, searchParams }: PageProps) {
                         ? item.variant
                         : undefined
 
+                    const lineSubtotalInCents =
+                      getPurchaseUnitPriceInCents(
+                        item.product,
+                        variant,
+                        purchaseTypeForPricing,
+                      ) * (item.quantity || 1)
+
                     return (
                       <li
                         key={item.id}
@@ -214,6 +232,7 @@ export default async function Order({ params, searchParams }: PageProps) {
                           product={item.product}
                           quantity={item.quantity}
                           variant={variant}
+                          lineSubtotalInCents={lineSubtotalInCents}
                         />
                       </li>
                     )
@@ -224,7 +243,7 @@ export default async function Order({ params, searchParams }: PageProps) {
               <div className="mt-8 border-t border-[#222] pt-6">
                 <div className="mb-3 flex justify-between text-neutral-400">
                   <span>Subtotal</span>
-                  {order.amount && <Price amount={order.amount} />}
+                  <Price amount={itemsSubtotal} />
                 </div>
 
                 <div className="mb-5 flex justify-between text-neutral-400">

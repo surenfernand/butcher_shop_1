@@ -11,6 +11,8 @@ type Props = {
   style?: 'compact' | 'default'
   variant?: Variant
   quantity?: number
+  /** Line subtotal in cents (e.g. subscription unit price × qty). When set, overrides catalog variant/product pricing. */
+  lineSubtotalInCents?: number
   /**
    * Force all formatting to a particular currency.
    */
@@ -22,6 +24,7 @@ export const ProductItem: React.FC<Props> = ({
   style = 'default',
   quantity,
   variant,
+  lineSubtotalInCents,
   currencyCode,
 }) => {
   const { title } = product
@@ -58,6 +61,8 @@ export const ProductItem: React.FC<Props> = ({
   }
 
   const itemPrice = variant?.priceInUSD || product.priceInUSD
+  const displayLineAmount =
+    typeof lineSubtotalInCents === 'number' ? lineSubtotalInCents : itemPrice && quantity ? itemPrice * quantity : undefined
   const itemURL = `/products/${product.slug}${variant ? `?variant=${variant.id}` : ''}`
 
   return (
@@ -90,12 +95,12 @@ export const ProductItem: React.FC<Props> = ({
           </div>
         </div>
 
-        {itemPrice && quantity && (
+        {displayLineAmount !== undefined && quantity && (
           <div className="text-right">
             <p className="font-medium text-lg">Subtotal</p>
             <Price
               className="font-mono text-primary/50 text-sm"
-              amount={itemPrice * quantity}
+              amount={displayLineAmount}
               currencyCode={currencyCode}
             />
           </div>

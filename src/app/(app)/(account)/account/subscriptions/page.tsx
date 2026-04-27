@@ -1,5 +1,6 @@
 import type { Order, Product, Media } from '@/payload-types'
 
+import { getPurchaseUnitPriceInCents } from '@/utilities/purchasePricing'
 import configPromise from '@payload-config'
 import { headers as getHeaders } from 'next/headers'
 import { redirect } from 'next/navigation'
@@ -25,7 +26,7 @@ const formatDate = (date?: string | null) =>
         }).format(new Date(date))
         : '—'
 
-const getProductImage = (product?: Product): Media | undefined => {
+const getProductImage = (product?: Product | null): Media | undefined => {
     const image = product?.productGallery?.[0]?.image
     return image && typeof image === 'object' ? image : undefined
 }
@@ -65,6 +66,11 @@ export default async function SubscriptionsPage() {
     const subscriptions = result.docs as Order[]
 
     const getSubscriptionAmount = (order: Order) => {
+        const purchaseType =
+            order.purchaseType === 'weekly' || order.purchaseType === 'monthly'
+                ? order.purchaseType
+                : 'monthly'
+
         return (
             order.items?.reduce((total, item) => {
                 const product = typeof item.product === 'object' ? item.product : undefined
@@ -72,16 +78,9 @@ export default async function SubscriptionsPage() {
 
                 if (!product) return total
 
-                const basePrice = variant?.priceInUSD || product.priceInUSD || 0
+                const unitPrice = getPurchaseUnitPriceInCents(product, variant, purchaseType)
 
-                const monthlyOverride =
-                    product.purchaseFrequencies?.monthly?.priceOverride
-
-                const monthlyPrice = monthlyOverride
-                    ? Math.round(Number(monthlyOverride.replace(/[^0-9.]/g, '')) * 100)
-                    : basePrice
-
-                return total + monthlyPrice * (item.quantity || 1)
+                return total + unitPrice * (item.quantity || 1)
             }, 0) || 0
         )
     }

@@ -106,9 +106,12 @@ export default async function Orders() {
                     </td>
 
                     <td className="px-6 py-5 text-right font-semibold text-[#E2B84F]">
-                      {typeof order.total === 'number'
-                        ? `$${order.total.toFixed(2)}`
-                        : order.total || '—'}
+                      {typeof order.amount === 'number'
+                        ? new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: 'USD',
+                          }).format(order.amount / 100)
+                        : '—'}
                     </td>
                   </tr>
                 ))}
