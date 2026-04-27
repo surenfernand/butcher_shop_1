@@ -26,7 +26,7 @@ const generateURL: GenerateURL<Product | Page> = ({ doc }) => {
 
   return doc?.slug ? `${url}/${doc.slug}` : url
 }
-  
+
 export const plugins: Plugin[] = [
   seoPlugin({
     generateTitle,
@@ -49,7 +49,7 @@ export const plugins: Plugin[] = [
     formOverrides: {
       access: {
         delete: isAdmin,
-        read: isAdmin,
+        read: () => true,
         update: isAdmin,
         create: isAdmin,
       },
@@ -94,6 +94,15 @@ export const plugins: Plugin[] = [
         fields: [
           ...defaultCollection.fields,
           {
+            name: 'inventoryReduced',
+            type: 'checkbox',
+            defaultValue: false,
+            admin: {
+              position: 'sidebar',
+              readOnly: true,
+            },
+          },
+          {
             name: 'accessToken',
             type: 'text',
             unique: true,
@@ -102,6 +111,8 @@ export const plugins: Plugin[] = [
               position: 'sidebar',
               readOnly: true,
             },
+
+
             hooks: {
               beforeValidate: [
                 ({ value, operation }) => {
@@ -112,6 +123,21 @@ export const plugins: Plugin[] = [
                 },
               ],
             },
+          },
+
+          {
+            name: 'purchaseType',
+            type: 'select',
+            defaultValue: 'one_time',
+            options: [
+              { label: 'One Time', value: 'one_time' },
+              { label: 'Weekly', value: 'weekly' },
+              { label: 'Monthly', value: 'monthly' },
+            ],
+          },
+          {
+            name: 'stripeSubscriptionID',
+            type: 'text',
           },
         ],
       }),

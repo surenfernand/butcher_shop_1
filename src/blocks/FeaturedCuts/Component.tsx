@@ -17,7 +17,7 @@ export const FeaturedCutsBlock: React.FC<Props> = ({
   if (!items || !items.length) return null
 
   return (
-    <section className={['bg-[#111616] py-20', className].filter(Boolean).join(' ')}>
+    <section className={['py-20', className].filter(Boolean).join(' ')}>
       <div className="container">
         <div className="mb-12 text-center">
           {eyebrow && (

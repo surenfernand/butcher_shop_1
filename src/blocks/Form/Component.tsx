@@ -1,17 +1,18 @@
 'use client'
+
 import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+import type { DefaultDocumentIDType } from 'payload'
 
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useState } from 'react'
-import { useForm, FormProvider } from 'react-hook-form'
+import { FormProvider, useForm } from 'react-hook-form'
+
 import { RichText } from '@/components/RichText'
-import { Button } from '@/components/ui/button'
-import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+import { getClientSideURL } from '@/utilities/getURL'
 
 import { buildInitialFormState } from './buildInitialFormState'
 import { fields } from './fields'
-import { getClientSideURL } from '@/utilities/getURL'
-import { DefaultDocumentIDType } from 'payload'
 
 export type Value = unknown
 
@@ -36,16 +37,32 @@ export const FormBlock: React.FC<
     id?: DefaultDocumentIDType
   }
 > = (props) => {
+  const { enableIntro, form: formRaw, introContent } = props
+
+  const formFromProps =
+    formRaw &&
+    typeof formRaw === 'object' &&
+    'fields' in formRaw &&
+    Array.isArray(formRaw.fields)
+      ? (formRaw as FormType)
+      : null
+
+  if (!formFromProps) {
+    return null
+  }
+
   const {
-    enableIntro,
-    form: formFromProps,
-    form: { id: formID, confirmationMessage, confirmationType, redirect, submitButtonLabel } = {},
-    introContent,
-  } = props
+    id: formID,
+    confirmationMessage,
+    confirmationType,
+    redirect,
+    submitButtonLabel,
+  } = formFromProps
 
   const formMethods = useForm({
-    defaultValues: buildInitialFormState(formFromProps.fields),
+    defaultValues: buildInitialFormState(formFromProps.fields ?? []),
   })
+
   const {
     control,
     formState: { errors },
@@ -56,11 +73,13 @@ export const FormBlock: React.FC<
   const [isLoading, setIsLoading] = useState(false)
   const [hasSubmitted, setHasSubmitted] = useState<boolean>()
   const [error, setError] = useState<{ message: string; status?: string } | undefined>()
+
   const router = useRouter()
 
   const onSubmit = useCallback(
     (data: Data) => {
       let loadingTimerID: ReturnType<typeof setTimeout>
+
       const submitForm = async () => {
         setError(undefined)
 
@@ -69,7 +88,6 @@ export const FormBlock: React.FC<
           value,
         }))
 
-        // delay loading indicator by 1s
         loadingTimerID = setTimeout(() => {
           setIsLoading(true)
         }, 1000)
@@ -105,9 +123,7 @@ export const FormBlock: React.FC<
           setHasSubmitted(true)
 
           if (confirmationType === 'redirect' && redirect) {
-            const { url } = redirect
-
-            const redirectUrl = url
+            const redirectUrl = redirect.url
 
             if (redirectUrl) router.push(redirectUrl)
           }
@@ -126,51 +142,72 @@ export const FormBlock: React.FC<
   )
 
   return (
-    <div className="container lg:max-w-3xl">
+    <div className="w-full">
       {enableIntro && introContent && !hasSubmitted && (
         <RichText className="mb-8 lg:mb-12" data={introContent} enableGutter={false} />
       )}
-      <div className="p-4 lg:p-6 border border-border rounded-[0.8rem]">
-        <FormProvider {...formMethods}>
-          {!isLoading && hasSubmitted && confirmationType === 'message' && (
+
+      <FormProvider {...formMethods}>
+        {!isLoading && hasSubmitted && confirmationType === 'message' && (
+          <div className="border border-[#3a3323] bg-black/20 p-6 text-white">
             <RichText data={confirmationMessage} />
-          )}
-          {isLoading && !hasSubmitted && <p>Loading, please wait...</p>}
-          {error && <div>{`${error.status || '500'}: ${error.message || ''}`}</div>}
-          {!hasSubmitted && (
-            <form id={formID} onSubmit={handleSubmit(onSubmit)}>
-              <div className="mb-4 last:mb-0">
-                {formFromProps &&
-                  formFromProps.fields &&
-                  formFromProps.fields?.map((field, index) => {
-                    const Field: React.FC<any> | undefined =
-                      fields?.[field.blockType as keyof typeof fields]
+          </div>
+        )}
 
-                    if (Field) {
-                      return (
-                        <div className="mb-6 last:mb-0" key={index}>
-                          <Field
-                            form={formFromProps}
-                            {...field}
-                            {...formMethods}
-                            control={control}
-                            errors={errors}
-                            register={register}
-                          />
-                        </div>
-                      )
-                    }
-                    return null
-                  })}
-              </div>
+        {isLoading && !hasSubmitted && (
+          <p className="text-sm text-white/70">Loading, please wait...</p>
+        )}
 
-              <Button form={formID} type="submit" variant="default">
-                {submitButtonLabel}
-              </Button>
-            </form>
-          )}
-        </FormProvider>
-      </div>
+        {error && (
+          <div className="mb-6 border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-300">
+            {`${error.status || '500'}: ${error.message || ''}`}
+          </div>
+        )}
+
+        {!hasSubmitted && (
+          <form id={String(formID)} onSubmit={handleSubmit(onSubmit)}>
+            <div className="grid grid-cols-1 gap-x-6 gap-y-6 md:grid-cols-2">
+              {formFromProps?.fields?.map((field, index) => {
+                const Field: React.FC<any> | undefined =
+                  fields?.[field.blockType as keyof typeof fields]
+
+                if (!Field) return null
+
+                const isFullWidth =
+                  field.blockType === 'textarea' ||
+                  field.blockType === 'select' ||
+                  field.name?.toLowerCase() === 'subject' ||
+                  field.name?.toLowerCase() === 'message'
+
+                return (
+                  <div
+                    key={index}
+                    className={isFullWidth ? 'md:col-span-2' : 'md:col-span-1'}
+                  >
+                    <Field
+                      form={formFromProps}
+                      {...field}
+                      {...formMethods}
+                      control={control}
+                      errors={errors}
+                      register={register}
+                    />
+                  </div>
+                )
+              })}
+            </div>
+
+            <button
+              form={String(formID)}
+              type="submit"
+              disabled={isLoading}
+              className="mt-10 bg-[#d9aa45] px-12 py-4 text-xs font-bold uppercase tracking-[0.2em] text-black transition hover:bg-[#e6bd60] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isLoading ? 'Sending...' : submitButtonLabel || 'Dispatch Message'}
+            </button>
+          </form>
+        )}
+      </FormProvider>
     </div>
   )
 }

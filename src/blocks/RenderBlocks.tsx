@@ -20,6 +20,7 @@ import type { ComponentType } from 'react'
 
 
 import type { Page } from '../payload-types'
+import { ContactPageBlock } from './ContactPage/Component'
 
 const blockComponents: Record<string, ComponentType<any>> = {
   aboutStory: AboutStoryBlock,
@@ -38,6 +39,7 @@ const blockComponents: Record<string, ComponentType<any>> = {
   visitSection: VisitSectionBlock,
   socialLinks: SocialLinksBlock,
   productGrid: ProductGridBlock,
+  contactPage: ContactPageBlock,
 }
 
 

@@ -1,15 +1,25 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Product } from '@/payload-types'
-import Link from 'next/link'
-import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
-import { showCartErrorToast, showCartSuccessToast } from '../Cart/CartToastAlert'
 import { AddToCart } from '@/components/Cart/AddToCart'
+
+type PurchaseType = 'one_time' | 'monthly'
 
 type ProductWithUIFields = Product & {
   title?: string
   slug?: string
+  purchaseFrequencies?: {
+    oneTime?: {
+      enabled?: boolean | null
+      priceOverride?: string | null
+    } | null
+    monthly?: {
+      enabled?: boolean | null
+      priceOverride?: string | null
+      savingsText?: string | null
+    } | null
+  } | null
   meta?: {
     description?: string | null
     image?: unknown
@@ -21,42 +31,52 @@ type Props = {
 }
 
 export default function ProductDetails({ product }: Props) {
-  const { addItem, isLoading } = useCart()
+  const frequencies = product.purchaseFrequencies
 
-  const defaultOptionIndex = useMemo(() => {
-    if (!Array.isArray(product.purchaseOptions) || product.purchaseOptions.length === 0) {
-      return null
-    }
+  const purchaseOptions = useMemo<
+    {
+      label: string
+      value: PurchaseType
+      price?: string | null
+      subtext?: string | null
+    }[]
+  >(() => {
+    return [
+      ...(frequencies?.oneTime?.enabled !== false
+        ? [
+            {
+              label: 'One-Time',
+              value: 'one_time' as PurchaseType,
+              price: frequencies?.oneTime?.priceOverride,
+            },
+          ]
+        : []),
 
-    const highlightedIndex = product.purchaseOptions.findIndex((option) => option.highlighted)
-    return highlightedIndex >= 0 ? highlightedIndex : 0
-  }, [product.purchaseOptions])
+      ...(frequencies?.monthly?.enabled !== false
+        ? [
+            {
+              label: 'Monthly',
+              value: 'monthly' as PurchaseType,
+              price: frequencies?.monthly?.priceOverride,
+              subtext: frequencies?.monthly?.savingsText,
+            },
+          ]
+        : []),
+    ]
+  }, [frequencies])
 
-  const [selectedOptionIndex, setSelectedOptionIndex] = useState<number | null>(
-    defaultOptionIndex,
+  const [purchaseType, setPurchaseType] = useState<PurchaseType>(
+    purchaseOptions[0]?.value || 'one_time',
   )
 
-  const handleAddToCart = async () => {
-    try {
-      await addItem({
-        product: product.id,
-      })
-
-      console.log('Added to cart:', {
-        productId: product.id,
-        selectedOption:
-          selectedOptionIndex !== null && Array.isArray(product.purchaseOptions)
-            ? product.purchaseOptions[selectedOptionIndex]
-            : null,
-      })
-
-      showCartSuccessToast(product.title)
-
-    } catch (error) {
-      showCartErrorToast()
-      console.error('Failed to add item to cart:', error)
+  useEffect(() => {
+    if (
+      purchaseOptions.length > 0 &&
+      !purchaseOptions.some((option) => option.value === purchaseType)
+    ) {
+      setPurchaseType(purchaseOptions[0].value)
     }
-  }
+  }, [purchaseOptions, purchaseType])
 
   return (
     <div className="flex flex-col">
@@ -106,49 +126,45 @@ export default function ProductDetails({ product }: Props) {
         </div>
       )}
 
-      {Array.isArray(product.purchaseOptions) && product.purchaseOptions.length > 0 && (
+      {purchaseOptions.length > 0 && (
         <div className="mb-8">
           <span className="mb-4 block text-xs uppercase tracking-[0.2em] text-[#8f8679]">
-            Select Experience
+            Purchase Type
           </span>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {product.purchaseOptions.map((option, i) => {
-              const isSelected = selectedOptionIndex === i
+          <div className="grid grid-cols-2 border border-white/10 bg-[#111]">
+            {purchaseOptions.map((option) => {
+              const isSelected = purchaseType === option.value
 
               return (
                 <button
-                  key={i}
+                  key={option.value}
                   type="button"
-                  onClick={() => setSelectedOptionIndex(i)}
+                  onClick={() => setPurchaseType(option.value)}
                   className={
                     isSelected
-                      ? 'border border-[#d4a63c] bg-[#d4a63c]/5 p-5 text-left'
-                      : 'border border-white/10 p-5 text-left'
+                      ? 'border border-[#d4a63c] bg-[#d4a63c]/10 px-4 py-5 text-center'
+                      : 'border-r border-white/10 px-4 py-5 text-center last:border-r-0'
                   }
                 >
                   <span
                     className={
                       isSelected
-                        ? 'mb-1 block text-xs uppercase tracking-[0.15em] text-[#d4a63c]'
-                        : 'mb-1 block text-xs uppercase tracking-[0.15em] text-[#8f8679]'
+                        ? 'block text-xs font-bold uppercase tracking-[0.15em] text-[#d4a63c]'
+                        : 'block text-xs font-bold uppercase tracking-[0.15em] text-[#8f8679]'
                     }
                   >
                     {option.label}
                   </span>
 
-                  <span className="block text-3xl font-semibold text-white">
-                    {option.price}
-                  </span>
+                  {option.price && (
+                    <span className="mt-2 block text-2xl font-semibold text-white">
+                      {option.price}
+                    </span>
+                  )}
 
                   {option.subtext && (
-                    <span
-                      className={
-                        isSelected
-                          ? 'mt-1 block text-[10px] uppercase tracking-[0.14em] text-[#b89e62]'
-                          : 'mt-1 block text-[10px] uppercase tracking-[0.14em] text-[#8f8679]'
-                      }
-                    >
+                    <span className="mt-1 block text-[10px] font-bold uppercase tracking-[0.14em] text-[#b89e62]">
                       {option.subtext}
                     </span>
                   )}
@@ -160,28 +176,11 @@ export default function ProductDetails({ product }: Props) {
       )}
 
       <div className="flex flex-col gap-4">
-        {/* <button
-          type="button"
-          onClick={handleAddToCart}
-          disabled={isLoading}
-          className="flex h-16 items-center justify-center bg-[#d4a63c] text-sm font-bold uppercase tracking-[0.2em] text-black disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isLoading ? 'Adding...' : product.primaryCTA?.label || 'Add To Cart'}
-        </button> */}
-
         <AddToCart
           product={product}
+           purchaseType={purchaseType}
           className="flex h-16 items-center justify-center bg-[#d4a63c] text-sm font-bold uppercase tracking-[0.2em] text-black"
         />
-
-        {product.secondaryCTA?.label && (
-          <Link
-            href={product.secondaryCTA.url || '#'}
-            className="flex h-16 items-center justify-center border border-[#d4a63c] text-sm font-bold uppercase tracking-[0.2em] text-[#d4a63c]"
-          >
-            {product.secondaryCTA.label}
-          </Link>
-        )}
       </div>
     </div>
   )

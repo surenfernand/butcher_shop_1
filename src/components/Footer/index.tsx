@@ -3,11 +3,11 @@
 import type { Footer as FooterType } from '@/payload-types'
 import { FooterMenu } from '@/components/Footer/menu'
 import { CMSLink } from '@/components/Link'
-import { LogoIcon } from '@/components/icons/logo'
+// import { LogoIcon } from '@/components/icons/logo'
 import { getCachedGlobal } from '@/utilities/getGlobals'
 import Link from 'next/link'
 import React, { Suspense } from 'react'
-
+import { Media } from '@/components/Media'
 export async function Footer() {
   const footer: FooterType = await getCachedGlobal('footer', 1)()
   const menu = footer.navItems || []
@@ -24,10 +24,16 @@ export async function Footer() {
               href="/"
               className="mb-6 flex items-center gap-3 text-[#d4a63c] transition-opacity hover:opacity-80"
             >
-              <LogoIcon className="w-6 text-[#d4a63c]" />
-              <span className="text-xl font-semibold uppercase tracking-wide">
-                {footer.brandName || 'Filet Gourmet Atelier'}
-              </span>
+              {footer.logo && typeof footer.logo === 'object' ? (
+                <Media
+                  resource={footer.logo}
+                  imgClassName="h-16 w-auto object-contain"
+                />
+              ) : (
+                <span className="text-xl font-semibold uppercase tracking-wide">
+                  {footer.brandName || 'The Butcher’s Craft'}
+                </span>
+              )}
             </Link>
 
             {footer.description && (

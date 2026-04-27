@@ -29,8 +29,7 @@ export default async function AddressesPage() {
         </h1>
 
         <p className="mt-4 max-w-3xl text-lg text-white/60">
-          Manage your delivery destinations and billing details for a seamless
-          master-crafted experience.
+          Manage your billing details 
         </p>
       </div>
 

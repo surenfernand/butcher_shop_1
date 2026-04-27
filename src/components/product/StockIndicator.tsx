@@ -36,8 +36,8 @@ export const StockIndicator: React.FC<Props> = ({ product }) => {
         return selectedVariant.inventory || 0
       }
     }
-    return product.inventory || 0
-  }, [product.enableVariants, selectedVariant, product.inventory])
+    return 0;
+  }, [product.enableVariants, selectedVariant])
 
   if (product.enableVariants && !selectedVariant) {
     return null

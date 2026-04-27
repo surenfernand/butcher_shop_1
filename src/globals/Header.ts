@@ -20,5 +20,15 @@ export const Header: GlobalConfig = {
       ],
       maxRows: 6,
     },
+
+    {
+      name: 'logo',
+      type: 'upload',
+      relationTo: 'media',
+      required: false,
+      admin: {
+        description: 'Header logo. Upload the transparent gold logo here.',
+      },
+    },
   ],
 }

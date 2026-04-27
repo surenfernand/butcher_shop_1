@@ -1,9 +1,9 @@
-import type { Order, Product, Variant, Media } from '@/payload-types'
+import type { Media, Order, Product } from '@/payload-types'
 
+import configPromise from '@payload-config'
+import { headers as getHeaders } from 'next/headers'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { headers as getHeaders } from 'next/headers'
-import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
 export const dynamic = 'force-dynamic'
@@ -115,6 +115,9 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
 
   const fulfillment = typedOrder.fulfillment as any
 
+  console.log("fulfillment")
+  console.log(fulfillment)
+
   const shippingTotal =
     fulfillment?.serviceType === 'delivery'
       ? Number(fulfillment?.shippingCharge || 0)
@@ -123,9 +126,9 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
   const address = typedOrder.shippingAddress
 
   return (
-    <main className="min-h-screen bg-[#121414] text-[#e2e2e2]">
+    <main className="min-h-screen text-[#e2e2e2]">
       <section className="relative flex h-[520px] items-center justify-center overflow-hidden text-center">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-[#121414]" />
+        <div className="absolute inset-0 bg-dark" />
 
         <div className="relative z-10 px-6">
           <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-[#D3A84B] text-2xl font-black text-black">
@@ -184,6 +187,14 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
                     <div className="flex-1">
                       <h3 className="font-bold uppercase text-white">{product.title}</h3>
 
+                      {typedOrder.purchaseType && typedOrder.purchaseType !== 'one_time' ? (
+                        <p className="mt-1 text-xs uppercase tracking-[0.18em] text-[#D3A84B]">
+                          {typedOrder.purchaseType === 'monthly'
+                            ? 'Monthly subscription'
+                            : 'Weekly subscription'}
+                        </p>
+                      ) : null}
+
                       {variant?.title ? (
                         <p className="mt-1 text-xs uppercase tracking-[0.18em] text-[#9a8f7e]">
                           {variant.title}
@@ -208,11 +219,11 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
 
               <div className="flex justify-between text-sm uppercase tracking-[0.12em] text-[#d2c5b1]">
                 <span>Shipping</span>
-                <span>{shippingTotal > 0 ? formatMoney(shippingTotal) : 'Free'}</span>
+                <span>{shippingTotal > 0 ? formatMoney(shippingTotal) : '0.00'}</span>
               </div>
 
               <div className="flex justify-between border-t border-[#333535] pt-4 text-2xl font-black">
-                <span className="uppercase text-[#D3A84B]">Total Investment</span>
+                <span className="uppercase text-[#D3A84B]">Total Amount</span>
                 <span>{formatMoney(typedOrder.amount)}</span>
               </div>
             </div>

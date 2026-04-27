@@ -33,6 +33,50 @@ const stripe = loadStripe(apiKey)
 
 const formatMoney = (amount = 0) => `$${(amount / 100).toFixed(2)}`
 
+type PurchaseType = 'one_time' | 'weekly' | 'monthly'
+
+const getPurchaseTypeLabel = (purchaseType: PurchaseType) => {
+  if (purchaseType === 'weekly') return 'Weekly subscription'
+  if (purchaseType === 'monthly') return 'Monthly subscription'
+  return 'One-time purchase'
+}
+
+const getPurchaseTypeKey = (productID: string, variantID?: string) => {
+  return variantID ? `purchaseType:${productID}:${variantID}` : `purchaseType:${productID}`
+}
+
+const parsePriceOverride = (value?: string | null) => {
+  if (!value) return undefined
+
+  const numericValue = Number(value.replace(/[^0-9.]/g, ''))
+
+  if (Number.isNaN(numericValue)) return undefined
+
+  return Math.round(numericValue * 100)
+}
+
+const getPurchasePrice = (
+  product: any,
+  variant: any,
+  purchaseType: PurchaseType,
+) => {
+  let price = variant?.priceInUSD || product.priceInUSD || 0
+
+  if (purchaseType === 'monthly') {
+    price =
+      parsePriceOverride(product.purchaseFrequencies?.monthly?.priceOverride) ||
+      price
+  }
+
+  if (purchaseType === 'one_time') {
+    price =
+      parsePriceOverride(product.purchaseFrequencies?.oneTime?.priceOverride) ||
+      price
+  }
+
+  return price
+}
+
 export const CheckoutPage: React.FC = () => {
   const { user } = useAuth()
   const router = useRouter()
@@ -52,7 +96,29 @@ export const CheckoutPage: React.FC = () => {
   const [paymentElementComplete, setPaymentElementComplete] = useState(false)
 
   const cartIsEmpty = !cart || !cart.items || !cart.items.length
-  const subtotal = cart?.subtotal || 0
+  const subtotal =
+    cart?.items?.reduce((total, item) => {
+      if (typeof item.product !== 'object' || !item.product) return total
+
+      const product = item.product
+      const quantity = item.quantity || 0
+
+      const variant =
+        item.variant && typeof item.variant === 'object' ? item.variant : undefined
+
+      const variantID = variant ? String(variant.id) : undefined
+
+      const purchaseType =
+        typeof window !== 'undefined'
+          ? ((localStorage.getItem(
+            getPurchaseTypeKey(String(product.id), variantID),
+          ) || 'one_time') as PurchaseType)
+          : 'one_time'
+
+      const price = getPurchasePrice(product, variant, purchaseType)
+
+      return total + price * quantity
+    }, 0) || 0
 
   const [shippingCharge, setShippingCharge] = useState(0)
   const [taxRate, setTaxRate] = useState(0)
@@ -250,10 +316,36 @@ export const CheckoutPage: React.FC = () => {
     async (paymentID: string) => {
       try {
 
+
         const fulfillment =
           typeof window !== 'undefined'
             ? JSON.parse(localStorage.getItem('fulfillment') || '{}')
             : {}
+
+        const purchaseTypes =
+          typeof window !== 'undefined'
+            ? cart?.items?.map((item) => {
+              const productID =
+                typeof item.product === 'object' ? item.product.id : item.product
+
+              const variantID = item.variant
+                ? typeof item.variant === 'object'
+                  ? item.variant.id
+                  : item.variant
+                : undefined
+
+              return {
+                product: productID,
+                variant: variantID,
+                purchaseType:
+                  localStorage.getItem(
+                    variantID
+                      ? `purchaseType:${productID}:${variantID}`
+                      : `purchaseType:${productID}`
+                  ) || 'one_time',
+              }
+            })
+            : []
 
         const paymentData = (await initiatePayment(paymentID, {
           additionalData: {
@@ -261,6 +353,7 @@ export const CheckoutPage: React.FC = () => {
             billingAddress,
             shippingAddress: billingAddressSameAsShipping ? billingAddress : shippingAddress,
             fulfillment,
+            purchaseTypes, // ✅ ADD THIS LINE
           }
         })) as Record<string, unknown>
 
@@ -279,7 +372,14 @@ export const CheckoutPage: React.FC = () => {
         toast.error(errorMessage)
       }
     },
-    [billingAddress, billingAddressSameAsShipping, email, initiatePayment, shippingAddress],
+    [
+      billingAddress,
+      billingAddressSameAsShipping,
+      cart?.items,
+      email,
+      initiatePayment,
+      shippingAddress,
+    ],
   )
 
   if (!stripe) return null
@@ -568,6 +668,16 @@ export const CheckoutPage: React.FC = () => {
 
                 const isVariant = Boolean(variant) && typeof variant === 'object'
 
+                const variantID =
+                  variant && typeof variant === 'object' ? String(variant.id) : undefined
+
+                const purchaseType =
+                  typeof window !== 'undefined'
+                    ? ((localStorage.getItem(
+                      getPurchaseTypeKey(String(product.id), variantID),
+                    ) || 'one_time') as PurchaseType)
+                    : 'one_time'
+
                 if (isVariant) {
                   price = variant?.priceInUSD
 
@@ -596,12 +706,19 @@ export const CheckoutPage: React.FC = () => {
                   }
                 }
 
+                price = getPurchasePrice(
+                  product,
+                  isVariant ? variant : undefined,
+                  purchaseType,
+                )
+
                 return (
                   <div className="grid grid-cols-[80px_1fr_auto] items-center gap-4" key={index}>
                     <div className="relative h-20 w-20 border  bg-black">
                       {image && typeof image !== 'string' && (
                         <Media className="" fill imgClassName="object-cover grayscale" resource={image} />
                       )}
+
                     </div>
                     <div>
                       <p className="font-sans text-base font-black uppercase text-stone-100">{title}</p>
@@ -616,6 +733,9 @@ export const CheckoutPage: React.FC = () => {
                         </p>
                       )}
                       <p className="mt-1 text-xs uppercase tracking-[0.18em] text-stone-500">Qty {quantity}</p>
+                      <p className="mt-1 text-xs uppercase tracking-[0.18em] text-amber-400">
+                        {getPurchaseTypeLabel(purchaseType)}
+                      </p>
                     </div>
                     {typeof price === 'number' && (
                       <Price className="font-sans font-black text-amber-400" amount={price} />
@@ -727,8 +847,8 @@ export const CheckoutPage: React.FC = () => {
       </main>
 
       {isDateModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-          <div className="w-[420px] border border-amber-500/30 bg-[#0f0f0f] p-6 shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 animate-[modalFadeIn_180ms_ease-out]">
+          <div className="w-[420px] border border-amber-500/30 bg-[#0f0f0f] p-6 shadow-xl animate-[modalScaleIn_240ms_cubic-bezier(0.16,1,0.3,1)]">
 
             {/* Header */}
             <p className="mb-2 text-center font-sans text-xs uppercase tracking-[0.3em] text-amber-400">
@@ -742,7 +862,7 @@ export const CheckoutPage: React.FC = () => {
             {/* Delivery / Pickup */}
             <div className="mb-6 grid grid-cols-2 gap-4">
               <button
-                className={`py-3 font-sans text-sm font-black uppercase tracking-[0.2em] ${fulfillmentMethod === 'delivery'
+                className={`py-3 font-sans text-sm font-black uppercase tracking-[0.2em] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-400/10 active:translate-y-0 ${fulfillmentMethod === 'delivery'
                   ? 'bg-amber-400 text-black'
                   : 'bg-stone-800 text-stone-400'
                   }`}
@@ -755,7 +875,7 @@ export const CheckoutPage: React.FC = () => {
               </button>
 
               <button
-                className={`py-3 font-sans text-sm font-black uppercase tracking-[0.2em] ${fulfillmentMethod === 'pickup'
+                className={`py-3 font-sans text-sm font-black uppercase tracking-[0.2em] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-400/10 active:translate-y-0 ${fulfillmentMethod === 'pickup'
                   ? 'bg-amber-400 text-black'
                   : 'bg-stone-800 text-stone-400'
                   }`}
@@ -792,7 +912,7 @@ export const CheckoutPage: React.FC = () => {
                         void loadSchedules(branch.id, 'pickup')
                       }
                     }}
-                    className={`w-full border p-3 text-left ${selectedBranch?.id === branch.id
+                    className={`w-full border p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:bg-amber-400/10 hover:shadow-md active:translate-y-0 animate-[itemSlideIn_220ms_ease-out_both] ${selectedBranch?.id === branch.id
                       ? 'border-amber-400'
                       : 'border-amber-500/30'
                       }`}
@@ -803,13 +923,6 @@ export const CheckoutPage: React.FC = () => {
                 ))}
               </div>
             )}
-
-            {/* {selectedBranch && (
-              <div className="mb-6 border border-amber-500/30 p-4 text-sm text-stone-300">
-                <p className="font-sans text-amber-400">{selectedBranch.name}</p>
-                <p className="mt-1 text-xs">{selectedBranch.address}</p>
-              </div>
-            )} */}
 
             {selectedBranch && fulfillmentMethod === 'delivery' && (
               <div className="mb-6">
@@ -856,7 +969,7 @@ export const CheckoutPage: React.FC = () => {
                 type="button"
                 onClick={() => setShowCalendar((prev) => !prev)}
                 disabled={!selectedBranch || !availableSchedules.length}
-                className="w-full border border-amber-500/30 bg-black px-3 py-3 text-left text-stone-400 hover:text-stone-100 disabled:cursor-not-allowed disabled:opacity-40"
+                className="w-full border border-amber-500/30 bg-black px-3 py-3 text-left text-stone-400 transition-all duration-200 hover:border-amber-400 hover:text-stone-100 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {selectedDate
                   ? formatDisplayDate(formatDateForInput(selectedDate))
@@ -872,7 +985,7 @@ export const CheckoutPage: React.FC = () => {
                   />
 
                   {/* calendar popup */}
-                  <div className="relative z-[101] rounded-md border border-amber-500/30 bg-white p-4 text-black shadow-2xl">
+                  <div className="relative z-[101] rounded-md border border-amber-500/30 bg-[#0f0f0f] p-4 text-stone-100 shadow-2xl">
                     <DayPicker
                       mode="single"
                       selected={selectedDate}
@@ -892,7 +1005,7 @@ export const CheckoutPage: React.FC = () => {
 
             {/* Actions */}
             <button
-              className="w-full bg-amber-400 py-3 font-sans font-black uppercase tracking-[0.2em] text-black hover:bg-amber-300"
+              className="w-full bg-amber-400 py-3 font-sans font-black uppercase tracking-[0.2em] text-black transition-all duration-200 hover:-translate-y-0.5 hover:bg-amber-300 hover:shadow-lg hover:shadow-amber-400/20 active:translate-y-0"
               onClick={() => {
                 if (!selectedBranch) {
                   setBranchError('Please select a branch first.')
@@ -944,6 +1057,84 @@ export const CheckoutPage: React.FC = () => {
           </div>
         </div>
       )}
+      <style jsx global>{`
+  .rdp {
+    --rdp-accent-color: #fbbf24;
+    --rdp-background-color: #1c1917;
+    --rdp-outline: 2px solid #fbbf24;
+    margin: 0;
+    color: #f5f5f4;
+  }
+
+  .rdp-caption_label {
+    color: #fbbf24;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .rdp-head_cell {
+    color: #a8a29e;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+
+  .rdp-day {
+    color: #f5f5f4;
+    border-radius: 0;
+  }
+
+  .rdp-day:hover:not([disabled]) {
+    background: #292524;
+    color: #fbbf24;
+  }
+
+  .rdp-day_selected,
+  .rdp-day_selected:hover {
+    background: #fbbf24;
+    color: #000;
+    font-weight: 900;
+  }
+
+  .rdp-day_disabled {
+    color: #57534e;
+    opacity: 0.45;
+  }
+
+  .rdp-day_outside {
+    color: #44403c;
+  }
+
+  .rdp-nav_button {
+    color: #fbbf24;
+  }
+
+  .rdp-nav_button:hover {
+    background: #292524;
+  }
+`}</style>
+
+      <style jsx global>{`
+  @keyframes modalFadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes modalScaleIn {
+    from {
+      opacity: 0;
+      transform: translateY(18px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+`}</style>
     </div>
 
 

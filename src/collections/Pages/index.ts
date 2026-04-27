@@ -29,6 +29,7 @@ import {
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
 import { revalidatePage, revalidateDelete } from './hooks/revalidatePage'
+import { ContactPage } from '@/blocks/ContactPage/config'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -112,6 +113,7 @@ export const Pages: CollectionConfig = {
                 VisitSection,
                 SocialLinks,
                 ProductGrid,
+                ContactPage,
               ],
               required: true,
             },

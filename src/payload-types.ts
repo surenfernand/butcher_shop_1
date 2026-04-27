@@ -277,7 +277,10 @@ export interface Order {
   status?: OrderStatus;
   amount?: number | null;
   currency?: 'USD' | null;
+  inventoryReduced?: boolean | null;
   accessToken?: string | null;
+  purchaseType?: ('one_time' | 'weekly' | 'monthly') | null;
+  stripeSubscriptionID?: string | null;
   fulfillment?: {
     branch?: (number | null) | Branch;
     serviceType?: ('pickup' | 'delivery') | null;
@@ -298,11 +301,7 @@ export interface Order {
  * via the `definition` "products".
  */
 export interface Product {
-  description: any;
-  meta: any;
   id: number;
-  gallery : any;
-  inventory?: number | null;
   enableVariants?: boolean | null;
   variantTypes?: (number | VariantType)[] | null;
   variants?: {
@@ -354,20 +353,18 @@ export interface Product {
         id?: string | null;
       }[]
     | null;
-  purchaseOptions?:
-    | {
-        label: string;
-        price: string;
-        subtext?: string | null;
-        highlighted?: boolean | null;
-        id?: string | null;
-      }[]
-    | null;
-  primaryCTA?: {
-    label?: string | null;
-    url?: string | null;
+  purchaseFrequencies?: {
+    oneTime?: {
+      enabled?: boolean | null;
+      priceOverride?: string | null;
+    };
+    monthly?: {
+      enabled?: boolean | null;
+      priceOverride?: string | null;
+      savingsText?: string | null;
+    };
   };
-  secondaryCTA?: {
+  primaryCTA?: {
     label?: string | null;
     url?: string | null;
   };
@@ -695,6 +692,7 @@ export interface Page {
     | VisitSectionBlock
     | SocialLinksBlock
     | ProductGridBlock
+    | ContactPageBlock
   )[];
   meta?: {
     title?: string | null;
@@ -1268,6 +1266,38 @@ export interface ProductGridBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContactPageBlock".
+ */
+export interface ContactPageBlock {
+  formTitle?: string | null;
+  cards?:
+    | {
+        icon?: ('map-pin' | 'phone' | 'mail') | null;
+        title: string;
+        line1: string;
+        line2?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  storeHours?:
+    | {
+        day: string;
+        time: string;
+        id?: string | null;
+      }[]
+    | null;
+  storeNote?: string | null;
+  form: number | Form;
+  mapImage?: (number | null) | Media;
+  mapTitle?: string | null;
+  mapLabel?: string | null;
+  mapEmbedUrl: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'contactPage';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "meat-types".
  */
 export interface MeatType {
@@ -1335,9 +1365,6 @@ export interface BranchInventory {
   id: number;
   branch: number | Branch;
   product: number | Product;
-  price: number;
-  regularPrice?: number | null;
-  salePrice?: number | null;
   sku?: string | null;
   manageStock?: boolean | null;
   stockQuantity?: number | null;
@@ -1645,6 +1672,7 @@ export interface PagesSelect<T extends boolean = true> {
         visitSection?: T | VisitSectionBlockSelect<T>;
         socialLinks?: T | SocialLinksBlockSelect<T>;
         productGrid?: T | ProductGridBlockSelect<T>;
+        contactPage?: T | ContactPageBlockSelect<T>;
       };
   meta?:
     | T
@@ -1905,6 +1933,37 @@ export interface SocialLinksBlockSelect<T extends boolean = true> {
 export interface ProductGridBlockSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContactPageBlock_select".
+ */
+export interface ContactPageBlockSelect<T extends boolean = true> {
+  formTitle?: T;
+  cards?:
+    | T
+    | {
+        icon?: T;
+        title?: T;
+        line1?: T;
+        line2?: T;
+        id?: T;
+      };
+  storeHours?:
+    | T
+    | {
+        day?: T;
+        time?: T;
+        id?: T;
+      };
+  storeNote?: T;
+  form?: T;
+  mapImage?: T;
+  mapTitle?: T;
+  mapLabel?: T;
+  mapEmbedUrl?: T;
   id?: T;
   blockName?: T;
 }
@@ -2193,7 +2252,6 @@ export interface VariantOptionsSelect<T extends boolean = true> {
  * via the `definition` "products_select".
  */
 export interface ProductsSelect<T extends boolean = true> {
-  inventory?: T;
   enableVariants?: T;
   variantTypes?: T;
   variants?: T;
@@ -2238,22 +2296,24 @@ export interface ProductsSelect<T extends boolean = true> {
         label?: T;
         id?: T;
       };
-  purchaseOptions?:
+  purchaseFrequencies?:
     | T
     | {
-        label?: T;
-        price?: T;
-        subtext?: T;
-        highlighted?: T;
-        id?: T;
+        oneTime?:
+          | T
+          | {
+              enabled?: T;
+              priceOverride?: T;
+            };
+        monthly?:
+          | T
+          | {
+              enabled?: T;
+              priceOverride?: T;
+              savingsText?: T;
+            };
       };
   primaryCTA?:
-    | T
-    | {
-        label?: T;
-        url?: T;
-      };
-  secondaryCTA?:
     | T
     | {
         label?: T;
@@ -2331,7 +2391,10 @@ export interface OrdersSelect<T extends boolean = true> {
   status?: T;
   amount?: T;
   currency?: T;
+  inventoryReduced?: T;
   accessToken?: T;
+  purchaseType?: T;
+  stripeSubscriptionID?: T;
   fulfillment?:
     | T
     | {
@@ -2414,9 +2477,6 @@ export interface BranchesSelect<T extends boolean = true> {
 export interface BranchInventorySelect<T extends boolean = true> {
   branch?: T;
   product?: T;
-  price?: T;
-  regularPrice?: T;
-  salePrice?: T;
   sku?: T;
   manageStock?: T;
   stockQuantity?: T;
@@ -2533,6 +2593,10 @@ export interface Header {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Header logo. Upload the transparent gold logo here.
+   */
+  logo?: (number | null) | Media;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2544,6 +2608,10 @@ export interface Footer {
   id: number;
   brandName: string;
   description?: string | null;
+  /**
+   * Footer logo. Upload the transparent gold logo here.
+   */
+  logo?: (number | null) | Media;
   contactEmail?: string | null;
   contactPhone?: string | null;
   address?: string | null;
@@ -2612,8 +2680,6 @@ export interface ShopPage {
  * via the `definition` "shop-luxury-page".
  */
 export interface ShopLuxuryPage {
-  filterSections: { title: string; options?: { label: string; }[] | undefined; }[];
-  itemsPerPage: number;
   id: number;
   eyebrow?: string | null;
   title?: string | null;
@@ -2658,6 +2724,7 @@ export interface HeaderSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  logo?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -2669,6 +2736,7 @@ export interface HeaderSelect<T extends boolean = true> {
 export interface FooterSelect<T extends boolean = true> {
   brandName?: T;
   description?: T;
+  logo?: T;
   contactEmail?: T;
   contactPhone?: T;
   address?: T;

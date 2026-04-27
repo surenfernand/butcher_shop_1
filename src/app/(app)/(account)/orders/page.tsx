@@ -2,11 +2,11 @@ import type { Order } from '@/payload-types'
 import type { Metadata } from 'next'
 
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
-import { headers as getHeaders } from 'next/headers'
 import configPromise from '@payload-config'
-import { getPayload } from 'payload'
-import { redirect } from 'next/navigation'
+import { headers as getHeaders } from 'next/headers'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { getPayload } from 'payload'
 
 export default async function Orders() {
   const headers = await getHeaders()
@@ -38,12 +38,12 @@ export default async function Orders() {
 
   return (
     <div className="w-full space-y-12 text-white">
-      <div>
+      <div className='mt-3'>
         <h1 className="text-5xl font-bold tracking-tight">
           Order History
         </h1>
         <p className="mt-3 text-white/55">
-          Manage your and order history.
+          Manage your order history.
         </p>
       </div>
 
@@ -66,10 +66,10 @@ export default async function Orders() {
               <thead className="bg-white/[0.03] text-xs uppercase tracking-[0.15em] text-white/45">
                 <tr>
                   <th className="px-6 py-4 font-medium">Order #</th>
-                  <th className="px-6 py-4 font-medium">Date</th>
+                  <th className="px-6 py-4 font-medium">Order Date</th>
                   <th className="px-6 py-4 font-medium">Status</th>
                   <th className="px-6 py-4 text-right font-medium">
-                    Total Investment
+                    Total Amount
                   </th>
                 </tr>
               </thead>

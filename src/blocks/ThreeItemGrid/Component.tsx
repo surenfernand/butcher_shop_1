@@ -71,7 +71,7 @@ export const ThreeItemGridBlock: React.FC<
   const [firstProduct, secondProduct] = products
 
   return (
-    <section className="bg-[#0b0f12] py-16">
+    <section className="py-16">
       <div className="container">
         <div className="mb-10 grid gap-6 md:grid-cols-2 md:items-start">
           <div>

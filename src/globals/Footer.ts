@@ -21,6 +21,15 @@ export const Footer: GlobalConfig = {
       type: 'textarea',
     },
     {
+      name: 'logo',
+      type: 'upload',
+      relationTo: 'media',
+      required: false,
+      admin: {
+        description: 'Footer logo. Upload the transparent gold logo here.',
+      },
+    },
+    {
       type: 'row',
       fields: [
         {

@@ -26,6 +26,14 @@ export function CartModal() {
   const { cart, clearCart } = useCart()
   const [isOpen, setIsOpen] = useState(false)
 
+  const [purchaseTypeVersion, setPurchaseTypeVersion] = useState(0)
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    setPurchaseTypeVersion((version) => version + 1)
+  }, [isOpen, cart?.items])
+
   const pathname = usePathname()
 
   const hasAcknowledgedWarningRef = useRef(false)
@@ -38,6 +46,48 @@ export function CartModal() {
   const timerSeconds = Number(settings?.timerSeconds || 120)
   const warningSeconds = Math.min(Number(settings?.warningSeconds || 10), 10, timerSeconds - 1)
 
+
+  type PurchaseType = 'one_time' | 'weekly' | 'monthly'
+
+  const parsePriceOverride = (value?: string | null) => {
+    if (!value) return undefined
+
+    const numericValue = Number(value.replace(/[^0-9.]/g, ''))
+
+    if (Number.isNaN(numericValue)) return undefined
+
+    return Math.round(numericValue * 100)
+  }
+
+  const getPurchaseTypeKey = (productID: string, variantID?: string) => {
+    return variantID ? `purchaseType:${productID}:${variantID}` : `purchaseType:${productID}`
+  }
+
+  const getPurchaseTypeLabel = (purchaseType: PurchaseType) => {
+    if (purchaseType === 'weekly') return 'Weekly subscription'
+    if (purchaseType === 'monthly') return 'Monthly subscription'
+    return 'One-time purchase'
+  }
+
+  const getPurchasePrice = (product: any, variant: any, purchaseType: PurchaseType) => {
+    const variantID = variant?.id ? String(variant.id) : undefined
+    const key = getPurchaseTypeKey(String(product.id), variantID)
+
+    // ✅ FIRST: try reading saved price from localStorage
+    if (typeof window !== 'undefined') {
+      const storedPrice = localStorage.getItem(`${key}:price`)
+
+      if (storedPrice) {
+        const parsed = Number(storedPrice)
+        if (!Number.isNaN(parsed)) return parsed
+      }
+    }
+
+    // fallback (only if not saved)
+    let price = variant?.priceInUSD || product.priceInUSD || 0
+
+    return price
+  }
   useEffect(() => {
     fetch('/api/globals/cart-settings')
       .then((res) => res.json())
@@ -62,6 +112,32 @@ export function CartModal() {
     if (!cart || !cart.items || !cart.items.length) return 0
     return cart.items.reduce((quantity, item) => (item.quantity || 0) + quantity, 0)
   }, [cart])
+
+  const adjustedSubtotal = useMemo(() => {
+    if (!cart?.items?.length) return 0
+
+    return cart.items.reduce((total, item) => {
+      const product = item.product
+      const variant = item.variant
+
+      if (typeof product !== 'object' || !product) return total
+
+      const isVariant = Boolean(variant) && typeof variant === 'object'
+      const variantID = isVariant ? String(variant.id) : undefined
+
+      const purchaseType =
+        typeof window !== 'undefined'
+          ? ((localStorage.getItem(
+            getPurchaseTypeKey(String(product.id), variantID),
+          ) || 'one_time') as PurchaseType)
+          : 'one_time'
+
+      const price = getPurchasePrice(product, isVariant ? variant : undefined, purchaseType)
+
+      return total + price * (item.quantity || 1)
+    }, 0)
+  }, [cart?.items, purchaseTypeVersion])
+
 
   useEffect(() => {
     if (!settings?.enabled || totalQuantity === 0) {
@@ -198,17 +274,27 @@ export function CartModal() {
 
                     const isVariant = Boolean(variant) && typeof variant === 'object'
 
+                    const variantID = isVariant ? String(variant.id) : undefined
+
+                    const purchaseType =
+                      typeof window !== 'undefined'
+                        ? ((localStorage.getItem(
+                          getPurchaseTypeKey(String(product.id), variantID),
+                        ) || 'one_time') as PurchaseType)
+                        : 'one_time'
+
+
                     if (isVariant) {
                       price = variant?.priceInUSD
 
                       const imageVariant = product.gallery?.find(
-                        (galleryItem: NonNullable<Product['gallery']>[number]) => {
-                          if (!galleryItem.variantOption) return false
+                        (galleryItem: NonNullable<Product['productGallery']>[number]) => {
+                          if (!galleryItem.image) return false
 
                           const variantOptionID =
-                            typeof galleryItem.variantOption === 'object'
-                              ? galleryItem.variantOption.id
-                              : galleryItem.variantOption
+                            typeof galleryItem.image === 'object'
+                              ? galleryItem.id
+                              : galleryItem.image
 
                           return variant?.options?.some(
                             (option: NonNullable<typeof variant.options>[number]) => {
@@ -222,6 +308,8 @@ export function CartModal() {
                         image = imageVariant.image
                       }
                     }
+
+                    price = getPurchasePrice(product, isVariant ? variant : undefined, purchaseType)
 
                     const variantText = isVariant
                       ? variant?.options
@@ -269,6 +357,11 @@ export function CartModal() {
                                   {variantText ? `Weight: ${variantText}` : ''}
                                 </p>
                               )}
+
+                              <p className="mt-1 text-[0.72rem] uppercase tracking-[0.1em] text-[#d4a63c]">
+                                {getPurchaseTypeLabel(purchaseType)}
+                              </p>
+
                             </div>
 
                             <DeleteItemButton item={item} />
@@ -311,7 +404,7 @@ export function CartModal() {
                   <div className="flex items-center justify-between text-[#a9a9a9]">
                     <span>Subtotal</span>
                     {typeof cart?.subtotal === 'number' && (
-                      <Price amount={cart.subtotal} className="text-base text-[#bcbcbc]" />
+                      <Price amount={adjustedSubtotal} className="text-base text-[#bcbcbc]" />
                     )}
                   </div>
 
@@ -325,7 +418,7 @@ export function CartModal() {
                       Total
                     </span>
                     {typeof cart?.subtotal === 'number' && (
-                      <Price amount={cart.subtotal} className="text-3xl font-black text-[#d4a63c]" />
+                      <Price amount={adjustedSubtotal} className="text-3xl font-black text-[#d4a63c]" />
                     )}
                   </div>
                 </div>

@@ -8,7 +8,7 @@ export const createBranchInventoryCollection = (
   slug: 'branch-inventory',
   admin: {
     group: adminGroup,
-    defaultColumns: ['branch', 'product', 'price', 'stockStatus', 'stockQuantity'],
+    defaultColumns: ['branch', 'product',  'stockStatus', 'stockQuantity'],
   },
   access: {
     read: publicRead,
@@ -19,9 +19,9 @@ export const createBranchInventoryCollection = (
   fields: [
     { name: 'branch', type: 'relationship', relationTo: 'branches', required: true, index: true },
     { name: 'product', type: 'relationship', relationTo: productSlug, required: true, index: true },
-    { name: 'price', type: 'number', min: 0, required: true },
-    { name: 'regularPrice', type: 'number', min: 0 },
-    { name: 'salePrice', type: 'number', min: 0 },
+    // { name: 'price', type: 'number', min: 0, required: true },
+    // { name: 'regularPrice', type: 'number', min: 0 },
+    // { name: 'salePrice', type: 'number', min: 0 },
     { name: 'sku', type: 'text' },
     { name: 'manageStock', type: 'checkbox', defaultValue: true },
     { name: 'stockQuantity', type: 'number', defaultValue: 0 },

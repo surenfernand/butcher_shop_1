@@ -40,7 +40,7 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
     variants: true,
     enableVariants: true,
     priceInUSD: true,
-    inventory: true,
+    // inventory: true,
     productGallery: true,
     shopCardLabel: true,
     shopCardShortDescription: true,
@@ -50,10 +50,13 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
     sortPriority: true,
     cardButtonLabel: true,
     featuredInShop: true,
+    purchaseFrequencies: true,
   },
   fields: [
-    ...(defaultCollection?.fields || []),
-
+    ...(defaultCollection?.fields || []).filter((field) => {
+      if ('name' in field && field.name === 'inventory') return false
+      return true
+    }),
     {
       name: 'title',
       type: 'text',
@@ -276,31 +279,80 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
                 },
               ],
             },
+            // {
+            //   name: 'purchaseOptions',
+            //   type: 'array',
+            //   label: 'Purchase Options',
+            //   minRows: 1,
+            //   maxRows: 2,
+            //   fields: [
+            //     {
+            //       name: 'label',
+            //       type: 'text',
+            //       required: true,
+            //     },
+            //     {
+            //       name: 'price',
+            //       type: 'text',
+            //       required: true,
+            //     },
+            //     {
+            //       name: 'subtext',
+            //       type: 'text',
+            //     },
+            //     {
+            //       name: 'highlighted',
+            //       type: 'checkbox',
+            //       defaultValue: false,
+            //     },
+            //   ],
+            // },
             {
-              name: 'purchaseOptions',
-              type: 'array',
-              label: 'Purchase Options',
-              minRows: 1,
-              maxRows: 2,
+              name: 'purchaseFrequencies',
+              type: 'group',
+              label: 'Delivery Options',
               fields: [
                 {
-                  name: 'label',
-                  type: 'text',
-                  required: true,
+                  name: 'oneTime',
+                  type: 'group',
+                  label: 'One-Time Purchase',
+                  fields: [
+
+                    {
+                      name: 'enabled',
+                      type: 'checkbox',
+                      label: 'Enable',
+                      defaultValue: true,
+                    },
+                    {
+                      name: 'priceOverride',
+                      type: 'text',
+                      label: 'Override Price (e.g. $295)',
+                    },
+                  ],
                 },
                 {
-                  name: 'price',
-                  type: 'text',
-                  required: true,
-                },
-                {
-                  name: 'subtext',
-                  type: 'text',
-                },
-                {
-                  name: 'highlighted',
-                  type: 'checkbox',
-                  defaultValue: false,
+                  name: 'monthly',
+                  type: 'group',
+                  label: 'Monthly Subscription',
+                  fields: [
+                    {
+                      name: 'enabled',
+                      type: 'checkbox',
+                      label: 'Enable',
+                      defaultValue: true,
+                    },
+                    {
+                      name: 'priceOverride',
+                      type: 'text',
+                      label: 'Override Price (e.g. $249)',
+                    },
+                    {
+                      name: 'savingsText',
+                      type: 'text',
+                      label: 'Savings Label (e.g. SAVE 15%)',
+                    },
+                  ],
                 },
               ],
             },
@@ -312,14 +364,14 @@ export const ProductsCollection: CollectionOverride = ({ defaultCollection }) =>
                 { name: 'url', type: 'text', defaultValue: '#' },
               ],
             },
-            {
-              name: 'secondaryCTA',
-              type: 'group',
-              fields: [
-                { name: 'label', type: 'text', defaultValue: 'One-Time Purchase' },
-                { name: 'url', type: 'text', defaultValue: '#' },
-              ],
-            },
+            // {
+            //   name: 'secondaryCTA',
+            //   type: 'group',
+            //   fields: [
+            //     { name: 'label', type: 'text', defaultValue: 'One-Time Purchase' },
+            //     { name: 'url', type: 'text', defaultValue: '#' },
+            //   ],
+            // },
             {
               name: 'reviewsHeading',
               type: 'text',

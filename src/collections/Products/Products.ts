@@ -58,7 +58,34 @@ export const Products: CollectionConfig = {
     },
     {
       name: 'tag',
-      type: 'text', // e.g. "Miyazaki A5"
+      type: 'text',
+    },
+
+    {
+      name: 'purchaseFrequencies',
+      type: 'group',
+      label: 'Purchase Frequencies',
+      
+      fields: [
+        {
+          name: 'oneTimeEnabled',
+          type: 'checkbox',
+          label: 'Show One-Time Purchase',
+          defaultValue: true,
+        },
+        {
+          name: 'weeklyEnabled',
+          type: 'checkbox',
+          label: 'Show Weekly Subscription',
+          defaultValue: true,
+        },
+        {
+          name: 'monthlyEnabled',
+          type: 'checkbox',
+          label: 'Show Monthly Subscription',
+          defaultValue: true,
+        },
+      ],
     },
   ],
 }

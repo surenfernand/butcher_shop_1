@@ -80,7 +80,7 @@ export function ProductshopCardShortDescription({ product }: { product: Product 
       )}
       <div className="flex items-center justify-between">
         <Suspense fallback={null}>
-          <StockIndicator product={product} />
+          {/* <StockIndicator product={product} /> */}
         </Suspense>
       </div>
 

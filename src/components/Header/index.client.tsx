@@ -9,8 +9,10 @@ import { MobileMenu } from './MobileMenu'
 import type { Header } from 'src/payload-types'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/utilities/cn'
-import { LogoIcon } from '@/components/icons/logo'
+// import { LogoIcon } from '@/components/icons/logo'
 import { ShoppingCart, User, Search } from 'lucide-react'
+
+import { Media } from '@/components/Media'
 
 type Props = {
   header: Header
@@ -19,9 +21,9 @@ type Props = {
 export function HeaderClient({ header }: Props) {
   const menu = header.navItems || []
   const pathname = usePathname()
-
+ 
   return (
-    <header className="absolute left-0 top-0 z-50 w-full border-b border-[#3a2d14] bg-black/70 backdrop-blur-sm transition-all duration-300 ease-out hover:text-[#d4a63c] hover:-translate-y-0.5">
+    <header className="fixed left-0 top-0 z-50 w-full border-b border-[#3a2d14] bg-black/70 backdrop-blur-sm transition-all duration-300 ease-out hover:text-[#d4a63c] hover:-translate-y-0.5">
       <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 md:px-8">
         {/* Mobile menu */}
         <div className="flex items-center md:hidden">
@@ -33,7 +35,16 @@ export function HeaderClient({ header }: Props) {
         {/* Left: Logo */}
         <div className="flex flex-1 items-center">
           <Link href="/" className="flex items-center">
-            <LogoIcon className="h-8 w-auto text-[#d4a63c]" />
+
+            <Media
+              resource={header.logo}
+              imgClassName="h-20 w-auto object-contain"
+            />
+
+            {/* <span className="text-md font-black uppercase tracking-wide text-[#d4a63c]">
+              The Butcher’s Craft
+            </span> */}
+
           </Link>
         </div>
 

@@ -25,7 +25,7 @@ export const InfoSectionBlock: React.FC<Props> = ({
   if (!imageUrl) return null
 
   return (
-    <section className={['bg-[#0a0f12] py-20', className].filter(Boolean).join(' ')}>
+    <section className={['py-20', className].filter(Boolean).join(' ')}>
       <div className="container">
         <div className="grid items-center gap-10 md:grid-cols-[1.35fr_0.95fr]">
           <div className="relative aspect-[4/3] w-full overflow-hidden bg-white">

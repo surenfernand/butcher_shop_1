@@ -52,9 +52,8 @@ export const CheckoutForm: React.FC<Props> = ({
       }
 
       try {
-        const returnUrl = `${process.env.NEXT_PUBLIC_SERVER_URL}/checkout/confirm-order${
-          customerEmail ? `?email=${customerEmail}` : ''
-        }`
+        const returnUrl = `${process.env.NEXT_PUBLIC_SERVER_URL}/checkout/confirm-order${customerEmail ? `?email=${customerEmail}` : ''
+          }`
 
         const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
           confirmParams: {
@@ -79,10 +78,31 @@ export const CheckoutForm: React.FC<Props> = ({
         })
 
         if (paymentIntent && paymentIntent.status === 'succeeded') {
+
+          const fulfillment =
+            typeof window !== 'undefined'
+              ? JSON.parse(localStorage.getItem('fulfillment') || '{}')
+              : {}
+
+
+
+          const purchaseType =
+            typeof window !== 'undefined'
+              ? Object.keys(localStorage)
+                .filter((key) => key.startsWith('purchaseType:') && !key.endsWith(':price'))
+                .map((key) => localStorage.getItem(key))
+                .find((value) => value === 'monthly' || value === 'weekly') || 'one_time'
+              : 'one_time'
+
+          console.log('confirm fulfillment', fulfillment)
+          console.log('confirm purchaseType', purchaseType)
+
           const confirmResult = await confirmOrder('stripe', {
             additionalData: {
               paymentIntentID: paymentIntent.id,
               ...(customerEmail ? { customerEmail } : {}),
+              fulfillment,
+              purchaseType,
             },
           })
 
@@ -100,11 +120,35 @@ export const CheckoutForm: React.FC<Props> = ({
             if (customerEmail) queryParams.set('email', customerEmail)
             if (accessToken) queryParams.set('accessToken', accessToken)
 
+            const fulfillment =
+              typeof window !== 'undefined'
+                ? JSON.parse(localStorage.getItem('fulfillment') || '{}')
+                : {}
+
+            const purchaseType =
+              typeof window !== 'undefined'
+                ? Object.keys(localStorage)
+                  .filter((key) => key.startsWith('purchaseType:') && !key.endsWith(':price'))
+                  .map((key) => localStorage.getItem(key))
+                  .find((value) => value === 'monthly' || value === 'weekly') || 'one_time'
+                : 'one_time'
+
+            fetch('/api/order-extra-data', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                orderID: confirmResult.orderID,
+                fulfillment,
+                purchaseType,
+              }),
+            }).catch(console.error)
+
             clearCart()
 
             router.push(
-              `/thank-you/${confirmResult.orderID}${
-                queryParams.toString() ? `?${queryParams.toString()}` : ''
+              `/thank-you/${confirmResult.orderID}${queryParams.toString() ? `?${queryParams.toString()}` : ''
               }`,
             )
           }

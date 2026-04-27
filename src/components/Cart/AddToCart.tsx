@@ -4,14 +4,16 @@ import { Button } from '@/components/ui/button'
 import type { Product, Variant } from '@/payload-types'
 
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
-import clsx from 'clsx'
 import { useSearchParams } from 'next/navigation'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
+type PurchaseType = 'one_time' | 'weekly' | 'monthly'
+
 type Props = {
   product: Product
   className?: string
+  purchaseType?: PurchaseType
 }
 
 type BranchStock = {
@@ -19,7 +21,11 @@ type BranchStock = {
   stockStatus: string
 }
 
-export function AddToCart({ product, className }: Props) {
+export function AddToCart({
+  product,
+  className,
+  purchaseType = 'one_time',
+}: Props) {
   const { addItem, cart, isLoading } = useCart()
   const searchParams = useSearchParams()
 
@@ -38,6 +44,7 @@ export function AddToCart({ product, className }: Props) {
         if (typeof variant === 'object') {
           return String(variant.id) === variantId
         }
+
         return String(variant) === variantId
       })
 
@@ -49,39 +56,50 @@ export function AddToCart({ product, className }: Props) {
     return undefined
   }, [product.enableVariants, searchParams, variants])
 
+  const cartItemKey = useMemo(() => {
+    return selectedVariant?.id
+      ? `purchaseType:${product.id}:${selectedVariant.id}`
+      : `purchaseType:${product.id}`
+  }, [product.id, selectedVariant?.id])
+
   useEffect(() => {
     const loadBranchStock = async () => {
-      const fulfillment = JSON.parse(localStorage.getItem('fulfillment') || '{}')
-      const branchId = fulfillment.branch
+      try {
+        const fulfillment = JSON.parse(localStorage.getItem('fulfillment') || '{}')
+        const branchId = fulfillment.branch
 
-      if (!branchId) {
+        if (!branchId) {
+          setBranchStock({
+            stockQuantity: 0,
+            stockStatus: 'outofstock',
+          })
+          return
+        }
+
+        const res = await fetch(
+          `/api/multi-location/product-price?product=${product.id}&branch=${branchId}`,
+        )
+
+        if (!res.ok) {
+          setBranchStock({
+            stockQuantity: 0,
+            stockStatus: 'outofstock',
+          })
+          return
+        }
+
+        const data = await res.json()
+
+        setBranchStock({
+          stockQuantity: data.stockQuantity || 0,
+          stockStatus: data.stockStatus || 'outofstock',
+        })
+      } catch {
         setBranchStock({
           stockQuantity: 0,
           stockStatus: 'outofstock',
         })
-        return
       }
-
-      const productId = product.id
-
-      const res = await fetch(
-        `/api/multi-location/product-price?product=${productId}&branch=${branchId}`,
-      )
-
-      if (!res.ok) {
-        setBranchStock({
-          stockQuantity: 0,
-          stockStatus: 'outofstock',
-        })
-        return
-      }
-
-      const data = await res.json()
-
-      setBranchStock({
-        stockQuantity: data.stockQuantity || 0,
-        stockStatus: data.stockStatus || 'outofstock',
-      })
     }
 
     if (product.enableVariants && !selectedVariant) {
@@ -104,17 +122,54 @@ export function AddToCart({ product, className }: Props) {
         return
       }
 
+      const parsePriceOverride = (value?: string | null) => {
+        if (!value) return undefined
+        const numericValue = Number(value.replace(/[^0-9.]/g, ''))
+        if (Number.isNaN(numericValue)) return undefined
+        return Math.round(numericValue * 100)
+      }
+
+      let selectedPrice = selectedVariant?.priceInUSD || product.priceInUSD || 0
+
+      if (purchaseType === 'monthly') {
+        const monthly = parsePriceOverride(product.purchaseFrequencies?.monthly?.priceOverride)
+        if (monthly) selectedPrice = monthly
+      }
+
+      if (purchaseType === 'one_time') {
+        const oneTime = parsePriceOverride(product.purchaseFrequencies?.oneTime?.priceOverride)
+        if (oneTime) selectedPrice = oneTime
+      }
+
+      localStorage.setItem(cartItemKey, purchaseType)
+      localStorage.setItem(`${cartItemKey}:price`, String(selectedPrice))
+
+
       addItem({
         product: product.id,
         variant: selectedVariant?.id ?? undefined,
+        price: selectedPrice,
       }).then(() => {
-        toast.success('Item added to cart.')
+        toast.success(
+          purchaseType === 'one_time'
+            ? 'Item added to cart.'
+            : `${purchaseType === 'weekly' ? 'Weekly' : 'Monthly'} subscription added to cart.`,
+        )
       })
     },
-    [addItem, product.id, selectedVariant?.id, branchStock],
+    [
+      addItem,
+      product.id,
+      selectedVariant?.id,
+      branchStock.stockQuantity,
+      branchStock.stockStatus,
+      purchaseType,
+      cartItemKey,
+    ],
   )
 
   const disabled = useMemo<boolean>(() => {
+
     if (product.enableVariants && !selectedVariant) {
       return true
     }
@@ -125,6 +180,7 @@ export function AddToCart({ product, className }: Props) {
 
     const existingItem = cart?.items?.find((item) => {
       const productID = typeof item.product === 'object' ? item.product?.id : item.product
+
       const variantID = item.variant
         ? typeof item.variant === 'object'
           ? item.variant?.id
@@ -164,7 +220,7 @@ export function AddToCart({ product, className }: Props) {
       disabled={disabled || isLoading}
       onClick={addToCart}
       type="submit"
-      style={{ borderRadius: "0px", }}
+      style={{ borderRadius: '0px' }}
     >
       {isLoading ? 'Adding...' : product.primaryCTA?.label || 'Add To Cart'}
     </Button>

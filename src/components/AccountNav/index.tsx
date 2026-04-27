@@ -84,6 +84,19 @@ export const AccountNav: React.FC<Props> = ({ className }) => {
               </Link>
             </Button>
           </li>
+          <li>
+            <Button asChild variant="link" className="h-auto w-full p-0">
+              <Link
+                href="/account/subscriptions"
+                className={clsx(
+                  linkBase,
+                  pathname === '/account/subscriptions' ? linkActive : linkInactive,
+                )}
+              >
+                My Subscriptions
+              </Link>
+            </Button>
+          </li>
         </ul>
       </div>
 

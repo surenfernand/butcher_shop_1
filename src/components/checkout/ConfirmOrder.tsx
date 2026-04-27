@@ -22,13 +22,34 @@ export const ConfirmOrder: React.FC = () => {
     const paymentIntentID = searchParams.get('payment_intent')
     const email = searchParams.get('email')
 
+
     if (paymentIntentID) {
       if (!isConfirming.current) {
         isConfirming.current = true
 
+        const fulfillment =
+          typeof window !== 'undefined'
+            ? JSON.parse(localStorage.getItem('fulfillment') || '{}')
+            : {}
+
+        const purchaseType =
+          typeof window !== 'undefined'
+            ? Object.keys(localStorage)
+              .filter((key) => key.startsWith('purchaseType:') && !key.endsWith(':price'))
+              .map((key) => localStorage.getItem(key))
+              .find((value) => value === 'monthly' || value === 'weekly') || 'one_time'
+            : 'one_time'
+
+
+        console.log('redirect confirm fulfillment', fulfillment)
+        console.log('redirect confirm purchaseType', purchaseType)
+
         confirmOrder('stripe', {
           additionalData: {
             paymentIntentID,
+            ...(email ? { customerEmail: email } : {}),
+            fulfillment,
+            purchaseType,
           },
         }).then((result) => {
           if (result && typeof result === 'object' && 'orderID' in result && result.orderID) {
