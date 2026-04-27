@@ -54,22 +54,34 @@ export const ConfirmOrder: React.FC = () => {
               queryParams.set('accessToken', accessToken)
             }
 
+            if (purchaseType) {
+              queryParams.set('purchaseType', purchaseType)
+            }
+
+            if (fulfillment?.shippingCharge !== undefined) {
+              queryParams.set('shippingCharge', String(fulfillment.shippingCharge))
+            }
+ 
+            const thankYouHref = `/thank-you/${result.orderID}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+
             try {
-              fetch('/api/order-extra-data', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  orderID: result.orderID,
-                  fulfillment,
-                  purchaseType,
+              await Promise.all([
+                fetch('/api/order-extra-data', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    orderID: result.orderID,
+                    fulfillment,
+                    purchaseType,
+                  }),
                 }),
-              })
+                router.prefetch(thankYouHref),
+              ])
             } catch (e) {
               console.error(e)
             }
 
-            const queryString = queryParams.toString()
-            router.push(`/thank-you/${result.orderID}${queryString ? `?${queryString}` : ''}`)
+            router.push(thankYouHref)
           }
         })
       }

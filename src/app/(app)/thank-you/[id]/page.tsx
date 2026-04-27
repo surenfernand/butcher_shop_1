@@ -1,10 +1,7 @@
 import type { Media, Order, Product } from '@/payload-types'
 
-import { getPurchaseUnitPriceInCents } from '@/utilities/purchasePricing'
-import {
-  resolveOrderLineProductForPricing,
-  resolveOrderLineVariantForPricing,
-} from '@/utilities/resolveOrderLinePricingDocs'
+import { getPurchaseUnitPriceInCents, PurchaseType } from '@/utilities/purchasePricing'
+import { batchResolveOrderLinesForPricing } from '@/utilities/resolveOrderLinePricingDocs'
 import configPromise from '@payload-config'
 import { headers as getHeaders } from 'next/headers'
 import Link from 'next/link'
@@ -15,7 +12,13 @@ export const dynamic = 'force-dynamic'
 
 type PageProps = {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ email?: string; accessToken?: string }>
+  searchParams: Promise<{
+    email?: string
+    accessToken?: string
+    purchaseType?: string
+    shippingCharge?: string
+    estimatedTax?: string
+  }>
 }
 
 const formatMoney = (amount?: number | null) =>
@@ -52,7 +55,22 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
   const { user } = await payload.auth({ headers })
 
   const { id } = await params
-  const { email = '', accessToken = '' } = await searchParams
+
+
+  const {
+    email = '',
+    accessToken = '',
+    purchaseType: purchaseTypeFromUrl = '',
+    shippingCharge: shippingChargeFromUrl = '',
+    estimatedTax: estimatedTaxFromUrl = '',
+  } = await searchParams
+
+  console.log('ThankYou searchParams:', {
+    email,
+    accessToken,
+    purchaseTypeFromUrl,
+    shippingChargeFromUrl,
+  })
 
   const {
     docs: [order],
@@ -60,7 +78,7 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
     collection: 'orders',
     user,
     overrideAccess: !Boolean(user),
-    depth: 3,
+    depth: 1,
     where: {
       and: [
         {
@@ -102,33 +120,33 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
 
   const typedOrder = order as Order
 
-  const linePricingDocs = await Promise.all(
-    (typedOrder.items || []).map(async (item) => {
-      const pricingProduct = await resolveOrderLineProductForPricing(payload, item.product)
-      const pricingVariant = await resolveOrderLineVariantForPricing(payload, item.variant)
-
-      const embeddedProduct = typeof item.product === 'object' ? item.product : undefined
-      const embeddedVariant = typeof item.variant === 'object' ? item.variant : undefined
-
-      return {
-        item,
-        product: pricingProduct ?? embeddedProduct,
-        variant: pricingVariant ?? embeddedVariant,
-      }
-    }),
-  )
+  const linePricingDocs = await batchResolveOrderLinesForPricing(payload, typedOrder.items)
 
   const orderUrl = `/orders/${id}?${new URLSearchParams({
     ...(email ? { email } : {}),
     ...(accessToken ? { accessToken } : {}),
   }).toString()}`
 
-  const purchaseTypeForPricing =
-    typedOrder.purchaseType === 'weekly' ||
-    typedOrder.purchaseType === 'monthly' ||
-    typedOrder.purchaseType === 'one_time'
-      ? typedOrder.purchaseType
-      : 'one_time'
+
+
+  const purchaseTypeForPricing: PurchaseType =
+    purchaseTypeFromUrl === 'weekly' ||
+      purchaseTypeFromUrl === 'monthly' ||
+      purchaseTypeFromUrl === 'one_time'
+      ? purchaseTypeFromUrl
+      : (typedOrder.purchaseType ?? 'one_time')
+
+
+  const shippingChargeFromUrlNumber =
+    shippingChargeFromUrl !== '' ? Number(shippingChargeFromUrl) : null
+
+  const shippingTotal = Number.isFinite(shippingChargeFromUrlNumber)
+    ? shippingChargeFromUrlNumber
+    : typedOrder.fulfillment?.serviceType === 'delivery'
+      ? Number(typedOrder.fulfillment?.shippingCharge || 0)
+      : 0
+
+
 
   const itemsSubtotal =
     linePricingDocs.reduce((total, row) => {
@@ -142,13 +160,21 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
       return total + unitPrice * quantity
     }, 0) || 0
 
-  const fulfillment = typedOrder.fulfillment as any
 
-  const shippingTotal =
-    fulfillment?.serviceType === 'delivery'
-      ? Number(fulfillment?.shippingCharge || 0)
-      : 0
+  const estimatedTaxFromUrlNumber =
+    estimatedTaxFromUrl !== '' ? Number(estimatedTaxFromUrl) : null
 
+  const estimatedTax =
+    estimatedTaxFromUrlNumber !== null && Number.isFinite(estimatedTaxFromUrlNumber)
+      ? estimatedTaxFromUrlNumber
+      : Number(typedOrder.fulfillment?.estimatedTax || 0)
+
+  const safeShippingTotal = shippingTotal ?? 0
+  const safeEstimatedTax = estimatedTax ?? 0
+
+  const calculatedTotal = itemsSubtotal + safeShippingTotal + safeEstimatedTax
+
+ 
   const address = typedOrder.shippingAddress
 
   return (
@@ -214,9 +240,9 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
                     <div className="flex-1">
                       <h3 className="font-bold uppercase text-white">{product.title}</h3>
 
-                      {typedOrder.purchaseType && typedOrder.purchaseType !== 'one_time' ? (
+                      {purchaseTypeForPricing && purchaseTypeForPricing !== 'one_time' ? (
                         <p className="mt-1 text-xs uppercase tracking-[0.18em] text-[#D3A84B]">
-                          {typedOrder.purchaseType === 'monthly'
+                          {purchaseTypeForPricing === 'monthly'
                             ? 'Monthly subscription'
                             : 'Weekly subscription'}
                         </p>
@@ -246,12 +272,18 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
 
               <div className="flex justify-between text-sm uppercase tracking-[0.12em] text-[#d2c5b1]">
                 <span>Shipping</span>
-                <span>{shippingTotal > 0 ? formatMoney(shippingTotal) : '0.00'}</span>
+                {/* <span>{shippingTotal > 0 ? formatMoney(shippingTotal) : '0.00'}</span> */}
+                <span>{formatMoney(shippingTotal)}</span>
+              </div>
+
+              <div className="flex justify-between text-sm uppercase tracking-[0.12em] text-[#d2c5b1]">
+                <span>Tax</span>
+                <span>{formatMoney(estimatedTax)}</span>
               </div>
 
               <div className="flex justify-between border-t border-[#333535] pt-4 text-2xl font-black">
                 <span className="uppercase text-[#D3A84B]">Total Amount</span>
-                <span>{formatMoney(typedOrder.amount)}</span>
+                <span>{formatMoney(calculatedTotal)}</span>
               </div>
             </div>
           </div>

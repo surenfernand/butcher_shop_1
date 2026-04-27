@@ -117,30 +117,42 @@ export const CheckoutForm: React.FC<Props> = ({
                 ? JSON.parse(localStorage.getItem('fulfillment') || '{}')
                 : {}
 
+
             const purchaseTypeForOrder = getPurchaseTypeForConfirmationFromCart(cart?.items)
 
+        
+            if (customerEmail) queryParams.set('email', customerEmail)
+            if (accessToken) queryParams.set('accessToken', accessToken)
+            if (purchaseTypeForOrder) queryParams.set('purchaseType', purchaseTypeForOrder)
+
+            if (fulfillment?.shippingCharge !== undefined) {
+              queryParams.set('shippingCharge', String(fulfillment.shippingCharge))
+            }
+
+            if (fulfillment?.estimatedTax !== undefined) {
+              queryParams.set('estimatedTax', String(fulfillment.estimatedTax))
+            }
+
+            const thankYouHref = `/thank-you/${confirmResult.orderID}${queryParams.toString() ? `?${queryParams.toString()}` : ''
+              }`
+
             try {
-              await fetch('/api/order-extra-data', {
+              void fetch('/api/order-extra-data', {
                 method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   orderID: confirmResult.orderID,
                   fulfillment,
                   purchaseType: purchaseTypeForOrder,
                 }),
               })
+
+              clearCart()
+              router.push(thankYouHref)
             } catch (e) {
               console.error(e)
             }
 
-            clearCart()
-
-            router.push(
-              `/thank-you/${confirmResult.orderID}${queryParams.toString() ? `?${queryParams.toString()}` : ''
-              }`,
-            )
           }
         }
 

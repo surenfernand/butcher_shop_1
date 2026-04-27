@@ -15,10 +15,7 @@ import { getPayload } from 'payload'
 import { OrderStatus } from '@/components/OrderStatus'
 import { AddressItem } from '@/components/addresses/AddressItem'
 import { getPurchaseUnitPriceInCents } from '@/utilities/purchasePricing'
-import {
-  resolveOrderLineProductForPricing,
-  resolveOrderLineVariantForPricing,
-} from '@/utilities/resolveOrderLinePricingDocs'
+import { batchResolveOrderLinesForPricing } from '@/utilities/resolveOrderLinePricingDocs'
 
 export const dynamic = 'force-dynamic'
 
@@ -46,7 +43,7 @@ export default async function Order({ params, searchParams }: PageProps) {
       collection: 'orders',
       user,
       overrideAccess: !Boolean(user),
-      depth: 2,
+      depth: 1,
       where: {
         and: [
           {
@@ -122,21 +119,7 @@ export default async function Order({ params, searchParams }: PageProps) {
     notFound()
   }
 
-  const linePricingDocs = await Promise.all(
-    (order.items || []).map(async (item) => {
-      const pricingProduct = await resolveOrderLineProductForPricing(payload, item.product)
-      const pricingVariant = await resolveOrderLineVariantForPricing(payload, item.variant)
-
-      const embeddedProduct = typeof item.product === 'object' ? item.product : undefined
-      const embeddedVariant = typeof item.variant === 'object' ? item.variant : undefined
-
-      return {
-        item,
-        product: pricingProduct ?? embeddedProduct,
-        variant: pricingVariant ?? embeddedVariant,
-      }
-    }),
-  )
+  const linePricingDocs = await batchResolveOrderLinesForPricing(payload, order.items)
 
   const purchaseTypeForPricing =
     order.purchaseType === 'weekly' ||

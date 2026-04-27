@@ -1,6 +1,6 @@
 import type { BasePayload } from 'payload'
 
-import type { Product, Variant } from '@/payload-types'
+import type { Order, Product, Variant } from '@/payload-types'
 
 const productId = (ref: number | Product | null | undefined): number | undefined => {
   if (typeof ref === 'number') return ref
@@ -14,41 +14,77 @@ const variantId = (ref: number | Variant | null | undefined): number | undefined
   return undefined
 }
 
-/** Full product doc so `purchaseFrequencies` is present (order relation populate often omits it). */
-export const resolveOrderLineProductForPricing = async (
-  payload: BasePayload,
-  productRef: number | Product | null | undefined,
-): Promise<Product | undefined> => {
-  const id = productId(productRef)
-  if (id == null) return typeof productRef === 'object' && productRef ? (productRef as Product) : undefined
+export type OrderLineForPricing = NonNullable<Order['items']>[number]
 
-  try {
-    const doc = await payload.findByID({
-      collection: 'products',
-      id,
-      depth: 0,
-    })
-    return doc as Product
-  } catch {
-    return typeof productRef === 'object' && productRef ? (productRef as Product) : undefined
-  }
+export type ResolvedOrderLine = {
+  item: OrderLineForPricing
+  product: Product | undefined
+  variant: Variant | undefined
 }
 
-export const resolveOrderLineVariantForPricing = async (
+/**
+ * Loads full product + variant docs for pricing in 2 queries (not 2×N findByID).
+ * Order relation populate often omits `purchaseFrequencies` on nested products.
+ */
+export const batchResolveOrderLinesForPricing = async (
   payload: BasePayload,
-  variantRef: number | Variant | null | undefined,
-): Promise<Variant | undefined> => {
-  const id = variantId(variantRef)
-  if (id == null) return typeof variantRef === 'object' && variantRef ? (variantRef as Variant) : undefined
+  lines: OrderLineForPricing[] | null | undefined,
+): Promise<ResolvedOrderLine[]> => {
+  if (!lines?.length) return []
 
-  try {
-    const doc = await payload.findByID({
-      collection: 'variants',
-      id,
-      depth: 0,
-    })
-    return doc as Variant
-  } catch {
-    return typeof variantRef === 'object' && variantRef ? (variantRef as Variant) : undefined
+  const productIds = new Set<number>()
+  const variantIds = new Set<number>()
+
+  for (const item of lines) {
+    const pid = productId(item.product)
+    if (pid != null) productIds.add(pid)
+    const vid = variantId(item.variant)
+    if (vid != null) variantIds.add(vid)
   }
+
+  const [productsResult, variantsResult] = await Promise.all([
+    productIds.size
+      ? payload.find({
+          collection: 'products',
+          where: { id: { in: [...productIds] } },
+          limit: productIds.size,
+          pagination: false,
+          depth: 0,
+        })
+      : Promise.resolve({ docs: [] as Product[] }),
+    variantIds.size
+      ? payload.find({
+          collection: 'variants',
+          where: { id: { in: [...variantIds] } },
+          limit: variantIds.size,
+          pagination: false,
+          depth: 0,
+        })
+      : Promise.resolve({ docs: [] as Variant[] }),
+  ])
+
+  const productById = new Map<number, Product>()
+  for (const doc of productsResult.docs as Product[]) {
+    productById.set(doc.id, doc)
+  }
+
+  const variantById = new Map<number, Variant>()
+  for (const doc of variantsResult.docs as Variant[]) {
+    variantById.set(doc.id, doc)
+  }
+
+  return lines.map((item) => {
+    const embeddedProduct = typeof item.product === 'object' ? item.product : undefined
+    const embeddedVariant = typeof item.variant === 'object' ? item.variant : undefined
+
+    const pid = productId(item.product)
+    const vid = variantId(item.variant)
+
+    const product =
+      pid != null ? (productById.get(pid) ?? embeddedProduct) : embeddedProduct
+    const variant =
+      vid != null ? (variantById.get(vid) ?? embeddedVariant) : embeddedVariant
+
+    return { item, product, variant }
+  })
 }
