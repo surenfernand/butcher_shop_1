@@ -291,6 +291,7 @@ export interface Order {
      * Shipping charge stored in cents
      */
     shippingCharge?: number | null;
+    estimatedTax?: number | null;
     notes?: string | null;
   };
   updatedAt: string;
