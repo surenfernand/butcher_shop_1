@@ -65,21 +65,28 @@ export const AddressForm: React.FC<Props> = ({
     async (data: AddressFormValues) => {
       const newData = deepMergeSimple(initialData || {}, data)
 
-      if (!skipSubmission) {
-        if (addressID) {
-          await updateAddress(addressID, newData)
-        } else {
-          await createAddress(newData)
+      try {
+        if (!skipSubmission) {
+          if (addressID) {
+            await updateAddress(addressID, newData)
+          } else {
+            await createAddress(newData)
+          }
         }
-      }
 
-      if (callback) {
-        callback(newData)
+        if (callback) {
+          callback(newData)
+        }
+      } catch (error) {
+        console.error('Address form submit failed:', error)
+
+        if (callback) {
+          callback(newData)
+        }
       }
     },
     [initialData, skipSubmission, callback, addressID, updateAddress, createAddress],
   )
-
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="flex flex-col gap-4 mb-8">

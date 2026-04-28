@@ -5,8 +5,9 @@ import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, FormEvent } from 'react'
 import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
-import { getPurchaseTypeForConfirmationFromCart } from '@/utilities/localStoragePurchaseType'
+import { getPurchaseTypeForConfirmationFromCart, getPurchaseTypesForCartItems } from '@/utilities/localStoragePurchaseType'
 import { Address } from '@/payload-types'
+
 
 type Props = {
   customerEmail?: string
@@ -88,6 +89,7 @@ export const CheckoutForm: React.FC<Props> = ({
 
 
           const purchaseType = getPurchaseTypeForConfirmationFromCart(cart?.items)
+          const purchaseTypes = getPurchaseTypesForCartItems(cart?.items)
 
           const confirmResult = await confirmOrder('stripe', {
             additionalData: {
@@ -95,6 +97,7 @@ export const CheckoutForm: React.FC<Props> = ({
               ...(customerEmail ? { customerEmail } : {}),
               fulfillment,
               purchaseType,
+              purchaseTypes,
             },
           })
 
@@ -120,7 +123,7 @@ export const CheckoutForm: React.FC<Props> = ({
 
             const purchaseTypeForOrder = getPurchaseTypeForConfirmationFromCart(cart?.items)
 
-        
+
             if (customerEmail) queryParams.set('email', customerEmail)
             if (accessToken) queryParams.set('accessToken', accessToken)
             if (purchaseTypeForOrder) queryParams.set('purchaseType', purchaseTypeForOrder)
@@ -137,18 +140,34 @@ export const CheckoutForm: React.FC<Props> = ({
               }`
 
             try {
-              void fetch('/api/order-extra-data', {
+              const purchaseTypeForOrder = getPurchaseTypeForConfirmationFromCart(cart?.items)
+              const purchaseTypesForOrder = getPurchaseTypesForCartItems(cart?.items)
+
+              // const orderExtraDataResponse = await fetch('/api/order-extra-data', {
+              //   method: 'POST',
+              //   headers: { 'Content-Type': 'application/json' },
+              //   body: JSON.stringify({
+              //     orderID: confirmResult.orderID,
+              //     fulfillment,
+              //     purchaseType: purchaseTypeForOrder,
+              //     purchaseTypes: purchaseTypesForOrder,
+              //   }),
+              // })
+
+              await fetch('/api/order-extra-data', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   orderID: confirmResult.orderID,
                   fulfillment,
                   purchaseType: purchaseTypeForOrder,
+                  purchaseTypes: purchaseTypesForOrder,
                 }),
               })
 
               clearCart()
               router.push(thankYouHref)
+
             } catch (e) {
               console.error(e)
             }

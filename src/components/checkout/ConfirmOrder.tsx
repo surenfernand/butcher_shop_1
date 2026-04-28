@@ -2,7 +2,7 @@
 
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
-import { getPurchaseTypeForConfirmationFromCart } from '@/utilities/localStoragePurchaseType'
+import { getPurchaseTypeForConfirmationFromCart, getPurchaseTypesForCartItems } from '@/utilities/localStoragePurchaseType'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 
@@ -16,79 +16,83 @@ export const ConfirmOrder: React.FC = () => {
   const isConfirming = useRef(false)
 
   useEffect(() => {
-    if (!cart || !cart.items || cart.items?.length === 0) {
-      return
-    }
+    const run = async () => {
+      const paymentIntentID = searchParams.get('payment_intent')
+      const email = searchParams.get('email')
 
-    const paymentIntentID = searchParams.get('payment_intent')
-    const email = searchParams.get('email')
-
-
-    if (paymentIntentID) {
-      if (!isConfirming.current) {
-        isConfirming.current = true
-
-        const fulfillment =
-          typeof window !== 'undefined'
-            ? JSON.parse(localStorage.getItem('fulfillment') || '{}')
-            : {}
-
-        const purchaseType = getPurchaseTypeForConfirmationFromCart(cart?.items)
-
-        confirmOrder('stripe', {
-          additionalData: {
-            paymentIntentID,
-            ...(email ? { customerEmail: email } : {}),
-            fulfillment,
-            purchaseType,
-          },
-        }).then(async (result) => {
-          if (result && typeof result === 'object' && 'orderID' in result && result.orderID) {
-            const accessToken = 'accessToken' in result ? (result.accessToken as string) : ''
-            const queryParams = new URLSearchParams()
-
-            if (email) {
-              queryParams.set('email', email)
-            }
-            if (accessToken) {
-              queryParams.set('accessToken', accessToken)
-            }
-
-            if (purchaseType) {
-              queryParams.set('purchaseType', purchaseType)
-            }
-
-            if (fulfillment?.shippingCharge !== undefined) {
-              queryParams.set('shippingCharge', String(fulfillment.shippingCharge))
-            }
- 
-            const thankYouHref = `/thank-you/${result.orderID}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
-
-            try {
-              await Promise.all([
-                fetch('/api/order-extra-data', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    orderID: result.orderID,
-                    fulfillment,
-                    purchaseType,
-                  }),
-                }),
-                router.prefetch(thankYouHref),
-              ])
-            } catch (e) {
-              console.error(e)
-            }
-
-            router.push(thankYouHref)
-          }
-        })
+      if (!paymentIntentID) {
+        router.push('/')
+        return
       }
-    } else {
-      // If no payment intent ID is found, redirect to the home
-      router.push('/')
+
+      if (isConfirming.current) return
+      isConfirming.current = true
+
+      const fulfillment =
+        typeof window !== 'undefined'
+          ? JSON.parse(localStorage.getItem('fulfillment') || '{}')
+          : {}
+
+      const purchaseType = getPurchaseTypeForConfirmationFromCart(cart?.items)
+      const purchaseTypes = getPurchaseTypesForCartItems(cart?.items)
+
+      const result = await confirmOrder('stripe', {
+        additionalData: {
+          paymentIntentID,
+          ...(email ? { customerEmail: email } : {}),
+          fulfillment,
+          purchaseType,
+          purchaseTypes,
+        },
+      })
+
+      if (result && typeof result === 'object' && 'orderID' in result && result.orderID) {
+        const accessToken = 'accessToken' in result ? (result.accessToken as string) : ''
+        const queryParams = new URLSearchParams()
+
+        if (email) {
+          queryParams.set('email', email)
+        }
+        if (accessToken) {
+          queryParams.set('accessToken', accessToken)
+        }
+
+        if (purchaseType) {
+          queryParams.set('purchaseType', purchaseType)
+        }
+
+        if (fulfillment?.shippingCharge !== undefined) {
+          queryParams.set('shippingCharge', String(fulfillment.shippingCharge))
+        }
+
+        const thankYouHref = `/thank-you/${result.orderID}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+
+        try {
+          await Promise.race([
+            fetch('/api/order-extra-data', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                orderID: result.orderID,
+                fulfillment,
+                purchaseType,
+                purchaseTypes,
+              }),
+            }),
+            new Promise((resolve) => setTimeout(resolve, 6000)),
+          ])
+        } catch (e) {
+          console.error(e)
+        } finally {
+          router.push(thankYouHref)
+        }
+      } else {
+        router.push('/')
+      }
     }
+
+    run()
+    
   }, [cart, confirmOrder, router, searchParams])
 
   return (

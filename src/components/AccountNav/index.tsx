@@ -93,7 +93,7 @@ export const AccountNav: React.FC<Props> = ({ className }) => {
                   pathname === '/account/subscriptions' ? linkActive : linkInactive,
                 )}
               >
-                My Subscriptions
+                Subscriptions
               </Link>
             </Button>
           </li>

@@ -92,6 +92,18 @@ export const createFulfillmentSchedulesCollection = (
         description: 'Applies only to delivery orders.',
       },
     },
+ 
+    {
+      name: 'product',
+      label: 'Product',
+      type: 'relationship',
+      relationTo: productSlug,
+      index: true,
+      admin: {
+        description:
+          'Optional. Select a product to make this fulfillment schedule apply only to that product. Leave empty to keep it branch-wide.',
+      },
+    },
 
     {
       name: 'timeSlots',

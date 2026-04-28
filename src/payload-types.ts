@@ -280,6 +280,14 @@ export interface Order {
   inventoryReduced?: boolean | null;
   accessToken?: string | null;
   purchaseType?: ('one_time' | 'weekly' | 'monthly') | null;
+  purchaseTypes?:
+    | {
+        product: number | Product;
+        variant?: string | null;
+        purchaseType: 'one_time' | 'weekly' | 'monthly';
+        id?: string | null;
+      }[]
+    | null;
   stripeSubscriptionID?: string | null;
   fulfillment?: {
     branch?: (number | null) | Branch;
@@ -291,7 +299,6 @@ export interface Order {
      * Shipping charge stored in cents
      */
     shippingCharge?: number | null;
-    estimatedTax?: number | null;
     notes?: string | null;
   };
   updatedAt: string;
@@ -1417,6 +1424,10 @@ export interface FulfillmentSchedule {
    * Applies only to delivery orders.
    */
   shippingCharge?: number | null;
+  /**
+   * Optional. Select a product to make this fulfillment schedule apply only to that product. Leave empty to keep it branch-wide.
+   */
+  product?: (number | null) | Product;
   timeSlots?:
     | {
         label: string;
@@ -2395,6 +2406,14 @@ export interface OrdersSelect<T extends boolean = true> {
   inventoryReduced?: T;
   accessToken?: T;
   purchaseType?: T;
+  purchaseTypes?:
+    | T
+    | {
+        product?: T;
+        variant?: T;
+        purchaseType?: T;
+        id?: T;
+      };
   stripeSubscriptionID?: T;
   fulfillment?:
     | T
@@ -2510,6 +2529,7 @@ export interface FulfillmentSchedulesSelect<T extends boolean = true> {
         id?: T;
       };
   shippingCharge?: T;
+  product?: T;
   timeSlots?:
     | T
     | {

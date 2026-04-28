@@ -70,6 +70,9 @@ export const CheckoutPage: React.FC = () => {
   const [isProcessingPayment, setProcessingPayment] = useState(false)
   const [fulfillmentMethod, setFulfillmentMethod] = useState<'pickup' | 'delivery'>('pickup')
   const [paymentElementComplete, setPaymentElementComplete] = useState(false)
+  // src/components/checkout/CheckoutPage.tsx
+
+  const [allowedWeeklyDays, setAllowedWeeklyDays] = useState<string[]>([])
 
   const cartIsEmpty = !cart || !cart.items || !cart.items.length
   const subtotal =
@@ -170,6 +173,8 @@ export const CheckoutPage: React.FC = () => {
     setShowCalendar(false)
     setShippingCharge(0)
     setSelectedDate(undefined)
+    setAllowedWeeklyDays([])
+
 
   }
 
@@ -180,6 +185,7 @@ export const CheckoutPage: React.FC = () => {
   ) => {
     setBranchError('')
     setAvailableSchedules([])
+    setAllowedWeeklyDays([])
     setTimeSlot('')
 
     if (!branchId) {
@@ -194,7 +200,19 @@ export const CheckoutPage: React.FC = () => {
       return
     }
 
+    // inside fetchFulfillmentOptions(), before let url = ...
+
+    const productIds =
+      cart?.items
+        ?.map((item) => (typeof item.product === 'object' ? item.product?.id : item.product))
+        .filter(Boolean)
+        .map(String) || []
+
     let url = `/api/multi-location/fulfillment-options?branch=${branchId}&serviceType=${type}`
+
+    if (productIds.length) {
+      url += `&products=${encodeURIComponent(productIds.join(','))}`
+    }
 
     if (type === 'delivery') {
       url += `&postalCode=${encodeURIComponent(cleanedPostalCode)}`
@@ -203,6 +221,9 @@ export const CheckoutPage: React.FC = () => {
     try {
       const res = await fetch(url)
       const data = await res.json()
+
+      console.log("res")
+      console.log(res)
 
       if (!res.ok) {
         setBranchError(data?.error || 'Could not load fulfillment options.')
@@ -223,6 +244,17 @@ export const CheckoutPage: React.FC = () => {
       setPostalCode(cleanedPostalCode)
       setAvailableSchedules(schedules)
 
+      const nextAllowedWeeklyDays = (
+        data.allowedWeeklyDays || schedules.flatMap((schedule: any) => schedule.weeklyDays || [])
+      ).map((day: any) => String(day).toLowerCase())
+
+      if (!nextAllowedWeeklyDays.length) {
+        setBranchError('Sorry, there are no common available dates for all products in your cart.')
+        return
+      }
+
+      setAllowedWeeklyDays(nextAllowedWeeklyDays)
+
       const firstSchedule = schedules[0]
 
       setShippingCharge(
@@ -236,6 +268,8 @@ export const CheckoutPage: React.FC = () => {
     }
   }
 
+  
+
   const dayMap: Record<number, string> = {
     0: 'sunday',
     1: 'monday',
@@ -246,9 +280,7 @@ export const CheckoutPage: React.FC = () => {
     6: 'saturday',
   }
 
-  const allowedWeeklyDays = availableSchedules
-    .flatMap((schedule) => schedule.weeklyDays || [])
-    .map((day) => String(day).toLowerCase())
+
 
   const isDateAllowed = (date: Date) => {
     const today = new Date()
@@ -373,7 +405,7 @@ export const CheckoutPage: React.FC = () => {
     return (
       <div className="min-h-[60vh] bg-black px-6 py-20 text-center text-stone-100">
         <p className="mb-4 font-sans text-xl uppercase tracking-[0.2em] text-amber-400">Your cart is empty.</p>
-        <Link className="underline underline-offset-4" href="/the-shop">
+        <Link className="underline underline-offset-4" href="/shop">
           Continue shopping?
         </Link>
       </div>

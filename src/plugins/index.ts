@@ -136,6 +136,33 @@ export const plugins: Plugin[] = [
             ],
           },
           {
+            name: 'purchaseTypes',
+            type: 'array',
+            fields: [
+              {
+                name: 'product',
+                type: 'relationship',
+                relationTo: 'products',
+                required: true,
+              },
+              {
+                name: 'variant',
+                type: 'text',
+              },
+              {
+                name: 'purchaseType',
+                type: 'select',
+                defaultValue: 'one_time',
+                options: [
+                  { label: 'One Time', value: 'one_time' },
+                  { label: 'Weekly', value: 'weekly' },
+                  { label: 'Monthly', value: 'monthly' },
+                ],
+                required: true,
+              },
+            ],
+          },
+          {
             name: 'stripeSubscriptionID',
             type: 'text',
           },

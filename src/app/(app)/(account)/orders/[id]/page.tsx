@@ -24,6 +24,34 @@ type PageProps = {
   searchParams: Promise<{ email?: string; accessToken?: string }>
 }
 
+const getID = (value: unknown) => {
+  if (typeof value === 'object' && value && 'id' in value) {
+    return String((value as { id: string | number }).id)
+  }
+
+  return value != null ? String(value) : ''
+}
+
+const getLinePurchaseType = (order: Order, item: NonNullable<Order['items']>[number]) => {
+  const productID = getID(item.product)
+  const variantID = getID(item.variant)
+
+  const line = order.purchaseTypes?.find((purchaseLine: any) => {
+    if (getID(purchaseLine.product) !== productID) return false
+    return String(purchaseLine.variant || '') === String(variantID || '')
+  }) as any
+
+  if (line?.purchaseType === 'weekly' || line?.purchaseType === 'monthly') {
+    return line.purchaseType
+  }
+
+  if (order.purchaseType === 'weekly' || order.purchaseType === 'monthly') {
+    return order.purchaseType
+  }
+
+  return 'one_time'
+}
+
 export default async function Order({ params, searchParams }: PageProps) {
   const headers = await getHeaders()
   const payload = await getPayload({ config: configPromise })
@@ -121,20 +149,14 @@ export default async function Order({ params, searchParams }: PageProps) {
 
   const linePricingDocs = await batchResolveOrderLinesForPricing(payload, order.items)
 
-  const purchaseTypeForPricing =
-    order.purchaseType === 'weekly' ||
-    order.purchaseType === 'monthly' ||
-    order.purchaseType === 'one_time'
-      ? order.purchaseType
-      : 'one_time'
-
   const itemsSubtotal =
     linePricingDocs.reduce((total, row) => {
       const { item, product, variant } = row
 
       if (!product) return total
 
-      const unitPrice = getPurchaseUnitPriceInCents(product, variant, purchaseTypeForPricing)
+      const purchaseTypeForLine = getLinePurchaseType(order, item)
+      const unitPrice = getPurchaseUnitPriceInCents(product, variant, purchaseTypeForLine)
       const quantity = item.quantity || 0
 
       return total + unitPrice * quantity
@@ -146,6 +168,8 @@ export default async function Order({ params, searchParams }: PageProps) {
     fulfillment?.serviceType === 'delivery'
       ? Number(fulfillment?.shippingCharge || 0)
       : 0
+  const estimatedTax = Number(fulfillment?.estimatedTax || 0)
+  const computedTotal = itemsSubtotal + shippingTotal + estimatedTax
 
   return (
     <div className="min-h-screen text-neutral-200 px-6 py-10">
@@ -166,14 +190,7 @@ export default async function Order({ params, searchParams }: PageProps) {
             <div />
           )}
 
-          <div className="flex items-center gap-3">
-            {order.status && (
-              <OrderStatus
-                className="border border-[#f5a400]/50 bg-[#f5a400]/10 px-3 py-1 font-mono text-xs uppercase tracking-[0.16em] text-[#f5a400]"
-                status={order.status}
-              />
-            )}
-          </div>
+         
         </div>
 
         <div className="mb-10">
@@ -215,7 +232,7 @@ export default async function Order({ params, searchParams }: PageProps) {
                       getPurchaseUnitPriceInCents(
                         product,
                         variant,
-                        purchaseTypeForPricing,
+                        getLinePurchaseType(order, item),
                       ) * (item.quantity || 1)
 
                     return (
@@ -251,12 +268,10 @@ export default async function Order({ params, searchParams }: PageProps) {
                     Total
                   </span>
 
-                  {order.amount && (
-                    <Price
-                      className="text-2xl font-bold text-[#f5a400]"
-                      amount={order.amount}
-                    />
-                  )}
+                  <Price
+                    className="text-2xl font-bold text-[#f5a400]"
+                    amount={computedTotal}
+                  />
                 </div>
               </div>
             </section>

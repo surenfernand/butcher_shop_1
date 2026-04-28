@@ -4,51 +4,44 @@ import { Price } from '@/components/Price'
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
-import { ShoppingCart, X } from 'lucide-react'
+import { ShoppingCart } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
+import { Product } from '@/payload-types'
+import { getPurchaseUnitPriceInCents } from '@/utilities/purchasePricing'
+import { CartTimerModal } from './CartTimerModal'
 import { DeleteItemButton } from './DeleteItemButton'
 import { EditItemQuantityButton } from './EditItemQuantityButton'
 import { OpenCartButton } from './OpenCart'
-import { Product } from '@/payload-types'
-import { CartTimerModal } from './CartTimerModal'
-import { getPurchaseUnitPriceInCents } from '@/utilities/purchasePricing'
 
 export function CartModal() {
   const { cart, clearCart } = useCart()
   const [isOpen, setIsOpen] = useState(false)
-
-  const [purchaseTypeVersion, setPurchaseTypeVersion] = useState(0)
-
-  useEffect(() => {
-    if (!isOpen) return
-
-    setPurchaseTypeVersion((version) => version + 1)
-  }, [isOpen, cart?.items])
-
   const pathname = usePathname()
 
-  const hasAcknowledgedWarningRef = useRef(false)
-  const isResettingTimerRef = useRef(false)
+  const [purchaseTypeVersion, setPurchaseTypeVersion] = useState(0)
 
   const [settings, setSettings] = useState<any>(null)
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null)
   const [showTimerModal, setShowTimerModal] = useState(false)
 
-  const timerSeconds = Number(settings?.timerSeconds || 120)
-  const warningSeconds = Math.min(Number(settings?.warningSeconds || 10), 10, timerSeconds - 1)
-
+  const hasAcknowledgedWarningRef = useRef(false)
+  const isResettingTimerRef = useRef(false)
 
   type PurchaseType = 'one_time' | 'weekly' | 'monthly'
+
+  const totalQuantity = useMemo(() => {
+    if (!cart || !cart.items || !cart.items.length) return 0
+    return cart.items.reduce((quantity, item) => (item.quantity || 0) + quantity, 0)
+  }, [cart])
 
   const getPurchaseTypeKey = (productID: string, variantID?: string) => {
     return variantID ? `purchaseType:${productID}:${variantID}` : `purchaseType:${productID}`
@@ -64,7 +57,6 @@ export function CartModal() {
     const variantID = variant?.id ? String(variant.id) : undefined
     const key = getPurchaseTypeKey(String(product.id), variantID)
 
-    // ✅ FIRST: try reading saved price from localStorage
     if (typeof window !== 'undefined') {
       const storedPrice = localStorage.getItem(`${key}:price`)
 
@@ -76,30 +68,6 @@ export function CartModal() {
 
     return getPurchaseUnitPriceInCents(product, variant, purchaseType)
   }
-  useEffect(() => {
-    fetch('/api/globals/cart-settings')
-      .then((res) => res.json())
-      .then(setSettings)
-      .catch(() => {
-        setSettings({
-          enabled: true,
-          timerSeconds: 120,
-          warningSeconds: 30,
-          extendSeconds: 30,
-          modalTitle: 'Preserving Freshness',
-          modalMessage:
-            'Our artisanal selections are limited. Your cart is about to be cleared to ensure other patrons can enjoy these prime cuts.',
-          confirmButtonLabel: 'OK',
-          extendButtonLabel: 'Add 30 sec more',
-          footerText: "The Butcher's Craft — Est. 1982",
-        })
-      })
-  }, [])
-
-  const totalQuantity = useMemo(() => {
-    if (!cart || !cart.items || !cart.items.length) return 0
-    return cart.items.reduce((quantity, item) => (item.quantity || 0) + quantity, 0)
-  }, [cart])
 
   const adjustedSubtotal = useMemo(() => {
     if (!cart?.items?.length) return 0
@@ -115,9 +83,8 @@ export function CartModal() {
 
       const purchaseType =
         typeof window !== 'undefined'
-          ? ((localStorage.getItem(
-            getPurchaseTypeKey(String(product.id), variantID),
-          ) || 'one_time') as PurchaseType)
+          ? ((localStorage.getItem(getPurchaseTypeKey(String(product.id), variantID)) ||
+              'one_time') as PurchaseType)
           : 'one_time'
 
       const price = getPurchasePrice(product, isVariant ? variant : undefined, purchaseType)
@@ -126,6 +93,22 @@ export function CartModal() {
     }, 0)
   }, [cart?.items, purchaseTypeVersion])
 
+  useEffect(() => {
+    if (!isOpen) return
+    setPurchaseTypeVersion((version) => version + 1)
+  }, [isOpen, cart?.items])
+
+  useEffect(() => {
+    fetch('/api/globals/cart-settings')
+      .then((res) => res.json())
+      .then((data) => {
+        setSettings(data)
+      })
+      .catch((err) => {
+        console.error('Failed to load cart timer settings', err)
+        setSettings(null)
+      })
+  }, [])
 
   useEffect(() => {
     if (!settings?.enabled || totalQuantity === 0) {
@@ -136,7 +119,9 @@ export function CartModal() {
       return
     }
 
-    const timerSeconds = Number(settings?.timerSeconds || 120)
+    const timerSeconds = Number(settings?.timerSeconds ?? 0)
+
+    if (!timerSeconds || timerSeconds <= 0) return
 
     isResettingTimerRef.current = true
     hasAcknowledgedWarningRef.current = false
@@ -172,34 +157,21 @@ export function CartModal() {
       return
     }
 
-    const timerSeconds = Number(settings?.timerSeconds || 120)
-    const warningSeconds = Math.min(
-      Number(settings?.warningSeconds || 10),
-      10,
-      timerSeconds - 1,
-    )
+    const warningSeconds = Number(settings?.warningSeconds ?? 0)
 
     if (
+      warningSeconds > 0 &&
       secondsLeft > 0 &&
       secondsLeft <= warningSeconds &&
       !hasAcknowledgedWarningRef.current
     ) {
       setShowTimerModal(true)
     }
-  }, [
-    secondsLeft,
-    settings?.enabled,
-    settings?.timerSeconds,
-    settings?.warningSeconds,
-    totalQuantity,
-    clearCart,
-  ])
+  }, [secondsLeft, settings?.enabled, settings?.warningSeconds, totalQuantity, clearCart])
 
   useEffect(() => {
     setIsOpen(false)
   }, [pathname])
-
-
 
   return (
     <Sheet onOpenChange={setIsOpen} open={isOpen}>
@@ -218,10 +190,7 @@ export function CartModal() {
                 <SheetTitle className="text-left text-[2.1rem] font-black uppercase tracking-[-0.02em] text-[#d4a63c]">
                   Cart
                 </SheetTitle>
-
               </div>
-
-
             </div>
           </SheetHeader>
 
@@ -231,9 +200,7 @@ export function CartModal() {
               <p className="text-xl font-bold uppercase tracking-wide text-white">
                 Your cart is empty
               </p>
-              <p className="text-sm text-[#8a8a8a]">
-                Add Items to view in Cart
-              </p>
+              <p className="text-sm text-[#8a8a8a]">Add Items to view in Cart</p>
             </div>
           ) : (
             <>
@@ -261,16 +228,14 @@ export function CartModal() {
                     let price = product.priceInUSD
 
                     const isVariant = Boolean(variant) && typeof variant === 'object'
-
                     const variantID = isVariant ? String(variant.id) : undefined
 
                     const purchaseType =
                       typeof window !== 'undefined'
                         ? ((localStorage.getItem(
-                          getPurchaseTypeKey(String(product.id), variantID),
-                        ) || 'one_time') as PurchaseType)
+                            getPurchaseTypeKey(String(product.id), variantID),
+                          ) || 'one_time') as PurchaseType)
                         : 'one_time'
-
 
                     if (isVariant) {
                       price = variant?.priceInUSD
@@ -288,7 +253,8 @@ export function CartModal() {
                             (option: NonNullable<typeof variant.options>[number]) => {
                               if (typeof option === 'object') return option.id === variantOptionID
                               return option === variantOptionID
-                            })
+                            },
+                          )
                         },
                       )
 
@@ -301,12 +267,12 @@ export function CartModal() {
 
                     const variantText = isVariant
                       ? variant?.options
-                        ?.map((option: NonNullable<typeof variant.options>[number]) => {
-                          if (typeof option === 'object') return option.label
-                          return null
-                        })
-                        .filter(Boolean)
-                        .join(' ')
+                          ?.map((option: NonNullable<typeof variant.options>[number]) => {
+                            if (typeof option === 'object') return option.label
+                            return null
+                          })
+                          .filter(Boolean)
+                          .join(' ')
                       : ''
 
                     return (
@@ -349,7 +315,6 @@ export function CartModal() {
                               <p className="mt-1 text-[0.72rem] uppercase tracking-[0.1em] text-[#d4a63c]">
                                 {getPurchaseTypeLabel(purchaseType)}
                               </p>
-
                             </div>
 
                             <DeleteItemButton item={item} />
@@ -366,6 +331,7 @@ export function CartModal() {
                               <span className="flex h-8 w-9 items-center justify-center text-sm text-[#d7d7d7]">
                                 {item.quantity}
                               </span>
+
                               <EditItemQuantityButton
                                 item={item}
                                 type="plus"
@@ -396,17 +362,15 @@ export function CartModal() {
                     )}
                   </div>
 
-                  {/* <div className="flex items-center justify-between text-[#a9a9a9]">
-                    <span>Shipping Est.</span>
-                    <span className="text-[#d4a63c]">Complimentary</span>
-                  </div> */}
-
                   <div className="mt-5 flex items-center justify-between border-t border-[#262626] pt-4">
                     <span className="text-lg font-extrabold tracking-[0.14em] text-[#f1f1f1]">
                       Total
                     </span>
                     {typeof cart?.subtotal === 'number' && (
-                      <Price amount={adjustedSubtotal} className="text-3xl font-black text-[#d4a63c]" />
+                      <Price
+                        amount={adjustedSubtotal}
+                        className="text-3xl font-black text-[#d4a63c]"
+                      />
                     )}
                   </div>
                 </div>
@@ -419,17 +383,7 @@ export function CartModal() {
                     Proceed to Checkout
                   </Link>
 
-
-
-                  <div className="flex items-center justify-center gap-10 border-t border-[#1f1f1f] pt-5 text-[11px] uppercase tracking-[0.14em] text-[#555]">
-
-                    {/* <Link
-                      href="/shipping-information"
-                      className="transition-colors hover:text-[#d4a63c]"
-                    >
-                      Shipping Info
-                    </Link> */}
-                  </div>
+                  <div className="flex items-center justify-center gap-10 border-t border-[#1f1f1f] pt-5 text-[11px] uppercase tracking-[0.14em] text-[#555]" />
                 </div>
               </div>
             </>
@@ -440,20 +394,25 @@ export function CartModal() {
       <CartTimerModal
         open={showTimerModal}
         secondsLeft={secondsLeft || 0}
-        title={settings?.modalTitle || 'Preserving Freshness'}
+        title={settings?.modalTitle || ''}
         message={settings?.modalMessage || ''}
-        confirmLabel={settings?.confirmButtonLabel || 'OK'}
-        extendLabel={settings?.extendButtonLabel || 'Add 30 sec more'}
+        confirmLabel={settings?.confirmButtonLabel || ''}
+        extendLabel={settings?.extendButtonLabel || ''}
         footerText={settings?.footerText}
         onConfirm={() => {
           hasAcknowledgedWarningRef.current = true
           setShowTimerModal(false)
         }}
         onExtend={() => {
+          const extendSeconds = Number(settings?.extendSeconds ?? 0)
+
+          if (!extendSeconds || extendSeconds <= 0) {
+            setShowTimerModal(false)
+            return
+          }
+
           hasAcknowledgedWarningRef.current = false
-          setSecondsLeft((current) =>
-            (current ?? 0) + Number(settings?.extendSeconds || 30),
-          )
+          setSecondsLeft((current) => (current ?? 0) + extendSeconds)
           setShowTimerModal(false)
         }}
       />
