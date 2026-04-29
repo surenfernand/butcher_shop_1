@@ -14,6 +14,10 @@ export const reduceBranchInventory = (): CollectionAfterChangeHook => {
     if (operation !== 'create' && operation !== 'update') return doc
     if ((doc as any).inventoryReduced) return doc
 
+    if (req.context?.skipReduceBranchInventory) {
+      return doc
+    }
+
     const branchID = getRelationshipId((doc as any).fulfillment?.branch || (doc as any).branch)
     const items = (doc as any).items || (doc as any).lineItems || []
 

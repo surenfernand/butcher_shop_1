@@ -9,6 +9,17 @@ const getRelationshipID = (value: any) => {
   return String(value)
 }
 
+const getRelationshipIDs = (value: any): string[] => {
+  if (!value) return []
+
+  if (Array.isArray(value)) {
+    return value.map(getRelationshipID).filter(Boolean) as string[]
+  }
+
+  const id = getRelationshipID(value)
+  return id ? [id] : []
+}
+
 const normalizeDays = (days: any[] = []) => days.map((day) => String(day).toLowerCase())
 
 const intersectDays = (dayGroups: string[][]) => {
@@ -47,7 +58,7 @@ export const getFulfillmentOptionsEndpoint: Endpoint = {
         },
         serviceType: {
           equals: serviceType,
-        }, 
+        },
       },
     })
 
@@ -57,7 +68,7 @@ export const getFulfillmentOptionsEndpoint: Endpoint = {
       if (!schedule.postalCodes?.length) return true
 
       return schedule.postalCodes.some((postal: any) => {
-        const normalized = normalizePostalCode(postal.postalCode)
+        const normalized = normalizePostalCode(postal.code)
         const schedulePrefix = getPostalPrefix(normalized)
 
         return normalized === postalCode || schedulePrefix === prefix
@@ -68,11 +79,13 @@ export const getFulfillmentOptionsEndpoint: Endpoint = {
       return Response.json({ schedules: filteredSchedules })
     }
 
-    const branchWideSchedules = filteredSchedules.filter((schedule: any) => !schedule.product)
+    const branchWideSchedules = filteredSchedules.filter(
+      (schedule: any) => getRelationshipIDs(schedule.product).length === 0,
+    )
 
     const schedulesByProduct = productIds.map((productId) => {
-      const productSchedules = filteredSchedules.filter(
-        (schedule: any) => getRelationshipID(schedule.product) === productId,
+      const productSchedules = filteredSchedules.filter((schedule: any) =>
+        getRelationshipIDs(schedule.product).includes(String(productId)),
       )
 
       return productSchedules.length ? productSchedules : branchWideSchedules
@@ -90,8 +103,12 @@ export const getFulfillmentOptionsEndpoint: Endpoint = {
       ),
     )
 
+    const uniqueSchedules = Array.from(
+      new Map(schedulesByProduct.flat().map((schedule: any) => [schedule.id, schedule])).values(),
+    )
+
     return Response.json({
-      schedules: schedulesByProduct.flat(),
+      schedules: uniqueSchedules,
       allowedWeeklyDays,
     })
   },

@@ -31,6 +31,7 @@ export const createFulfillmentSchedulesCollection = (
       type: 'relationship',
       relationTo: 'branches',
       required: true,
+      hasMany: true,
       index: true,
     },
 
@@ -92,12 +93,14 @@ export const createFulfillmentSchedulesCollection = (
         description: 'Applies only to delivery orders.',
       },
     },
- 
+
     {
       name: 'product',
       label: 'Product',
       type: 'relationship',
       relationTo: productSlug,
+      hasMany: true,
+      required: false,
       index: true,
       admin: {
         description:

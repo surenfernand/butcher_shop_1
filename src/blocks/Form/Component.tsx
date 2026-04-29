@@ -41,9 +41,9 @@ export const FormBlock: React.FC<
 
   const formFromProps =
     formRaw &&
-    typeof formRaw === 'object' &&
-    'fields' in formRaw &&
-    Array.isArray(formRaw.fields)
+      typeof formRaw === 'object' &&
+      'fields' in formRaw &&
+      Array.isArray(formRaw.fields)
       ? (formRaw as FormType)
       : null
 
@@ -201,7 +201,7 @@ export const FormBlock: React.FC<
               form={String(formID)}
               type="submit"
               disabled={isLoading}
-              className="mt-10 bg-[#d9aa45] px-12 py-4 text-xs font-bold uppercase tracking-[0.2em] text-black transition hover:bg-[#e6bd60] disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-3 w-full rounded-none border border-[#c8a24d] bg-[#c8a24d] px-5 py-6 text-center text-[11px] font-extrabold uppercase tracking-[0.28em] text-black transition-all duration-300 ease-out hover:bg-transparent hover:text-[#c8a24d] hover:scale-[1.03] active:scale-[0.97]"
             >
               {isLoading ? 'Sending...' : submitButtonLabel || 'Dispatch Message'}
             </button>

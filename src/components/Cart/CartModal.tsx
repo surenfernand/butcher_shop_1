@@ -84,7 +84,7 @@ export function CartModal() {
       const purchaseType =
         typeof window !== 'undefined'
           ? ((localStorage.getItem(getPurchaseTypeKey(String(product.id), variantID)) ||
-              'one_time') as PurchaseType)
+            'one_time') as PurchaseType)
           : 'one_time'
 
       const price = getPurchasePrice(product, isVariant ? variant : undefined, purchaseType)
@@ -210,6 +210,9 @@ export function CartModal() {
                     const product = item.product
                     const variant = item.variant
 
+                    console.log("product")
+                    console.log(product)
+
                     if (typeof product !== 'object' || !item || !product || !product.slug) {
                       return <React.Fragment key={i} />
                     }
@@ -220,12 +223,15 @@ export function CartModal() {
                         : undefined
 
                     const firstGalleryImage =
-                      typeof product.gallery?.[0]?.image === 'object'
-                        ? product.gallery?.[0]?.image
+                      typeof product.productGallery?.[0]?.image === 'object'
+                        ? product.productGallery?.[0]?.image
                         : undefined
 
                     let image = firstGalleryImage || metaImage
                     let price = product.priceInUSD
+
+                    console.log("image");
+                    console.log(image);
 
                     const isVariant = Boolean(variant) && typeof variant === 'object'
                     const variantID = isVariant ? String(variant.id) : undefined
@@ -233,14 +239,14 @@ export function CartModal() {
                     const purchaseType =
                       typeof window !== 'undefined'
                         ? ((localStorage.getItem(
-                            getPurchaseTypeKey(String(product.id), variantID),
-                          ) || 'one_time') as PurchaseType)
+                          getPurchaseTypeKey(String(product.id), variantID),
+                        ) || 'one_time') as PurchaseType)
                         : 'one_time'
 
                     if (isVariant) {
                       price = variant?.priceInUSD
 
-                      const imageVariant = product.gallery?.find(
+                      const imageVariant = product.productGallery?.find(
                         (galleryItem: NonNullable<Product['productGallery']>[number]) => {
                           if (!galleryItem.image) return false
 
@@ -267,12 +273,12 @@ export function CartModal() {
 
                     const variantText = isVariant
                       ? variant?.options
-                          ?.map((option: NonNullable<typeof variant.options>[number]) => {
-                            if (typeof option === 'object') return option.label
-                            return null
-                          })
-                          .filter(Boolean)
-                          .join(' ')
+                        ?.map((option: NonNullable<typeof variant.options>[number]) => {
+                          if (typeof option === 'object') return option.label
+                          return null
+                        })
+                        .filter(Boolean)
+                        .join(' ')
                       : ''
 
                     return (
@@ -378,7 +384,8 @@ export function CartModal() {
                 <div className="mt-7 space-y-5">
                   <Link
                     href="/checkout"
-                    className="flex h-14 w-full items-center justify-center bg-[#d4a63c] text-sm font-extrabold uppercase tracking-[0.18em] text-black transition-all hover:brightness-110"
+                    className="flex h-14 w-full items-center justify-center rounded-none border border-[#c8a24d] bg-[#c8a24d] px-5 py-6 text-center text-[11px] font-extrabold uppercase tracking-[0.28em] text-black transition-all duration-300 ease-out hover:bg-transparent hover:text-[#c8a24d] hover:scale-[1.03] active:scale-[0.97]"
+
                   >
                     Proceed to Checkout
                   </Link>

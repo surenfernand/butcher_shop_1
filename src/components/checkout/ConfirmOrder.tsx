@@ -34,7 +34,29 @@ export const ConfirmOrder: React.FC = () => {
           : {}
 
       const purchaseType = getPurchaseTypeForConfirmationFromCart(cart?.items)
-      const purchaseTypes = getPurchaseTypesForCartItems(cart?.items)
+
+      const purchaseTypes =
+        cart?.items?.map((item) => {
+          const productID =
+            typeof item.product === 'object' ? item.product.id : item.product
+
+          const purchaseType =
+            localStorage.getItem(`purchaseType:${productID}`) || 'one_time'
+
+          const price =
+            localStorage.getItem(`purchaseType:${productID}:price`) || null
+
+          return {
+            product: productID,
+            purchaseType,
+            price,
+          }
+        }) || []
+
+      const orderPurchaseType = purchaseTypes[0]?.purchaseType || 'one_time'
+
+      console.log(" one_time fulfillment")
+      console.log(fulfillment)
 
       const result = await confirmOrder('stripe', {
         additionalData: {
@@ -67,20 +89,38 @@ export const ConfirmOrder: React.FC = () => {
 
         const thankYouHref = `/thank-you/${result.orderID}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
 
+        let response = null;
+
         try {
-          await Promise.race([
-            fetch('/api/order-extra-data', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                orderID: result.orderID,
-                fulfillment,
-                purchaseType,
-                purchaseTypes,
-              }),
+
+          console.log('ORDER EXTRA DATA PAYLOAD', {
+            orderID: result.orderID,
+            fulfillment: JSON.parse(localStorage.getItem('fulfillment') || '{}'),
+            purchaseType: purchaseTypes[0]?.purchaseType || 'one_time',
+            purchaseTypes,
+          })
+
+
+          const response = await fetch('/api/order-extra-data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              orderID: result.orderID,
+              fulfillment,
+              purchaseType: orderPurchaseType,
+              purchaseTypes,
             }),
-            new Promise((resolve) => setTimeout(resolve, 6000)),
-          ])
+          })
+
+          const responseData = await response.json()
+
+          console.log('ORDER EXTRA DATA RESPONSE', {
+            ok: response.ok,
+            status: response.status,
+            data: responseData,
+          })
+
+          
         } catch (e) {
           console.error(e)
         } finally {
@@ -92,7 +132,7 @@ export const ConfirmOrder: React.FC = () => {
     }
 
     run()
-    
+
   }, [cart, confirmOrder, router, searchParams])
 
   return (

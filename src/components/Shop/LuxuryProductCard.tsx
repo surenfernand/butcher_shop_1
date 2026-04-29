@@ -73,9 +73,9 @@ export const LuxuryProductCard: React.FC<Props> = ({ product }) => {
               {product.shopCardShortDescription}
             </p>
           ) : null}
-
+ 
           <div className="pt-2">
-            <div className="border border-[#c8a24d] bg-[#c8a24d] px-5 py-3 text-center text-[11px] uppercase tracking-[0.28em] text-black transition-all duration-300 ease-out group-hover:bg-transparent group-hover:text-[#c8a24d] hover:scale-[1.03] active:scale-[0.97]">
+            <div className="font-extrabold border border-[#c8a24d] bg-[#c8a24d] px-5 py-3 text-center text-[11px] uppercase tracking-[0.28em] text-black transition-all duration-300 ease-out group-hover:bg-transparent group-hover:text-[#c8a24d] hover:scale-[1.03] active:scale-[0.97]">
               {product.cardButtonLabel || 'Add to Cart'}
             </div>
           </div>

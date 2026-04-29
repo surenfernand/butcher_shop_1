@@ -64,6 +64,7 @@ export default async function Order({ params, searchParams }: PageProps) {
 
 
 
+
   try {
     const {
       docs: [orderResult],
@@ -110,6 +111,7 @@ export default async function Order({ params, searchParams }: PageProps) {
         currency: true,
         items: true,
         purchaseType: true,
+        purchaseTypes: true,
         customerEmail: true,
         customer: true,
         status: true,
@@ -149,6 +151,13 @@ export default async function Order({ params, searchParams }: PageProps) {
 
   const linePricingDocs = await batchResolveOrderLinesForPricing(payload, order.items)
 
+  const getPurchaseTypeLabel = (purchaseType: string) => {
+    if (purchaseType === 'monthly') return 'Monthly subscription'
+    if (purchaseType === 'weekly') return 'Weekly subscription'
+    return 'One-time purchase'
+  }
+
+
   const itemsSubtotal =
     linePricingDocs.reduce((total, row) => {
       const { item, product, variant } = row
@@ -171,6 +180,10 @@ export default async function Order({ params, searchParams }: PageProps) {
   const estimatedTax = Number(fulfillment?.estimatedTax || 0)
   const computedTotal = itemsSubtotal + shippingTotal + estimatedTax
 
+
+  console.log("order");
+  console.log(order);
+
   return (
     <div className="min-h-screen text-neutral-200 px-6 py-10">
       <div className="mx-auto max-w-6xl">
@@ -190,7 +203,7 @@ export default async function Order({ params, searchParams }: PageProps) {
             <div />
           )}
 
-         
+
         </div>
 
         <div className="mb-10">
@@ -228,12 +241,18 @@ export default async function Order({ params, searchParams }: PageProps) {
                       )
                     }
 
-                    const lineSubtotalInCents =
-                      getPurchaseUnitPriceInCents(
-                        product,
-                        variant,
-                        getLinePurchaseType(order, item),
-                      ) * (item.quantity || 1)
+
+
+
+                    const linePurchaseType = getLinePurchaseType(order, item)
+
+                    const unitPriceInCents = getPurchaseUnitPriceInCents(
+                      product,
+                      variant,
+                      linePurchaseType,
+                    )
+
+                    const lineSubtotalInCents = unitPriceInCents * (item.quantity || 1)
 
                     return (
                       <li
@@ -246,6 +265,14 @@ export default async function Order({ params, searchParams }: PageProps) {
                           variant={variant}
                           lineSubtotalInCents={lineSubtotalInCents}
                         />
+
+                        <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-neutral-400">
+                          <span className="rounded-full border border-[#333] px-3 py-1 font-mono uppercase tracking-[0.12em] text-[#f5a400]">
+                            {getPurchaseTypeLabel(linePurchaseType)}
+                          </span>
+
+
+                        </div>
                       </li>
                     )
                   })}
@@ -294,14 +321,53 @@ export default async function Order({ params, searchParams }: PageProps) {
                   Shipping Address
                 </h2>
 
-                <div className="text-neutral-400">
+                <div className="flex justify-between gap-4 border-t border-[#222] pt-3">
                   {/* @ts-expect-error - some kind of type hell */}
                   <AddressItem address={order.shippingAddress} hideActions />
                 </div>
+
+              
+                  <h2 className="mb-6 text-2xl font-black uppercase tracking-tight text-neutral-100 mt-3">
+                    Fulfillment
+                  </h2>
+
+                  <div className="space-y-3 text-sm text-neutral-400">
+                    <div className="flex justify-between gap-4">
+                      <span>Service</span>
+                      <span className="text-neutral-200">
+                        {fulfillment?.serviceType === 'delivery'
+                          ? 'Delivery'
+                          : fulfillment?.serviceType === 'pickup'
+                            ? 'Pickup'
+                            : 'Not selected'}
+                      </span>
+                    </div>
+
+                    {fulfillment?.branchName && (
+                      <div className="flex justify-between gap-4">
+                        <span>Branch</span>
+                        <span className="text-neutral-200">{fulfillment.branchName}</span>
+                      </div>
+                    )}
+
+                    {fulfillment?.date && (
+                      <div className="flex justify-between gap-4">
+                        <span>Date</span>
+                        <span className="text-neutral-200">{fulfillment.date}</span>
+                      </div>
+                    )}
+
+                   
+                  </div>
+
+
+
+                
+
               </section>
             )}
 
-            
+
 
 
           </aside>

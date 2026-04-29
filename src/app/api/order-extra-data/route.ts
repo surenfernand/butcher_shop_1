@@ -10,15 +10,22 @@ const normalizePurchaseType = (value: unknown): PurchaseType => {
 }
 
 const getRefID = (value: unknown) => {
-  if (typeof value === 'object' && value && 'id' in value) return String(value.id)
+  if (typeof value === 'object' && value && 'id' in value) {
+    return String((value as { id: string | number }).id)
+  }
+
   if (value !== null && value !== undefined) return String(value)
+
   return ''
 }
 
 const getRelationshipID = (value: unknown): number | undefined => {
   const ref = getRefID(value)
+
   if (!ref) return undefined
+
   const numericID = Number(ref)
+
   return Number.isFinite(numericID) ? numericID : undefined
 }
 
@@ -30,9 +37,11 @@ const normalizePurchaseTypes = (value: unknown) => {
       if (!line || typeof line !== 'object') return null
 
       const product = 'product' in line ? getRelationshipID(line.product) : undefined
+
       if (!product) return null
 
       const variant = 'variant' in line ? getRefID(line.variant) || undefined : undefined
+
       const purchaseType = normalizePurchaseType(
         'purchaseType' in line ? line.purchaseType : undefined,
       )
@@ -43,7 +52,11 @@ const normalizePurchaseTypes = (value: unknown) => {
         purchaseType,
       }
     })
-    .filter(Boolean) as Array<{ product: number; variant?: string; purchaseType: PurchaseType }>
+    .filter(Boolean) as Array<{
+      product: number
+      variant?: string
+      purchaseType: PurchaseType
+    }>
 }
 
 const getPurchaseTypeForOrderLine = (
@@ -56,7 +69,8 @@ const getPurchaseTypeForOrderLine = (
 
   const match = purchaseTypes.find((line) => {
     if (String(line.product) !== productID) return false
-    return (line.variant || '') === (variantID || '')
+
+    return String(line.variant || '') === String(variantID || '')
   })
 
   return match?.purchaseType || fallback
@@ -64,7 +78,23 @@ const getPurchaseTypeForOrderLine = (
 
 const toCents = (value: unknown) => {
   const amount = Number(value || 0)
+
   return Number.isFinite(amount) ? Math.round(amount) : 0
+}
+
+const normalizeFulfillment = (fulfillment: any) => {
+  if (!fulfillment || typeof fulfillment !== 'object') return {}
+
+  return {
+    branch: fulfillment.branch || null,
+    serviceType: fulfillment.serviceType || null,
+    date: fulfillment.date || null,
+    timeSlot: fulfillment.timeSlot || null,
+    postalCode: fulfillment.postalCode || null,
+    shippingCharge: toCents(fulfillment.shippingCharge),
+
+    notes: fulfillment.notes || null,
+  }
 }
 
 export async function POST(req: Request) {
@@ -73,14 +103,31 @@ export async function POST(req: Request) {
 
     const { orderID, fulfillment, purchaseType, purchaseTypes } = body
 
+    console.log('ORDER EXTRA DATA API BODY', {
+      orderID,
+      fulfillment,
+      purchaseType,
+      purchaseTypes,
+    })
+
     if (!orderID) {
       return NextResponse.json({ error: 'Missing orderID' }, { status: 400 })
     }
 
     const payload = await getPayload({ config: configPromise })
 
-    const normalizedPurchaseType = normalizePurchaseType(purchaseType)
     const normalizedPurchaseTypes = normalizePurchaseTypes(purchaseTypes)
+
+    const normalizedPurchaseType =
+      normalizedPurchaseTypes[0]?.purchaseType || normalizePurchaseType(purchaseType)
+
+    const normalizedFulfillment = normalizeFulfillment(fulfillment)
+
+    console.log('1 normalized data', {
+      normalizedFulfillment,
+      normalizedPurchaseType,
+      normalizedPurchaseTypes,
+    })
 
     const order = await payload.findByID({
       collection: 'orders',
@@ -89,44 +136,92 @@ export async function POST(req: Request) {
       overrideAccess: true,
     })
 
+    console.log('2 order found', {
+      id: order.id,
+      items: order.items,
+    })
+
     const linePricingDocs = await batchResolveOrderLinesForPricing(payload, order.items)
 
+    console.log('3 pricing docs resolved', linePricingDocs.length)
+
     const itemsSubtotal = linePricingDocs.reduce((total, row) => {
+      if (!row.product) return total
+
       const purchaseTypeForLine = getPurchaseTypeForOrderLine(
         row.item,
         normalizedPurchaseTypes,
         normalizedPurchaseType,
       )
 
-      return (
-        total +
-        getPurchaseUnitPriceInCents(row.product, row.variant, purchaseTypeForLine) *
-        (row.item.quantity || 0)
+      const unitPrice = getPurchaseUnitPriceInCents(
+        row.product,
+        row.variant,
+        purchaseTypeForLine,
       )
+
+      return total + unitPrice * (row.item.quantity || 0)
     }, 0)
 
     const shippingTotal =
-      fulfillment?.serviceType === 'delivery' ? toCents(fulfillment?.shippingCharge) : 0
-    const estimatedTax = toCents(fulfillment?.estimatedTax)
-    const amount = itemsSubtotal + shippingTotal + estimatedTax
+      normalizedFulfillment.serviceType === 'delivery'
+        ? toCents(normalizedFulfillment.shippingCharge)
+        : 0
 
-    await payload.update({
+
+    const amount = itemsSubtotal + shippingTotal
+
+    console.log('4 before update', {
+      amount,
+      itemsSubtotal,
+      shippingTotal,
+
+      fulfillment: normalizedFulfillment,
+      purchaseType: normalizedPurchaseType,
+      purchaseTypes: normalizedPurchaseTypes,
+    })
+
+    const updatedOrder = await payload.update({
       collection: 'orders',
       id: orderID,
       data: {
         amount,
-        fulfillment: fulfillment || {},
+        fulfillment: normalizedFulfillment,
         purchaseType: normalizedPurchaseType,
-        ...(Array.isArray(purchaseTypes)
-          ? { purchaseTypes: normalizedPurchaseTypes }
-          : {}),
+        purchaseTypes: normalizedPurchaseTypes,
       },
       overrideAccess: true,
+      context: {
+        skipReduceBranchInventory: true,
+      },
     })
 
-    return NextResponse.json({ success: true })
+    console.log('5 UPDATED ORDER EXTRA DATA', {
+      id: updatedOrder.id,
+      amount: updatedOrder.amount,
+      fulfillment: updatedOrder.fulfillment,
+      purchaseType: updatedOrder.purchaseType,
+      purchaseTypes: updatedOrder.purchaseTypes,
+    })
+
+    return NextResponse.json({
+      success: true,
+      orderID: updatedOrder.id,
+      amount: updatedOrder.amount,
+      fulfillment: updatedOrder.fulfillment,
+      purchaseType: updatedOrder.purchaseType,
+      purchaseTypes: updatedOrder.purchaseTypes,
+    })
   } catch (error) {
-    console.error('order-extra-data failed:', error)
-    return NextResponse.json({ error: 'Failed to save order extra data' }, { status: 500 })
+    console.error('order-extra-data failed full:', JSON.stringify(error, null, 2))
+    console.error('order-extra-data failed raw:', error)
+
+    return NextResponse.json(
+      {
+        error: 'Failed to save order extra data',
+        message: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 },
+    )
   }
 }

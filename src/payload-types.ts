@@ -1396,7 +1396,7 @@ export interface BranchInventory {
 export interface FulfillmentSchedule {
   id: number;
   name: string;
-  branch: number | Branch;
+  branch: (number | Branch)[];
   /**
    * Create one schedule for Pickup and another schedule for Delivery if they have different days or dates.
    */
@@ -1427,7 +1427,7 @@ export interface FulfillmentSchedule {
   /**
    * Optional. Select a product to make this fulfillment schedule apply only to that product. Leave empty to keep it branch-wide.
    */
-  product?: (number | null) | Product;
+  product?: (number | Product)[] | null;
   timeSlots?:
     | {
         label: string;

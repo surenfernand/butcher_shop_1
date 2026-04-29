@@ -144,10 +144,15 @@ export const CheckoutPage: React.FC = () => {
     }
   }, [isDateModalOpen, selectedBranch, fulfillmentMethod])
 
-  const formatDateForInput = (date: Date) => date.toISOString().split('T')[0]
+  const formatDateForInput = (date: Date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
 
   const formatDisplayDate = (value: string) =>
-    new Date(`${value}T00:00:00`).toLocaleDateString('en-US', {
+    new Date(value + 'T00:00:00').toLocaleDateString('en-US', {
       weekday: 'long',
       month: 'short',
       day: 'numeric',
@@ -268,7 +273,7 @@ export const CheckoutPage: React.FC = () => {
     }
   }
 
-  
+
 
   const dayMap: Record<number, string> = {
     0: 'sunday',
@@ -464,15 +469,23 @@ export const CheckoutPage: React.FC = () => {
                 </div>
               )}
 
-              {user && (
-                <div className="border  bg-[#121212] p-6">
-                  <p className="font-sans text-xs uppercase tracking-[0.18em] text-stone-400">Signed in as</p>
-                  <p className="mt-2 text-stone-100">{user.email}</p>
-                  <Link className="mt-2 inline-block text-sm text-amber-400 underline underline-offset-4" href="/logout">
-                    Not you? Log out
-                  </Link>
-                </div>
-              )}
+
+
+              <div>
+                <p className="mb-3 font-sans text-xs uppercase tracking-[0.18em] text-stone-400">
+                  Signed in as
+                </p>
+                {user && (
+
+                  <div className="border  bg-[#121212] p-6">
+                    {/* <p className="font-sans text-xs uppercase tracking-[0.18em] text-stone-400">Signed in as</p> */}
+                    <p className="mt-2 text-stone-100">{user.email}</p>
+                    <Link className="mt-2 inline-block text-sm text-amber-400 underline underline-offset-4" href="/logout">
+                      Not you? Log out
+                    </Link>
+                  </div>
+                )}
+              </div>
 
               <div>
                 <p className="mb-3 font-sans text-xs uppercase tracking-[0.18em] text-stone-400">

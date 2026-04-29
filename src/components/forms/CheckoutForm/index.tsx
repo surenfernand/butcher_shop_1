@@ -143,18 +143,13 @@ export const CheckoutForm: React.FC<Props> = ({
               const purchaseTypeForOrder = getPurchaseTypeForConfirmationFromCart(cart?.items)
               const purchaseTypesForOrder = getPurchaseTypesForCartItems(cart?.items)
 
-              // const orderExtraDataResponse = await fetch('/api/order-extra-data', {
-              //   method: 'POST',
-              //   headers: { 'Content-Type': 'application/json' },
-              //   body: JSON.stringify({
-              //     orderID: confirmResult.orderID,
-              //     fulfillment,
-              //     purchaseType: purchaseTypeForOrder,
-              //     purchaseTypes: purchaseTypesForOrder,
-              //   }),
-              // })
 
-              await fetch('/api/order-extra-data', {
+              console.log("fulfillment")
+              console.log(fulfillment)
+              console.log(purchaseTypeForOrder)
+              console.log(purchaseTypesForOrder)
+
+              fetch('/api/order-extra-data', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

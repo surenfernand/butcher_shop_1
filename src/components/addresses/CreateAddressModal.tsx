@@ -50,22 +50,29 @@ export const CreateAddressModal: React.FC<Props> = ({
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}  >
       <DialogTrigger asChild disabled={disabled}>
         <Button variant={'outline'}>{buttonText}</Button>
       </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{modalTitle}</DialogTitle>
-          <DialogDescription>This address will be connected to your account.</DialogDescription>
-        </DialogHeader>
+ 
+      <DialogContent className="max-w-[1000px] border border-[#4b4235] bg-[#080b0a] p-0 text-[#efe4cf] shadow-2xl" style={{width: "900px"}}>
+        <div className="px-20 py-20">
+          <DialogHeader className="mb-10">
+            <DialogTitle className="text-4xl font-semibold tracking-tight text-[#f5c85b]">
+              {modalTitle}
+            </DialogTitle>
+            <DialogDescription className="mt-3 text-base text-[#d8cbb7]">
+              This address will be connected to your account.
+            </DialogDescription>
+          </DialogHeader>
 
-        <AddressForm
-          addressID={addressID}
-          initialData={initialData}
-          callback={handleCallback}
-          skipSubmission={skipSubmission}
-        />
+          <AddressForm
+            addressID={addressID}
+            initialData={initialData}
+            callback={handleCallback}
+            skipSubmission={skipSubmission}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   )
