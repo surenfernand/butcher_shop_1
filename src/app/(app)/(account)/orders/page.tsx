@@ -63,7 +63,7 @@ export default async function Orders() {
         {orders && orders.length > 0 && (
           <div className="w-full overflow-x-auto">
             <table className="w-full text-left">
-              <thead className="bg-white/[0.03] text-xs uppercase tracking-[0.15em] text-white/45">
+              <thead className="bg-black/[0.03] text-xs uppercase tracking-[0.15em] text-white/45">
                 <tr>
                   <th className="px-6 py-4 font-medium">Order #</th>
                   <th className="px-6 py-4 font-medium">Order Date</th>
@@ -78,7 +78,7 @@ export default async function Orders() {
                 {orders.map((order: any) => (
                   <tr
                     key={order.id}
-                    className="border-t border-white/5 hover:bg-white/[0.03] transition"
+                    className="border-t border-white/5 hover:bg-black/[0.03] transition"
                   >
                     <td className="px-6 py-5">
                       <Link

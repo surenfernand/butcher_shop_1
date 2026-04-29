@@ -2,11 +2,11 @@
 
 import type { PayloadAdminBarProps } from '@payloadcms/admin-bar'
 
-import { cn } from '@/utilities/cn'
-import { useSelectedLayoutSegments } from 'next/navigation'
-import { PayloadAdminBar } from '@payloadcms/admin-bar'
-import React, { useState } from 'react'
 import { User } from '@/payload-types'
+import { cn } from '@/utilities/cn'
+import { PayloadAdminBar } from '@payloadcms/admin-bar'
+import { useSelectedLayoutSegments } from 'next/navigation'
+import React, { useState } from 'react'
 
 const collectionLabels = {
   pages: {

@@ -1,9 +1,9 @@
-import Link from 'next/link'
-import React, { Suspense } from 'react'
-import { getPayload } from 'payload'
-import config from '@payload-config'
 import { Media } from '@/components/Media'
 import { Price } from '@/components/Price'
+import config from '@payload-config'
+import Link from 'next/link'
+import { getPayload } from 'payload'
+import { Suspense } from 'react'
 import { ProductSortSelect } from './ProductSortSelect'
 
 type SearchParams = { [key: string]: string | string[] | undefined }

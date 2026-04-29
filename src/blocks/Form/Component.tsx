@@ -175,9 +175,7 @@ export const FormBlock: React.FC<
 
                 const isFullWidth =
                   field.blockType === 'textarea' ||
-                  field.blockType === 'select' ||
-                  field.name?.toLowerCase() === 'subject' ||
-                  field.name?.toLowerCase() === 'message'
+                  field.blockType === 'select'               
 
                 return (
                   <div

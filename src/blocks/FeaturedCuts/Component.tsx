@@ -1,6 +1,6 @@
-import React from 'react'
-import type { DefaultDocumentIDType } from 'payload'
 import type { FeaturedCutsBlock as FeaturedCutsBlockProps } from '@/payload-types'
+import type { DefaultDocumentIDType } from 'payload'
+import React from 'react'
 
 type Props = FeaturedCutsBlockProps & {
   id?: DefaultDocumentIDType

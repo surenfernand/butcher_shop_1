@@ -1,10 +1,10 @@
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
-import { notFound } from 'next/navigation'
-import ProductGallery from '@/components/product/ProductGallery'
-import ProductDetails from '@/components/product/ProductDetails'
-import ProductReviews from '@/components/product/ProductReviews'
 import Breadcrumbs from '@/components/Breadcrumbs/Breadcrumbs'
+import ProductDetails from '@/components/product/ProductDetails'
+import ProductGallery from '@/components/product/ProductGallery'
+import ProductReviews from '@/components/product/ProductReviews'
+import configPromise from '@payload-config'
+import { notFound } from 'next/navigation'
+import { getPayload } from 'payload'
 
 type Args = {
   params: {

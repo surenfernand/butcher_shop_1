@@ -1,11 +1,11 @@
-import type { Order, Product, Media } from '@/payload-types'
+import type { Media, Order, Product } from '@/payload-types'
 
 import { getPurchaseUnitPriceInCents } from '@/utilities/purchasePricing'
 import configPromise from '@payload-config'
 import { headers as getHeaders } from 'next/headers'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
-import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
@@ -136,13 +136,13 @@ export default async function SubscriptionsPage() {
                 key={`${order.id}-${index}`}
                 className="grid overflow-hidden border border-[#3A3325] bg-[#141515] lg:grid-cols-[320px_1fr]"
               >
-                <div className="relative bg-white p-8">
+                <div className="relative bg-black">
                   <div className="flex h-full min-h-[300px] items-center justify-center">
                     {image?.url ? (
                       <img
                         src={image.url}
                         alt={image.alt || product?.title || 'Subscription product'}
-                        className="object-contain"
+                        className="object-cover"
                       />
                     ) : (
                       <div className="text-center text-black/50">No product image</div>

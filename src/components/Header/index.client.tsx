@@ -1,16 +1,16 @@
 'use client'
 
-import { CMSLink } from '@/components/Link'
 import { Cart } from '@/components/Cart'
 import { OpenCartButton } from '@/components/Cart/OpenCart'
-import Link from 'next/link'
-import React, { Suspense } from 'react'
-import { MobileMenu } from './MobileMenu'
-import type { Header } from 'src/payload-types'
-import { usePathname } from 'next/navigation'
+import { CMSLink } from '@/components/Link'
 import { cn } from '@/utilities/cn'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { Suspense } from 'react'
+import type { Header } from 'src/payload-types'
+import { MobileMenu } from './MobileMenu'
 // import { LogoIcon } from '@/components/icons/logo'
-import { ShoppingCart, User, Search } from 'lucide-react'
+import { Search, User } from 'lucide-react'
 
 import { Media } from '@/components/Media'
 

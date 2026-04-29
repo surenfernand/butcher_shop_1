@@ -2,7 +2,6 @@
 
 import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 import { Clock3, Mail, MapPin, Phone, type LucideIcon } from 'lucide-react'
-import Image from 'next/image'
 import React from 'react'
 
 import { FormBlock } from '@/blocks/Form/Component'

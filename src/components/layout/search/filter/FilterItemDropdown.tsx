@@ -2,7 +2,7 @@
 
 import { ChevronDownIcon } from 'lucide-react'
 import { usePathname, useSearchParams } from 'next/navigation'
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import type { ListItem } from '.'
 
@@ -50,7 +50,7 @@ export function FilterItemDropdown({ list }: { list: ListItem[] }) {
       </div>
       {openSelect && (
         <div
-          className="absolute z-40 w-full rounded-b-md bg-white p-4 shadow-md dark:bg-black"
+          className="absolute z-40 w-full rounded-b-md bg-black p-4 shadow-md dark:bg-black"
           onClick={() => {
             setOpenSelect(false)
           }}

@@ -1,10 +1,10 @@
 'use client'
 
-import { useHeaderTheme } from '@/providers/HeaderTheme'
-import React, { useEffect } from 'react'
-import type { Page } from '@/payload-types'
 import { CMSLink } from '@/components/Link'
+import type { Page } from '@/payload-types'
+import { useHeaderTheme } from '@/providers/HeaderTheme'
 import Image from 'next/image'
+import React, { useEffect } from 'react'
 
 export const HighImpactHero: React.FC<Page['hero']> = ({
   links,
@@ -19,8 +19,13 @@ export const HighImpactHero: React.FC<Page['hero']> = ({
     setHeaderTheme('dark')
   }, [setHeaderTheme])
 
-  const imageUrl =
+  const mediaUrl =
     media && typeof media === 'object' && media.url ? media.url : null
+
+  const isVideo =
+    media && typeof media === 'object' && media.mimeType?.startsWith('video/')
+
+
 
   return (
     <section
@@ -29,15 +34,27 @@ export const HighImpactHero: React.FC<Page['hero']> = ({
     >
       <div className="absolute inset-0">
         <div className="relative h-full w-full">
-          {imageUrl && (
-            <Image
-              src={imageUrl}
-              alt={(media && typeof media === 'object' && media.alt) || 'Hero image'}
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              priority
-              className="object-cover"
-            />
+          {mediaUrl && isVideo ? (
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="h-full w-full object-cover"
+            >
+              <source src={mediaUrl} type={media.mimeType || 'video/mp4'} />
+            </video>
+          ) : (
+            mediaUrl && (
+              <Image
+                src={mediaUrl}
+                alt={(media && typeof media === 'object' && media.alt) || 'Hero image'}
+                fill
+                sizes="100vw"
+                priority
+                className="object-cover"
+              />
+            )
           )}
         </div>
       </div>

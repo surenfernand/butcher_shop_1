@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
-import { ShoppingCart } from 'lucide-react'
 import clsx from 'clsx'
+import { ShoppingCart } from 'lucide-react'
 import React from 'react'
 
 export function OpenCartButton({

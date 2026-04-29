@@ -13,10 +13,10 @@ const linkBase =
   'w-full justify-start rounded-none px-5 py-4 text-sm font-medium tracking-wide hover:no-underline transition-colors'
 
 const linkInactive =
-  'text-white/40 hover:text-[#E2B84F] hover:bg-white/[0.03]'
+  'text-white/40 hover:text-[#E2B84F] hover:bg-black/[0.03]'
 
 const linkActive =
-  'text-[#E2B84F] bg-white/[0.04] border-r-2 border-[#E2B84F]'
+  'text-[#E2B84F] bg-black/[0.04] border-r-2 border-[#E2B84F]'
 
 export const AccountNav: React.FC<Props> = ({ className }) => {
   const pathname = usePathname()
@@ -110,8 +110,8 @@ export const AccountNav: React.FC<Props> = ({ className }) => {
             href="/logout"
             className={clsx(
               linkBase,
-              'text-[#F2B8A8] hover:bg-white/[0.03] hover:text-[#FFD1C7]',
-              pathname === '/logout' && 'bg-white/[0.04]',
+              'text-[#F2B8A8] hover:bg-black/[0.03] hover:text-[#FFD1C7]',
+              pathname === '/logout' && 'bg-black/[0.04]',
             )}
           >
             Log out

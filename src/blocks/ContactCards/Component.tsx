@@ -1,9 +1,9 @@
 import {
-  Clock3,
-  Mail,
-  MapPin,
-  Phone,
-  type LucideIcon,
+    Clock3,
+    Mail,
+    MapPin,
+    Phone,
+    type LucideIcon,
 } from 'lucide-react'
 import type { DefaultDocumentIDType } from 'payload'
 import React from 'react'

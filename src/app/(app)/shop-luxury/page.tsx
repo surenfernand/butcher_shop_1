@@ -1,6 +1,6 @@
+import { LuxuryProductCard } from '@/components/Shop/LuxuryProductCard'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
-import { LuxuryProductCard } from '@/components/Shop/LuxuryProductCard'
 
 export default async function ShopLuxuryPage() {
   const payload = await getPayload({ config: configPromise })

@@ -1,8 +1,8 @@
 import type { Media, Product, ThreeItemGridBlock as ThreeItemGridBlockProps } from '@/payload-types'
-import Link from 'next/link'
-import React from 'react'
-import type { DefaultDocumentIDType } from 'payload'
 import Image from 'next/image'
+import Link from 'next/link'
+import type { DefaultDocumentIDType } from 'payload'
+import React from 'react'
 
 type ProductCardItem = Product & {
   title?: string

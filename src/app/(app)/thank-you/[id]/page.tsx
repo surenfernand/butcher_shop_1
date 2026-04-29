@@ -48,6 +48,8 @@ const getProductImage = (product: Product): Media | undefined => {
   return undefined
 }
 
+
+
 export default async function ThankYouPage({ params, searchParams }: PageProps) {
   const headers = await getHeaders()
   const payload = await getPayload({ config: configPromise })

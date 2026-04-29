@@ -1,13 +1,13 @@
 // src/components/Footer/index.tsx
 
-import type { Footer as FooterType } from '@/payload-types'
 import { FooterMenu } from '@/components/Footer/menu'
 import { CMSLink } from '@/components/Link'
+import type { Footer as FooterType } from '@/payload-types'
 // import { LogoIcon } from '@/components/icons/logo'
+import { Media } from '@/components/Media'
 import { getCachedGlobal } from '@/utilities/getGlobals'
 import Link from 'next/link'
-import React, { Suspense } from 'react'
-import { Media } from '@/components/Media'
+import { Suspense } from 'react'
 export async function Footer() {
   const footer: FooterType = await getCachedGlobal('footer', 1)()
   const menu = footer.navItems || []

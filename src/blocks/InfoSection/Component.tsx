@@ -1,7 +1,7 @@
 import type { InfoSectionBlock as InfoSectionBlockProps, Media } from '@/payload-types'
-import type { DefaultDocumentIDType } from 'payload'
 import Image from 'next/image'
 import Link from 'next/link'
+import type { DefaultDocumentIDType } from 'payload'
 import React from 'react'
 
 type Props = InfoSectionBlockProps & {
@@ -28,7 +28,7 @@ export const InfoSectionBlock: React.FC<Props> = ({
     <section className={['py-20', className].filter(Boolean).join(' ')}>
       <div className="container">
         <div className="grid items-center gap-10 md:grid-cols-[1.35fr_0.95fr]">
-          <div className="relative aspect-[4/3] w-full overflow-hidden bg-white">
+          <div className="relative aspect-[4/3] w-full overflow-hidden bg-black">
             <Image
               src={imageUrl}
               alt={media?.alt || title || 'Info section image'}

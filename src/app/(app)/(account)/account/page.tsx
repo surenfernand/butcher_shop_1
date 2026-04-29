@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 
-import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
-import { headers as getHeaders } from 'next/headers.js'
-import configPromise from '@payload-config'
 import { AccountForm } from '@/components/forms/AccountForm'
-import { getPayload } from 'payload'
+import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
+import configPromise from '@payload-config'
+import { headers as getHeaders } from 'next/headers.js'
 import { redirect } from 'next/navigation'
+import { getPayload } from 'payload'
 
 export default async function AccountPage() {
   const headers = await getHeaders()
@@ -65,7 +65,7 @@ export default async function AccountPage() {
                 className="peer sr-only"
               />
               <span className="h-5 w-10 rounded-full bg-[#2B2D2E] border border-white/30 transition peer-checked:border-[#E2B84F] peer-checked:bg-[#E2B84F]" />
-              <span className="absolute left-1 top-1 h-3 w-3 rounded-full bg-white transition peer-checked:translate-x-5" />
+              <span className="absolute left-1 top-1 h-3 w-3 rounded-full bg-black transition peer-checked:translate-x-5" />
             </label>
           </div>
 
@@ -86,7 +86,7 @@ export default async function AccountPage() {
                 className="peer sr-only"
               />
               <span className="h-5 w-10 rounded-full bg-[#2B2D2E] border border-white/30 transition peer-checked:border-[#E2B84F] peer-checked:bg-[#E2B84F]" />
-              <span className="absolute left-1 top-1 h-3 w-3 rounded-full bg-white transition peer-checked:translate-x-5" />
+              <span className="absolute left-1 top-1 h-3 w-3 rounded-full bg-black transition peer-checked:translate-x-5" />
             </label>
           </div>
         </div>
