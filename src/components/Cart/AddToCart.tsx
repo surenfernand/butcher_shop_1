@@ -118,10 +118,10 @@ export function AddToCart({
     (e: React.FormEvent<HTMLButtonElement>) => {
       e.preventDefault()
 
-      if (branchStock.stockStatus === 'outofstock' || branchStock.stockQuantity <= 0) {
-        toast.error('This item is out of stock at the selected branch.')
-        return
-      }
+      // if (branchStock.stockStatus === 'outofstock' || branchStock.stockQuantity <= 0) {
+      //   toast.error('This item is out of stock at the selected branch.')
+      //   return
+      // }
 
       const selectedPrice = getPurchaseUnitPriceInCents(
         product,
@@ -158,13 +158,15 @@ export function AddToCart({
 
   const disabled = useMemo<boolean>(() => {
 
-    if (product.enableVariants && !selectedVariant) {
-      return true
-    }
+    // if (product.enableVariants && !selectedVariant) {
+    //   console.log("1");
+    //   return true
+    // }
 
-    if (branchStock.stockStatus === 'outofstock' || branchStock.stockQuantity <= 0) {
-      return true
-    }
+    // if (branchStock.stockStatus === 'outofstock' || branchStock.stockQuantity <= 0) {
+    //   console.log("2");
+    //   return true
+    // }
 
     const existingItem = cart?.items?.find((item) => {
       const productID = typeof item.product === 'object' ? item.product?.id : item.product
@@ -177,6 +179,7 @@ export function AddToCart({
 
       if (productID === product.id) {
         if (product.enableVariants) {
+          console.log("3");
           return variantID === selectedVariant?.id
         }
 
@@ -187,6 +190,7 @@ export function AddToCart({
     })
 
     if (existingItem) {
+      console.log("4");
       return existingItem.quantity >= branchStock.stockQuantity
     }
 
