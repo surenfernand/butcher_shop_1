@@ -1,14 +1,25 @@
 import { LuxuryProductCard } from '@/components/Shop/LuxuryProductCard'
+import type { ShopLuxuryPage } from '@/payload-types'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
+
+type ShopLuxuryPageExtras = ShopLuxuryPage & {
+  itemsPerPage?: number | null
+  filterSections?:
+    | {
+        title?: string | null
+        options?: { label?: string | null }[] | null
+      }[]
+    | null
+}
 
 export default async function ShopLuxuryPage() {
   const payload = await getPayload({ config: configPromise })
 
-  const pageData = await payload.findGlobal({
+  const pageData = (await payload.findGlobal({
     slug: 'shop-luxury-page',
     depth: 1,
-  })
+  })) as ShopLuxuryPageExtras
 
   const products = await payload.find({
     collection: 'products',
@@ -21,10 +32,7 @@ export default async function ShopLuxuryPage() {
     },
   })
 
-  const filterSections = pageData.filterSections as {
-    title: string
-    options?: { label: string }[]
-  }[]
+  const filterSections = pageData.filterSections ?? []
 
   return (
 
@@ -47,7 +55,7 @@ export default async function ShopLuxuryPage() {
         <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
           <aside className="border-r border-[#1f1f1f] pr-8">
             <div className="space-y-8">
-             {filterSections?.map((section, i) => (
+             {filterSections.map((section, i) => (
                 <div key={i}>
                   <h2 className="mb-4 text-xs uppercase tracking-[0.2em] text-[#c8a24d]">
                     {section.title}

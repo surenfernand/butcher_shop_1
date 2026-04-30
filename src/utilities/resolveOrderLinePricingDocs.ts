@@ -74,8 +74,8 @@ export const batchResolveOrderLinesForPricing = async (
   }
 
   return lines.map((item) => {
-    const embeddedProduct = typeof item.product === 'object' ? item.product : undefined
-    const embeddedVariant = typeof item.variant === 'object' ? item.variant : undefined
+    const embeddedProduct = item.product && typeof item.product === 'object' ? item.product : undefined
+    const embeddedVariant = item.variant && typeof item.variant === 'object' ? item.variant : undefined
 
     const pid = productId(item.product)
     const vid = variantId(item.variant)

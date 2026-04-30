@@ -59,6 +59,7 @@ export const CheckoutPage: React.FC = () => {
   const { cart } = useCart()
   const [error, setError] = useState<null | string>(null)
   const { theme } = useTheme()
+  const isDark = theme !== 'light'
   const [email, setEmail] = useState('')
   const [emailEditable, setEmailEditable] = useState(true)
   const [paymentData, setPaymentData] = useState<null | Record<string, unknown>>(null)
@@ -399,7 +400,7 @@ export const CheckoutPage: React.FC = () => {
 
   if (cartIsEmpty && isProcessingPayment) {
     return (
-      <div className="min-h-[60vh] bg-black py-20 text-center text-stone-100">
+      <div className="min-h-[60vh] bg-background py-20 text-center text-foreground">
         <p className="mb-8 font-sans text-lg tracking-[0.2em] text-amber-400">Processing your payment...</p>
         <LoadingSpinner />
       </div>
@@ -408,7 +409,7 @@ export const CheckoutPage: React.FC = () => {
 
   if (cartIsEmpty) {
     return (
-      <div className="min-h-[60vh] bg-black px-6 py-20 text-center text-stone-100">
+      <div className="min-h-[60vh] bg-background px-6 py-20 text-center text-foreground">
         <p className="mb-4 font-sans text-xl uppercase tracking-[0.2em] text-amber-400">Your cart is empty.</p>
         <Link className="underline underline-offset-4" href="/shop">
           Continue shopping?
@@ -418,7 +419,7 @@ export const CheckoutPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-stone-100 mt-5">
+    <div className="mt-5 min-h-screen bg-background text-foreground">
 
 
       <main className="mx-auto grid max-w-7xl gap-12 px-6 py-14 md:px-10 lg:grid-cols-[minmax(0,1.45fr)_minmax(360px,0.85fr)]">
@@ -428,21 +429,21 @@ export const CheckoutPage: React.FC = () => {
           <section>
             <div className="mb-8 flex items-center gap-4 border-b  pb-6">
               <span className="font-sans text-2xl font-black text-amber-400">01</span>
-              <h1 className="text-2xl font-black uppercase tracking-tight text-stone-100">Shipping Information</h1>
+              <h1 className="text-2xl font-black uppercase tracking-tight text-foreground">Shipping Information</h1>
             </div>
 
             <div className="space-y-8">
               {!user && (
-                <div className="border  bg-[#121212] p-6">
-                  <p className="mb-4 font-sans text-sm uppercase tracking-[0.18em] text-stone-400">
+                <div className="border border-border bg-card p-6">
+                  <p className="mb-4 font-sans text-sm uppercase tracking-[0.18em] text-muted-foreground">
                     Checkout as guest
                   </p>
                   <FormItem>
-                    <Label className="font-sans text-xs uppercase tracking-[0.18em] text-stone-400" htmlFor="email">
+                    <Label className="font-sans text-xs uppercase tracking-[0.18em] text-muted-foreground" htmlFor="email">
                       Email Address
                     </Label>
                     <Input
-                      className="mt-2 h-14 rounded-none  bg-[#121212] px-4 text-stone-100 placeholder:text-slate-500 focus-visible:ring-amber-500"
+                      className="mt-2 h-14 rounded-none border border-input bg-background px-4 text-foreground placeholder:text-muted-foreground focus-visible:ring-amber-500"
                       disabled={!emailEditable}
                       id="email"
                       name="email"
@@ -462,7 +463,7 @@ export const CheckoutPage: React.FC = () => {
                     >
                       Continue as guest
                     </Button>
-                    <Link className="text-sm text-stone-400 underline underline-offset-4" href="/login">
+                    <Link className="text-sm text-muted-foreground underline underline-offset-4" href="/login">
                       Log in instead
                     </Link>
                   </div>
@@ -472,14 +473,14 @@ export const CheckoutPage: React.FC = () => {
 
 
               <div>
-                <p className="mb-3 font-sans text-xs uppercase tracking-[0.18em] text-stone-400">
+                <p className="mb-3 font-sans text-xs uppercase tracking-[0.18em] text-muted-foreground">
                   Signed in as
                 </p>
                 {user && (
 
-                  <div className="border  bg-[#121212] p-6">
-                    {/* <p className="font-sans text-xs uppercase tracking-[0.18em] text-stone-400">Signed in as</p> */}
-                    <p className="mt-2 text-stone-100">{user.email}</p>
+                  <div className="border border-border bg-card p-6">
+                    {/* <p className="font-sans text-xs uppercase tracking-[0.18em] text-muted-foreground">Signed in as</p> */}
+                    <p className="mt-2 text-foreground">{user.email}</p>
                     <Link className="mt-2 inline-block text-sm text-amber-400 underline underline-offset-4" href="/logout">
                       Not you? Log out
                     </Link>
@@ -488,11 +489,11 @@ export const CheckoutPage: React.FC = () => {
               </div>
 
               <div>
-                <p className="mb-3 font-sans text-xs uppercase tracking-[0.18em] text-stone-400">
+                <p className="mb-3 font-sans text-xs uppercase tracking-[0.18em] text-muted-foreground">
                   Billing Address
                 </p>
                 {billingAddress ? (
-                  <div className="border  bg-[#121212] p-5">
+                  <div className="border border-border bg-card p-5">
                     <AddressItem
                       actions={
                         <Button
@@ -532,18 +533,18 @@ export const CheckoutPage: React.FC = () => {
                     setBillingAddressSameAsShipping(state as boolean)
                   }}
                 />
-                <Label className="font-sans text-xs uppercase tracking-[0.18em] text-stone-400" htmlFor="shippingTheSameAsBilling">
+                <Label className="font-sans text-xs uppercase tracking-[0.18em] text-muted-foreground" htmlFor="shippingTheSameAsBilling">
                   Shipping is the same as billing
                 </Label>
               </div>
 
               {!billingAddressSameAsShipping && (
                 <div>
-                  <p className="mb-3 font-sans text-xs uppercase tracking-[0.18em] text-stone-400">
+                  <p className="mb-3 font-sans text-xs uppercase tracking-[0.18em] text-muted-foreground">
                     Shipping Address
                   </p>
                   {shippingAddress ? (
-                    <div className="border  bg-[#121212] p-5">
+                    <div className="border border-border bg-card p-5">
                       <AddressItem
                         actions={
                           <Button
@@ -584,10 +585,10 @@ export const CheckoutPage: React.FC = () => {
           <section>
             <div className="mb-8 flex items-center gap-4 border-b  pb-6">
               <span className="font-sans text-2xl font-black text-amber-400">02</span>
-              <h2 className="text-2xl font-black uppercase tracking-tight text-stone-100">Payment Details</h2>
+              <h2 className="text-2xl font-black uppercase tracking-tight text-foreground">Payment Details</h2>
             </div>
 
-            <div className="border  bg-[#121212] p-6">
+            <div className="border border-border bg-card p-6">
               {!paymentData && (
                 <Button
                   className="rounded-none bg-amber-400 px-10 py-6 font-sans font-black uppercase tracking-[0.18em] text-black hover:bg-amber-300 disabled:opacity-40"
@@ -621,32 +622,53 @@ export const CheckoutPage: React.FC = () => {
                 {/* @ts-ignore */}
                 {paymentData && paymentData?.['clientSecret'] && (
                   <div>
-                    <p className="mb-6 font-sans text-sm uppercase tracking-[0.18em] text-stone-400">
+                    <p className="mb-6 font-sans text-sm uppercase tracking-[0.18em] text-muted-foreground">
                       Secure card payment
                     </p>
                     {error && <p className="mb-4 text-red-400">{`Error: ${error}`}</p>}
                     <Elements
                       options={{
-                        appearance: {
-                          theme: 'night',
-                          variables: {
-                            borderRadius: '0px',
-                            colorPrimary: '#d8ad45',
-                            gridColumnSpacing: '20px',
-                            gridRowSpacing: '20px',
-                            colorBackground: theme === 'dark' ? '#000000' : '#0f0f0f',
-                            colorDanger: cssVariables.colors.error500,
-                            colorDangerText: cssVariables.colors.error500,
-                            colorIcon: '#a8a29e',
-                            colorText: '#f5f5f4',
-                            colorTextPlaceholder: '#64748b',
-                            fontFamily: 'GeistSans, sans-serif',
-                            fontSizeBase: '16px',
-                            fontWeightBold: '700',
-                            fontWeightNormal: '500',
-                            spacingUnit: '4px',
-                          },
-                        },
+                        appearance: isDark
+                          ? {
+                              theme: 'night',
+                              variables: {
+                                borderRadius: '0px',
+                                colorPrimary: '#d8ad45',
+                                gridColumnSpacing: '20px',
+                                gridRowSpacing: '20px',
+                                colorBackground: '#000000',
+                                colorDanger: cssVariables.colors.error500,
+                                colorDangerText: cssVariables.colors.error500,
+                                colorIcon: '#a8a29e',
+                                colorText: '#f5f5f4',
+                                colorTextPlaceholder: '#64748b',
+                                fontFamily: 'GeistSans, sans-serif',
+                                fontSizeBase: '16px',
+                                fontWeightBold: '700',
+                                fontWeightNormal: '500',
+                                spacingUnit: '4px',
+                              },
+                            }
+                          : {
+                              theme: 'stripe',
+                              variables: {
+                                borderRadius: '0px',
+                                colorPrimary: '#d8ad45',
+                                gridColumnSpacing: '20px',
+                                gridRowSpacing: '20px',
+                                colorBackground: '#ffffff',
+                                colorDanger: cssVariables.colors.error500,
+                                colorDangerText: cssVariables.colors.error500,
+                                colorIcon: '#57534e',
+                                colorText: '#0c0a09',
+                                colorTextPlaceholder: '#78716c',
+                                fontFamily: 'GeistSans, sans-serif',
+                                fontSizeBase: '16px',
+                                fontWeightBold: '700',
+                                fontWeightNormal: '500',
+                                spacingUnit: '4px',
+                              },
+                            },
                         clientSecret: paymentData['clientSecret'] as string,
                       }}
                       stripe={stripe}
@@ -668,7 +690,7 @@ export const CheckoutPage: React.FC = () => {
           </section>
         </section>
 
-        <aside className="h-fit border  bg-[#121212] p-8 lg:sticky lg:top-8">
+        <aside className="h-fit border border-border bg-card p-8 lg:sticky lg:top-8">
           <h2 className="font-sans text-sm uppercase tracking-wider text-amber-400">Order Summary</h2>
           <div className="my-6 h-px bg-amber-500/30" />
 
@@ -681,9 +703,6 @@ export const CheckoutPage: React.FC = () => {
                   quantity,
                   variant,
                 } = item
-
-                console.log("item");
-                console.log(item);
 
                 if (!quantity) return null
 
@@ -738,16 +757,16 @@ export const CheckoutPage: React.FC = () => {
 
                 return (
                   <div className="grid grid-cols-[80px_1fr_auto] items-center gap-4" key={index}>
-                    <div className="relative h-20 w-20 border  bg-black">
+                    <div className="relative h-20 w-20 border border-border bg-muted">
                       {image && typeof image !== 'string' && (
                         <Media className="" fill imgClassName="object-cover" resource={image} />
                       )}
 
                     </div>
                     <div>
-                      <p className="font-sans text-base font-black uppercase text-stone-100">{title}</p>
+                      <p className="font-sans text-base font-black uppercase text-foreground">{title}</p>
                       {variant && typeof variant === 'object' && (
-                        <p className="mt-1 font-sans text-xs italic text-stone-400">
+                        <p className="mt-1 font-sans text-xs italic text-muted-foreground">
                           {variant.options
                             ?.map((option: NonNullable<typeof variant.options>[number]) => {
                               if (typeof option === 'object') return option.label
@@ -756,7 +775,7 @@ export const CheckoutPage: React.FC = () => {
                             .join(', ')}
                         </p>
                       )}
-                      <p className="mt-1 text-xs uppercase tracking-[0.18em] text-stone-500">Qty {quantity}</p>
+                      <p className="mt-1 text-xs uppercase tracking-[0.18em] text-muted-foreground">Qty {quantity}</p>
                       <p className="mt-1 text-xs uppercase tracking-[0.18em] text-amber-400">
                         {getPurchaseTypeLabel(purchaseType)}
                       </p>
@@ -774,21 +793,21 @@ export const CheckoutPage: React.FC = () => {
           <div className="my-8 h-px bg-amber-500/30" />
 
           <div className="space-y-5 font-sans text-sm uppercase tracking-wide">
-            <div className="flex justify-between text-stone-400">
+            <div className="flex justify-between text-muted-foreground">
               <span>Subtotal</span>
-              <span className="text-stone-100">{formatMoney(subtotal)}</span>
+              <span className="text-foreground">{formatMoney(subtotal)}</span>
             </div>
             {fulfillmentMethod === 'delivery' && (
-              <div className="flex justify-between text-stone-400">
+              <div className="flex justify-between text-muted-foreground">
                 <span>Delivery</span>
-                <span className="text-stone-100">
+                <span className="text-foreground">
                   {shipping ? formatMoney(shipping) : '0.00'}
                 </span>
               </div>
             )}
-            <div className="flex justify-between text-stone-400">
+            <div className="flex justify-between text-muted-foreground">
               <span>Estimated Tax</span>
-              <span className="text-stone-100">{formatMoney(estimatedTax)}</span>
+              <span className="text-foreground">{formatMoney(estimatedTax)}</span>
             </div>
             <div className="h-px bg-amber-500/30" />
             <div className="flex justify-between text-base text-amber-400">
@@ -811,12 +830,12 @@ export const CheckoutPage: React.FC = () => {
               </button>
             </div >
 
-            <div className="grid grid-cols-2 border-4 border-black">
+            <div className="grid grid-cols-2 border-2 border-border">
               <button
                 type="button"
                 className={`py-3 font-sans text-sm font-black uppercase tracking-[0.24em] ${fulfillmentMethod === 'pickup'
                   ? 'bg-amber-400 text-black'
-                  : 'bg-stone-800 text-stone-400 hover:text-stone-100'
+                  : 'bg-muted text-muted-foreground hover:text-foreground'
                   }`}
                 onClick={() => {
                   setFulfillmentMethod('pickup')
@@ -832,7 +851,7 @@ export const CheckoutPage: React.FC = () => {
                 type="button"
                 className={`py-3 font-sans text-sm font-black uppercase tracking-[0.24em] ${fulfillmentMethod === 'delivery'
                   ? 'bg-amber-400 text-black'
-                  : 'bg-stone-800 text-stone-400 hover:text-stone-100'
+                  : 'bg-muted text-muted-foreground hover:text-foreground'
                   }`}
                 onClick={() => {
                   setFulfillmentMethod('delivery')
@@ -872,14 +891,14 @@ export const CheckoutPage: React.FC = () => {
 
       {isDateModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 animate-[modalFadeIn_180ms_ease-out]">
-          <div className="w-[420px] border border-amber-500/30 bg-[#0f0f0f] p-6 shadow-xl animate-[modalScaleIn_240ms_cubic-bezier(0.16,1,0.3,1)]">
+          <div className="w-[420px] border border-border bg-card p-6 text-card-foreground shadow-xl animate-[modalScaleIn_240ms_cubic-bezier(0.16,1,0.3,1)]">
 
             {/* Header */}
             <p className="mb-2 text-center font-sans text-xs uppercase tracking-[0.3em] text-amber-400">
               The Butcher’s Craft
             </p>
 
-            <h2 className="mb-6 text-center font-sans text-xl font-black uppercase tracking-wide text-stone-100">
+            <h2 className="mb-6 text-center font-sans text-xl font-black uppercase tracking-wide text-foreground">
               Order Type
             </h2>
 
@@ -888,7 +907,7 @@ export const CheckoutPage: React.FC = () => {
               <button
                 className={`py-3 font-sans text-sm font-black uppercase tracking-[0.2em] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-400/10 active:translate-y-0 ${fulfillmentMethod === 'delivery'
                   ? 'bg-amber-400 text-black'
-                  : 'bg-stone-800 text-stone-400'
+                  : 'bg-muted text-muted-foreground'
                   }`}
                 onClick={() => {
                   setFulfillmentMethod('delivery')
@@ -901,7 +920,7 @@ export const CheckoutPage: React.FC = () => {
               <button
                 className={`py-3 font-sans text-sm font-black uppercase tracking-[0.2em] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-400/10 active:translate-y-0 ${fulfillmentMethod === 'pickup'
                   ? 'bg-amber-400 text-black'
-                  : 'bg-stone-800 text-stone-400'
+                  : 'bg-muted text-muted-foreground'
                   }`}
                 onClick={() => {
                   setFulfillmentMethod('pickup')
@@ -919,7 +938,7 @@ export const CheckoutPage: React.FC = () => {
             {isLoadingBranches ? (
               <div className="flex flex-col items-center justify-center py-8">
                 <div className="h-8 w-8 animate-spin rounded-full border-2 border-amber-400 border-t-transparent" />
-                <p className="mt-3 text-xs uppercase tracking-[0.2em] text-stone-400">
+                <p className="mt-3 text-xs uppercase tracking-[0.2em] text-muted-foreground">
                   Loading locations...
                 </p>
               </div>
@@ -942,7 +961,7 @@ export const CheckoutPage: React.FC = () => {
                       }`}
                   >
                     <p className="text-amber-400">{branch.name}</p>
-                    <p className="text-xs text-stone-400">{branch.address}</p>
+                    <p className="text-xs text-muted-foreground">{branch.address}</p>
                   </button>
                 ))}
               </div>
@@ -950,7 +969,7 @@ export const CheckoutPage: React.FC = () => {
 
             {selectedBranch && fulfillmentMethod === 'delivery' && (
               <div className="mb-6">
-                <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-stone-400 mt-3">
+                <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted-foreground mt-3">
                   Postal Code
                 </label>
 
@@ -965,7 +984,7 @@ export const CheckoutPage: React.FC = () => {
                       setBranchError('')
                     }}
                     placeholder="Example: J7K 0Z6"
-                    className="rounded-none border-amber-500/30 bg-black text-stone-100"
+                    className="rounded-none border-amber-500/30 bg-background text-foreground"
                   />
 
                   <button
@@ -985,7 +1004,7 @@ export const CheckoutPage: React.FC = () => {
 
             {/* Date Picker */}
             <div className="relative mb-6">
-              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-stone-400 mt-3">
+              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted-foreground mt-3">
                 Select Date
               </label>
 
@@ -993,7 +1012,7 @@ export const CheckoutPage: React.FC = () => {
                 type="button"
                 onClick={() => setShowCalendar((prev) => !prev)}
                 disabled={!selectedBranch || !availableSchedules.length}
-                className="w-full border border-amber-500/30 bg-black px-3 py-3 text-left text-stone-400 transition-all duration-200 hover:border-amber-400 hover:text-stone-100 disabled:cursor-not-allowed disabled:opacity-40"
+                className="w-full border border-amber-500/30 bg-background px-3 py-3 text-left text-muted-foreground transition-all duration-200 hover:border-amber-400 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {selectedDate
                   ? formatDisplayDate(formatDateForInput(selectedDate))
@@ -1009,7 +1028,7 @@ export const CheckoutPage: React.FC = () => {
                   />
 
                   {/* calendar popup */}
-                  <div className="relative z-[101] rounded-md border border-amber-500/30 bg-[#0f0f0f] p-4 text-stone-100 shadow-2xl">
+                  <div className="relative z-[101] rounded-md border border-border bg-card p-4 text-card-foreground shadow-2xl">
                     <DayPicker
                       mode="single"
                       selected={selectedDate}
@@ -1073,7 +1092,7 @@ export const CheckoutPage: React.FC = () => {
             </button>
 
             <button
-              className="mt-4 w-full text-sm uppercase tracking-[0.2em] text-stone-400"
+              className="mt-4 w-full text-sm uppercase tracking-[0.2em] text-muted-foreground"
               onClick={() => setIsDateModalOpen(false)}
             >
               Cancel

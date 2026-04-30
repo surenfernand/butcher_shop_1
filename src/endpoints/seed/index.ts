@@ -254,8 +254,8 @@ export const seed = async ({
     depth: 0,
     data: productTshirtData({
       galleryImages: [
-        { image: imageTshirtBlack, variantOption: black },
-        { image: imageTshirtWhite, variantOption: white },
+        { image: imageTshirtBlack },
+        { image: imageTshirtWhite },
       ],
       metaImage: imageTshirtBlack,
       contentImage: imageHero,

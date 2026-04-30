@@ -17,6 +17,7 @@ import { toKebabCase } from '@/utilities/toKebabCase'
 import React, { Fragment } from 'react'
 import { ProductGridBlock } from '@/blocks/ProductGrid/Component'
 import type { ComponentType } from 'react'
+import { MonthlyMenuPromo } from '@/components/home/MonthlyMenuPromo'
 
 
 import type { Page } from '../payload-types'
@@ -49,8 +50,9 @@ type SearchParams = { [key: string]: string | string[] | undefined }
 export const RenderBlocks: React.FC<{
   blocks: Page['layout'][0][]
   searchParams?: SearchParams
+  slug?: string
 }> = (props) => {
-  const { blocks, searchParams } = props
+  const { blocks, searchParams, slug } = props
 
   const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0
 
@@ -75,6 +77,9 @@ export const RenderBlocks: React.FC<{
                     searchParams={searchParams}
                     {...block}
                   />
+                  {slug === 'home' && (blockType === 'infoSection' || blockType === 'aboutStory') ? (
+                    <MonthlyMenuPromo />
+                  ) : null}
                 </div>
               )
             }

@@ -88,7 +88,7 @@ export default function ProductDetails({ product }: Props) {
         </div>
       )}
 
-      <h1 className="mb-4 text-5xl font-bold uppercase tracking-tight text-white">
+      <h1 className="mb-4 text-5xl font-bold uppercase tracking-tight text-foreground">
         {product.title}
       </h1>
 
@@ -106,20 +106,20 @@ export default function ProductDetails({ product }: Props) {
       )}
 
       {product.meta?.description && (
-        <p className="mb-8 text-lg leading-8 text-[#d8ccb7]">
+        <p className="mb-8 text-lg leading-8 text-muted-foreground">
           {product.meta.description}
         </p>
       )}
 
       {Array.isArray(product.whatsInside) && product.whatsInside.length > 0 && (
-        <div className="mb-10 border border-white/10 bg-[#111] p-6">
-          <h3 className="mb-4 text-2xl font-semibold text-white">What&apos;s Inside</h3>
+        <div className="mb-10 border border-border bg-card p-6">
+          <h3 className="mb-4 text-2xl font-semibold text-foreground">What&apos;s Inside</h3>
 
-          <ul className="space-y-3 text-base text-[#e7dfcf]">
+          <ul className="space-y-3 text-base text-foreground">
             {product.whatsInside.map((item, i) => (
               <li key={i}>
                 <span className="mr-2 font-bold text-[#d4a63c]">{item.quantity}</span>
-                {item.label}
+                <span className="text-foreground">{item.label}</span>
               </li>
             ))}
           </ul>
@@ -128,11 +128,11 @@ export default function ProductDetails({ product }: Props) {
 
       {purchaseOptions.length > 0 && (
         <div className="mb-8">
-          <span className="mb-4 block text-xs uppercase tracking-[0.2em] text-[#8f8679]">
+          <span className="mb-4 block text-xs uppercase tracking-[0.2em] text-muted-foreground">
             Purchase Type
           </span>
 
-          <div className="grid grid-cols-2 border border-white/10 bg-[#111]">
+          <div className="grid grid-cols-2 border border-border bg-card">
             {purchaseOptions.map((option) => {
               const isSelected = purchaseType === option.value
 
@@ -144,21 +144,21 @@ export default function ProductDetails({ product }: Props) {
                   className={
                     isSelected
                       ? 'border border-[#d4a63c] bg-[#d4a63c]/10 px-4 py-5 text-center'
-                      : 'border-r border-white/10 px-4 py-5 text-center last:border-r-0'
+                      : 'border-r border-border px-4 py-5 text-center last:border-r-0'
                   }
                 >
                   <span
                     className={
                       isSelected
                         ? 'block text-xs font-bold uppercase tracking-[0.15em] text-[#d4a63c]'
-                        : 'block text-xs font-bold uppercase tracking-[0.15em] text-[#8f8679]'
+                        : 'block text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground'
                     }
                   >
                     {option.label}
                   </span>
 
                   {option.price && (
-                    <span className="mt-2 block text-2xl font-semibold text-white">
+                    <span className="mt-2 block text-2xl font-semibold text-foreground">
                       {option.price}
                     </span>
                   )}

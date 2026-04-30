@@ -81,7 +81,7 @@ export const ThreeItemGridBlock: React.FC<
           </div>
 
           <div className="max-w-md md:justify-self-end">
-            <p className="text-sm leading-6 text-white/80">
+            <p className="text-sm leading-6 text-white">
               A meticulous selection from the best livestock to ensure unparalleled
               tenderness and flavor.
             </p>

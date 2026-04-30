@@ -22,10 +22,19 @@ export const getProductBranchPriceEndpoint: Endpoint = {
     })
 
     const item = inventory.docs[0]
+    const legacyBranchPrice = item
+      ? ((item as unknown as { salePrice?: number | null }).salePrice ??
+        (item as unknown as { price?: number | string | null }).price ??
+        null)
+      : null
+    const productPrice =
+      item && typeof item.product === 'object'
+        ? item.product.purchaseFrequencies?.oneTime?.priceOverride ?? item.product.priceInUSD ?? null
+        : null
 
     return Response.json({
       inventory: item || null,
-      price: item?.salePrice ?? item?.price ?? null,
+      price: legacyBranchPrice ?? productPrice,
       stockStatus: item?.stockStatus ?? null,
       stockQuantity: item?.stockQuantity ?? null,
     })

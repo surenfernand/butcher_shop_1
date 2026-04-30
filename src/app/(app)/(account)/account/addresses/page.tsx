@@ -20,7 +20,7 @@ export default async function AddressesPage() {
   }
 
   return (
-    <div className="space-y-10 text-white mt-5" >
+    <div className="mt-5 space-y-10 text-foreground">
 
       {/* HEADER */}
       <div>
@@ -28,7 +28,7 @@ export default async function AddressesPage() {
           Address Book
         </h1>
 
-        <p className="mt-4 max-w-3xl text-lg text-white/60">
+        <p className="mt-4 max-w-3xl text-lg text-muted-foreground">
           Manage your billing details 
         </p>
       </div>
@@ -41,7 +41,7 @@ export default async function AddressesPage() {
         </h2>
 
         {/* LEFT - FORM / LIST */}
-        <div className="rounded-xl border border-[#3A3325] bg-[#1A1C1C] p-8">
+        <div className="rounded-xl border border-border bg-card p-8">
           {/* <h2 className="mb-8 text-xl font-bold uppercase tracking-[0.18em] text-[#E2B84F]">
             Shipping Address
           </h2> */}
@@ -49,7 +49,7 @@ export default async function AddressesPage() {
           <div className="">
             <AddressListing />
 
-            <div className="border-t border-white/10 pt-6">
+            <div className="border-t border-border/40 pt-6">
               <CreateAddressModal />
             </div>
           </div>

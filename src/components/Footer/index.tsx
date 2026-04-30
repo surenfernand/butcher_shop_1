@@ -15,7 +15,7 @@ export async function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="border-t border-[#1a1a1a] bg-black text-[#8f8f8f]">
+    <footer data-theme="dark" className="border-t border-[#1a1a1a] bg-black text-[#8f8f8f]">
       <div className="mx-auto max-w-7xl px-6 py-16 md:px-10 lg:px-12">
         <div className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr]">
           {/* Brand / Description */}

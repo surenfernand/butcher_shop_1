@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, CollectionSlug } from 'payload'
 import { adminOnly, publicRead } from '../utilities/access'
 
 const weeklyDayOptions = [
@@ -12,7 +12,7 @@ const weeklyDayOptions = [
 ]
 
 export const createFulfillmentSchedulesCollection = (
-  productSlug = 'products',
+  productSlug: CollectionSlug = 'products',
   adminGroup = 'Shop',
 ): CollectionConfig => ({
   slug: 'fulfillment-schedules',

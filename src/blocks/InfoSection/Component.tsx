@@ -57,13 +57,13 @@ export const InfoSectionBlock: React.FC<Props> = ({
             )}
 
             {description && (
-              <p className="mb-8 text-lg leading-9 text-[#eadfbf]">
+              <p className="mb-8 text-lg leading-9 text-neutral-800 dark:text-[#eadfbf]">
                 {description}
               </p>
             )}
 
             {quote && (
-              <p className="mb-10 text-xl italic leading-9 text-[#eadfbf]">
+              <p className="mb-10 text-xl italic leading-9 text-neutral-800 dark:text-[#eadfbf]">
                 “{quote}”
               </p>
             )}

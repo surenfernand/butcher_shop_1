@@ -11,7 +11,7 @@ type Props = {
 }
 
 export const ProductGridItem: React.FC<Props> = ({ product }) => {
-  const { gallery, priceInUSD, title } = product
+  const { productGallery, priceInUSD, title } = product
 
   let price = priceInUSD
 
@@ -30,7 +30,7 @@ export const ProductGridItem: React.FC<Props> = ({ product }) => {
   }
 
   const image =
-    gallery?.[0]?.image && typeof gallery[0]?.image !== 'string' ? gallery[0]?.image : false
+    productGallery?.[0]?.image && typeof productGallery[0]?.image !== 'string' ? productGallery[0]?.image : false
 
   return (
     <Link className="relative inline-block h-full w-full group" href={`/products/${product.slug}`}>

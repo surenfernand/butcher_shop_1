@@ -41,40 +41,42 @@ type Props = {
   mapEmbedUrl?: string | null
 }
 
-const getImageUrl = (image?: Media | number | string | null) =>
-  image && typeof image === 'object' && image.url ? image.url : null
-
 export const ContactPageBlock: React.FC<Props> = ({
   formTitle,
   cards,
   storeHours,
   storeNote,
   form,
-  mapImage,
+  mapImage: _mapImage,
   mapTitle,
   mapLabel,
   mapEmbedUrl,
 }) => {
-  const mapImageUrl = getImageUrl(mapImage)
-
   return (
-    <section className="bg-black px-6 py-20 text-white">
+    <section className="bg-dark px-6 py-20 text-foreground">
       <div className="mx-auto grid max-w-[1280px] gap-6 lg:grid-cols-[400px_1fr]">
         <div className="space-y-6">
           {(cards || []).map((card, index) => {
             const Icon = icons[card.icon || 'map-pin'] || MapPin
 
             return (
-              <div key={index} className="bg-[#1b1f1e] p-7">
+              <div
+                key={index}
+                className="border border-border bg-card p-7 shadow-sm"
+              >
                 <Icon className="mb-5 h-5 w-5 text-[#d9aa45]" />
-                <h3 className="mb-3 text-sm font-semibold">{card.title}</h3>
-                <p className="text-sm leading-7 text-white/80">{card.line1}</p>
-                {card.line2 && <p className="text-sm leading-7 text-white/80">{card.line2}</p>}
+                <h3 className="mb-3 text-sm font-semibold text-foreground">{card.title}</h3>
+                {card.line1 && (
+                  <p className="text-sm leading-7 text-muted-foreground">{card.line1}</p>
+                )}
+                {card.line2 && (
+                  <p className="text-sm leading-7 text-muted-foreground">{card.line2}</p>
+                )}
               </div>
             )
           })}
 
-          <div className="border border-[#4f3a12] bg-black p-7">
+          <div className="border border-border bg-card p-7 shadow-sm">
             <div className="mb-6 flex items-center gap-3">
               <Clock3 className="h-5 w-5 text-[#d9aa45]" />
               <h3 className="text-sm font-semibold uppercase text-[#d9aa45]">Store Hours</h3>
@@ -84,20 +86,24 @@ export const ContactPageBlock: React.FC<Props> = ({
               {(storeHours || []).map((item, index) => (
                 <div
                   key={index}
-                  className="flex justify-between border-b border-white/10 pb-3 text-sm"
+                  className="flex justify-between border-b border-border pb-3 text-sm"
                 >
-                  <span className="font-bold uppercase">{item.day}</span>
+                  <span className="font-bold uppercase text-foreground">{item.day}</span>
                   <span className="font-bold text-[#d9aa45]">{item.time}</span>
                 </div>
               ))}
             </div>
 
-            {storeNote && <p className="mt-6 text-xs italic text-white/70">{storeNote}</p>}
+            {storeNote && (
+              <p className="mt-6 text-xs italic text-muted-foreground">{storeNote}</p>
+            )}
           </div>
         </div>
 
-        <div className="bg-[#1b1f1e] p-8 md:p-12">
-          <h2 className="text-3xl font-extrabold uppercase">{formTitle || 'Send An Inquiry'}</h2>
+        <div className="border border-border bg-card p-8 shadow-sm md:p-12">
+          <h2 className="text-3xl font-extrabold uppercase text-foreground">
+            {formTitle || 'Send An Inquiry'}
+          </h2>
           <div className="mb-10 mt-4 h-[3px] w-12 bg-[#d9aa45]" />
 
           {form && <FormBlock form={form} enableIntro={false} />}
@@ -105,7 +111,7 @@ export const ContactPageBlock: React.FC<Props> = ({
       </div>
 
       <div className="mx-auto mt-20 max-w-[1280px]">
-        <div className="relative h-[440px] overflow-hidden bg-[#1b1f1e]">
+        <div className="relative h-[440px] overflow-hidden rounded-md border border-border bg-muted">
           {mapEmbedUrl ? (
             <iframe
               src={mapEmbedUrl}
@@ -117,7 +123,7 @@ export const ContactPageBlock: React.FC<Props> = ({
               className="absolute inset-0 h-full w-full border-0 grayscale"
             />
           ) : (
-            <div className="flex h-full items-center justify-center text-white/60">
+            <div className="flex h-full items-center justify-center text-muted-foreground">
               Google Map not configured
             </div>
           )}
@@ -125,9 +131,13 @@ export const ContactPageBlock: React.FC<Props> = ({
           {(mapTitle || mapLabel) && (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
               <div className="text-center">
-                {mapTitle && <h3 className="text-5xl font-bold text-black">{mapTitle}</h3>}
+                {mapTitle && (
+                  <h3 className="text-5xl font-bold text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.85)]">
+                    {mapTitle}
+                  </h3>
+                )}
                 {mapLabel && (
-                  <p className="mt-2 bg-black px-4 py-2 text-xs uppercase text-white">
+                  <p className="mt-2 border border-white/20 bg-black/75 px-4 py-2 text-xs uppercase text-white backdrop-blur-sm">
                     {mapLabel}
                   </p>
                 )}

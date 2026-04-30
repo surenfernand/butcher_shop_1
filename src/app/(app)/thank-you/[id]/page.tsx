@@ -148,6 +148,11 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
       ? Number(typedOrder.fulfillment?.shippingCharge || 0)
       : 0
 
+  const fulfillmentWithTax = (typedOrder.fulfillment as
+    | (typeof typedOrder.fulfillment & { estimatedTax?: number | null })
+    | null
+    | undefined)
+
 
 
   const itemsSubtotal =
@@ -169,7 +174,7 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
   const estimatedTax =
     estimatedTaxFromUrlNumber !== null && Number.isFinite(estimatedTaxFromUrlNumber)
       ? estimatedTaxFromUrlNumber
-      : Number(typedOrder.fulfillment?.estimatedTax || 0)
+      : Number(fulfillmentWithTax?.estimatedTax || 0)
 
   const safeShippingTotal = shippingTotal ?? 0
   const safeEstimatedTax = estimatedTax ?? 0

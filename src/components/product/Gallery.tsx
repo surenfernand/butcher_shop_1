@@ -8,10 +8,9 @@ import { useSearchParams } from 'next/navigation'
 import React, { useEffect } from 'react'
 
 import { Carousel, CarouselApi, CarouselContent, CarouselItem } from '@/components/ui/carousel'
-import { DefaultDocumentIDType } from 'payload'
 
 type Props = {
-  gallery: NonNullable<Product['gallery']>
+  gallery: NonNullable<Product['productGallery']>
 }
 
 export const Gallery: React.FC<Props> = ({ gallery }) => {
@@ -29,18 +28,9 @@ export const Gallery: React.FC<Props> = ({ gallery }) => {
     const values = Array.from(searchParams.values())
 
     if (values && api) {
-      const index = gallery.findIndex((item: NonNullable<Product['gallery']>[number]) => {
-        if (!item.variantOption) return false
-
-        let variantID: DefaultDocumentIDType
-
-        if (typeof item.variantOption === 'object') {
-          variantID = item.variantOption.id
-        } else {
-          variantID = item.variantOption
-        }
-
-        return Boolean(values.find((value) => value === String(variantID)))
+      const index = gallery.findIndex((item: NonNullable<Product['productGallery']>[number]) => {
+        if (!item.id) return false
+        return Boolean(values.find((value) => value === String(item.id)))
       })
       if (index !== -1) {
         setCurrent(index)
@@ -61,7 +51,7 @@ export const Gallery: React.FC<Props> = ({ gallery }) => {
 
       <Carousel setApi={setApi} className="w-full" opts={{ align: 'start', loop: false }}>
         <CarouselContent>
-          {gallery.map((item: NonNullable<Product['gallery']>[number], i: number) => {
+          {gallery.map((item: NonNullable<Product['productGallery']>[number], i: number) => {
             if (typeof item.image !== 'object') return null
 
             return (

@@ -149,13 +149,13 @@ export const FormBlock: React.FC<
 
       <FormProvider {...formMethods}>
         {!isLoading && hasSubmitted && confirmationType === 'message' && (
-          <div className="border border-[#3a3323] bg-black/20 p-6 text-white">
+          <div className="border border-border bg-muted/60 p-6 text-foreground">
             <RichText data={confirmationMessage} />
           </div>
         )}
 
         {isLoading && !hasSubmitted && (
-          <p className="text-sm text-white/70">Loading, please wait...</p>
+          <p className="text-sm text-muted-foreground">Loading, please wait...</p>
         )}
 
         {error && (

@@ -113,14 +113,14 @@ export default async function SubscriptionsPage() {
   )
 
   return (
-    <div className="space-y-12 text-white">
+    <div className="space-y-12 text-foreground">
       <div className="mt-3">
         <h1 className="text-5xl font-bold tracking-tight">My Subscriptions</h1>
-        <p className="mt-3 text-white/55">View your all Subscriptions</p>
+        <p className="mt-3 text-muted-foreground">View your all Subscriptions</p>
       </div>
 
       {subscriptionItems.length === 0 ? (
-        <div className="border border-[#3A3325] bg-[#1A1C1C] p-10 text-white/60">
+        <div className="border border-border bg-card p-10 text-muted-foreground">
           You do not have any active subscriptions yet.
         </div>
       ) : (
@@ -134,9 +134,9 @@ export default async function SubscriptionsPage() {
             return (
               <section
                 key={`${order.id}-${index}`}
-                className="grid overflow-hidden border border-[#3A3325] bg-[#141515] lg:grid-cols-[320px_1fr]"
+                className="grid overflow-hidden border border-border bg-card lg:grid-cols-[320px_1fr]"
               >
-                <div className="relative bg-black">
+                <div className="relative bg-muted">
                   <div className="flex h-full min-h-[300px] items-center justify-center">
                     {image?.url ? (
                       <img
@@ -145,23 +145,23 @@ export default async function SubscriptionsPage() {
                         className="object-cover"
                       />
                     ) : (
-                      <div className="text-center text-black/50">No product image</div>
+                      <div className="text-center text-muted-foreground">No product image</div>
                     )}
                   </div>
                 </div>
 
                 <div className="p-10">
-                  <div className="flex flex-col gap-6 border-b border-white/10 pb-8 md:flex-row md:items-start md:justify-between">
+                  <div className="flex flex-col gap-6 border-b border-border/40 pb-8 md:flex-row md:items-start md:justify-between">
                     <div>
                       <h2 className="text-xl font-bold uppercase">
                         {product?.title || 'Subscription Box'}
                       </h2>
 
-                      <p className="mt-2 text-white/45">
+                      <p className="mt-2 text-muted-foreground">
                         Quantity: {item.quantity || 1}
                       </p>
 
-                      <p className="mt-2 text-white/45">
+                      <p className="mt-2 text-muted-foreground">
                         Subscription ID:{' '}
                         {order.stripeSubscriptionID || `#${order.id}`}
                       </p>
@@ -170,12 +170,12 @@ export default async function SubscriptionsPage() {
                     <div className="text-left md:text-right">
                       <p className="text-xl font-bold text-[#E2B84F]">
                         {formatMoney(amount)}
-                        <span className="text-sm font-normal text-white/50">
+                        <span className="text-sm font-normal text-muted-foreground">
                           /{purchaseType === 'monthly' ? 'mo' : 'wk'}
                         </span>
                       </p>
 
-                      <p className="mt-1 text-xs uppercase tracking-[0.2em] text-white/45">
+                      <p className="mt-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">
                         {purchaseType === 'monthly'
                           ? 'Monthly Subscription'
                           : 'Weekly Subscription'}
@@ -183,16 +183,16 @@ export default async function SubscriptionsPage() {
                     </div>
                   </div>
 
-                  <div className="grid gap-8 border-b border-white/10 py-8 md:grid-cols-2">
+                  <div className="grid gap-8 border-b border-border/40 py-8 md:grid-cols-2">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.18em] text-white/35">
+                      <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
                         Next Delivery
                       </p>
                       <p className="mt-3 font-semibold">{formatDate(fulfillment?.date)}</p>
                     </div>
 
                     <div>
-                      <p className="text-xs uppercase tracking-[0.18em] text-white/35">
+                      <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
                         Shipping To
                       </p>
                       <p className="mt-3 font-semibold">
@@ -211,7 +211,7 @@ export default async function SubscriptionsPage() {
                       Manage Selection
                     </Link>
 
-                    <button className="border border-white/10 px-8 py-4 text-xs font-black uppercase tracking-[0.25em] text-white/45">
+                    <button className="border border-border/60 px-8 py-4 text-xs font-black uppercase tracking-[0.25em] text-muted-foreground">
                       Pause Subscription
                     </button>
                   </div>

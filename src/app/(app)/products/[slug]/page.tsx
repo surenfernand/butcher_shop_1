@@ -36,7 +36,7 @@ export default async function ProductPage({ params }: Args) {
   if (!product) return notFound()
 
   return (
-    <main className="bg-black pt-32 pb-20 text-white">
+    <main className="bg-background pt-32 pb-20 text-foreground">
       <div className="container">
         <Breadcrumbs
           items={[

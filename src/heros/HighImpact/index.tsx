@@ -1,19 +1,28 @@
 'use client'
 
 import { CMSLink } from '@/components/Link'
-import type { Page } from '@/payload-types'
+import { Media } from '@/components/Media'
+import type { Header, Page } from '@/payload-types'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import Image from 'next/image'
 import React, { useEffect } from 'react'
 
-export const HighImpactHero: React.FC<Page['hero']> = ({
+type HighImpactHeroProps = Page['hero'] & {
+  brandLogo?: Header['logo']
+  pageSlug?: string
+}
+
+export const HighImpactHero: React.FC<HighImpactHeroProps> = ({
   links,
   media,
   eyebrow,
   heading,
   description,
+  brandLogo,
+  pageSlug,
 }) => {
   const { setHeaderTheme } = useHeaderTheme()
+  const isHomeHero = pageSlug === 'home'
 
   useEffect(() => {
     setHeaderTheme('dark')
@@ -63,12 +72,24 @@ export const HighImpactHero: React.FC<Page['hero']> = ({
 
       <div className="relative z-10 flex min-h-screen items-center">
         <div className="container w-full px-4 md:px-8">
-          <div className="max-w-xl pt-24 md:pt-32">
-            {eyebrow && (
+          <div
+            className={
+              isHomeHero
+                ? 'mx-auto flex max-w-5xl flex-col items-center pt-24 text-center md:pt-32'
+                : 'max-w-xl pt-24 md:pt-32'
+            }
+          >
+            {isHomeHero && brandLogo && typeof brandLogo === 'object' ? (
+              <div className="mb-8 flex w-full justify-center">
+                <Media resource={brandLogo} imgClassName="h-80 w-full object-contain" priority />
+              </div>
+            ) : null}
+
+            {/* {eyebrow && (
               <p className="mb-4 text-[11px] uppercase tracking-[0.35em] text-[#d4a63c]">
                 {eyebrow}
               </p>
-            )}
+            )} */}
 
             {heading && (
               <h1 className="mb-4 text-3xl font-light uppercase leading-tight md:text-5xl">
@@ -77,18 +98,24 @@ export const HighImpactHero: React.FC<Page['hero']> = ({
             )}
 
             {description && (
-              <p className="mb-8 text-sm leading-7 text-white/80 md:text-base">
+              <p
+                className={
+                  isHomeHero
+                    ? 'mb-8 max-w-3xl text-center text-sm leading-7 text-white/80 md:text-base'
+                    : 'mb-8 text-sm leading-7 text-white/80 md:text-base'
+                }
+              >
                 {description}
               </p>
             )}
 
             {Array.isArray(links) && links.length > 0 && (
-              <ul className="flex flex-wrap gap-4">
+              <ul className={isHomeHero ? 'flex flex-wrap justify-center gap-4' : 'flex flex-wrap gap-4'}>
                 {links.map(({ link }, i) => (
                   <li key={i}>
                     <CMSLink
                       {...link}
-                      className="inline-flex min-w-[160px] items-center justify-center border border-[#d4a63c] px-6 py-3 text-xs uppercase tracking-[0.2em] transition"
+                      className="inline-flex min-w-[160px] items-center justify-center border border-[#d4a63c] bg-white px-6 py-3 text-xs uppercase tracking-[0.2em] text-black transition hover:bg-[#d4a63c]"
                     />
                   </li>
                 ))}

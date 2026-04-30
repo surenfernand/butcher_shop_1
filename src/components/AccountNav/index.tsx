@@ -13,10 +13,10 @@ const linkBase =
   'w-full justify-start rounded-none px-5 py-4 text-sm font-medium tracking-wide hover:no-underline transition-colors'
 
 const linkInactive =
-  'text-white/40 hover:text-[#E2B84F] hover:bg-black/[0.03]'
+  'text-muted-foreground hover:text-[#E2B84F] hover:bg-muted/40'
 
 const linkActive =
-  'text-[#E2B84F] bg-black/[0.04] border-r-2 border-[#E2B84F]'
+  'border-r-2 border-[#E2B84F] bg-muted/60 text-[#E2B84F]'
 
 export const AccountNav: React.FC<Props> = ({ className }) => {
   const pathname = usePathname()
@@ -25,15 +25,16 @@ export const AccountNav: React.FC<Props> = ({ className }) => {
     <div
       className={clsx(
         'flex min-h-full flex-col justify-between text-white',
+        'text-foreground',
         className,
       )}
     >
       <div>
-        <div className="border-b border-white/5 px-5 py-6">
+        <div className="border-b border-border/40 px-5 py-6">
           <p className="text-lg font-bold uppercase tracking-[0.18em] text-[#E2B84F]">
             THE BUTCHER'S CRAFT
           </p>
-          <p className="mt-1 text-xs text-white/45">Artisan Butchery</p>
+          <p className="mt-1 text-xs text-muted-foreground">Artisan Butchery</p>
         </div>
 
         <ul className="mt-6 flex flex-col">
@@ -100,7 +101,7 @@ export const AccountNav: React.FC<Props> = ({ className }) => {
         </ul>
       </div>
 
-      <div className="border-t border-white/5">
+      <div className="border-t border-border/40">
         <Button
           asChild
           variant="link"
@@ -110,8 +111,8 @@ export const AccountNav: React.FC<Props> = ({ className }) => {
             href="/logout"
             className={clsx(
               linkBase,
-              'text-[#F2B8A8] hover:bg-black/[0.03] hover:text-[#FFD1C7]',
-              pathname === '/logout' && 'bg-black/[0.04]',
+              'text-[#F2B8A8] hover:bg-muted/40 hover:text-[#FFD1C7]',
+              pathname === '/logout' && 'bg-muted/60',
             )}
           >
             Log out

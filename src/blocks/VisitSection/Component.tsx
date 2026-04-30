@@ -31,7 +31,7 @@ export const VisitSectionBlock: React.FC<Props> = ({
 
   return (
     <section className={['py-20', className].filter(Boolean).join(' ')}>
-      <div className="mx-auto grid max-w-[1280px] grid-cols-1 items-stretch gap-6 px-8 md:grid-cols-12">
+      <div data-theme="dark" className="mx-auto grid max-w-[1280px] grid-cols-1 items-stretch gap-6 px-8 md:grid-cols-12">
         <div className="bg-[#282a2b] p-10 md:col-span-4">
           {title && <h2 className="mb-6 text-4xl font-semibold uppercase tracking-[0.08em] text-white">{title}</h2>}
           {description && <p className="mb-10 text-base leading-8 text-[#d2c5b1]">{description}</p>}

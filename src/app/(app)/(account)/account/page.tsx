@@ -19,13 +19,13 @@ export default async function AccountPage() {
   }
 
   return (
-    <div className="space-y-14 text-white mt-5">      
+    <div className="mt-5 space-y-14 text-foreground">
       <div>
         <h1 className="text-5xl font-bold tracking-tight">
          Account Settings
         </h1>
 
-        <p className="mt-4 max-w-3xl text-lg text-white/60">
+        <p className="mt-4 max-w-3xl text-lg text-muted-foreground">
          Manage your atelier experience, security protocols, and artisanal fulfillment
           preferences.
         </p>
@@ -37,7 +37,7 @@ export default async function AccountPage() {
           Security
         </h2>
 
-        <div className="border border-[#3A3325] bg-[#1A1C1C] p-8">
+        <div className="border border-border bg-card p-8">
           <AccountForm />
         </div>
       </section>
@@ -48,11 +48,11 @@ export default async function AccountPage() {
           Notifications
         </h2>
 
-        <div className="border border-[#3A3325] bg-[#1A1C1C]">
+        <div className="border border-border bg-card">
           <div className="flex items-center justify-between px-8 py-8">
             <div>
-              <h3 className="font-semibold text-white">Email Preferences</h3>
-              <p className="mt-1 text-sm text-white/60">
+              <h3 className="font-semibold text-foreground">Email Preferences</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
                 Receive artisanal updates and order confirmations.
               </p>
             </div>
@@ -64,17 +64,17 @@ export default async function AccountPage() {
                 defaultChecked
                 className="peer sr-only"
               />
-              <span className="h-5 w-10 rounded-full bg-[#2B2D2E] border border-white/30 transition peer-checked:border-[#E2B84F] peer-checked:bg-[#E2B84F]" />
-              <span className="absolute left-1 top-1 h-3 w-3 rounded-full bg-black transition peer-checked:translate-x-5" />
+              <span className="h-5 w-10 rounded-full border border-border bg-muted transition peer-checked:border-[#E2B84F] peer-checked:bg-[#E2B84F]" />
+              <span className="absolute left-1 top-1 h-3 w-3 rounded-full bg-background transition peer-checked:translate-x-5" />
             </label>
           </div>
 
-          <div className="border-t border-white/10" />
+          <div className="border-t border-border/40" />
 
           <div className="flex items-center justify-between px-8 py-8">
             <div>
-              <h3 className="font-semibold text-white">SMS Notifications</h3>
-              <p className="mt-1 text-sm text-white/60">
+              <h3 className="font-semibold text-foreground">SMS Notifications</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
                 Real-time alerts for when your cut is ready for fulfillment.
               </p>
             </div>
@@ -85,8 +85,8 @@ export default async function AccountPage() {
                 name="smsNotifications"
                 className="peer sr-only"
               />
-              <span className="h-5 w-10 rounded-full bg-[#2B2D2E] border border-white/30 transition peer-checked:border-[#E2B84F] peer-checked:bg-[#E2B84F]" />
-              <span className="absolute left-1 top-1 h-3 w-3 rounded-full bg-black transition peer-checked:translate-x-5" />
+              <span className="h-5 w-10 rounded-full border border-border bg-muted transition peer-checked:border-[#E2B84F] peer-checked:bg-[#E2B84F]" />
+              <span className="absolute left-1 top-1 h-3 w-3 rounded-full bg-background transition peer-checked:translate-x-5" />
             </label>
           </div>
         </div>

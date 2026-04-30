@@ -37,20 +37,22 @@ export const getPurchaseTypesForCartItems = (
 ): CartPurchaseTypeLine[] => {
   if (typeof window === 'undefined' || !items?.length) return []
 
-  return items
-    .map((line) => {
+  return items.reduce<CartPurchaseTypeLine[]>((acc, line) => {
       const { productID, variantID } = getCartLineIDs(line)
-      if (!productID) return null
+      if (!productID) return acc
 
-      return {
+      const nextLine: CartPurchaseTypeLine = {
         product: productID,
-        variant: variantID,
         purchaseType: normalizePurchaseType(
           localStorage.getItem(getPurchaseTypeStorageKey(productID, variantID)),
         ),
       }
-    })
-    .filter((line): line is CartPurchaseTypeLine => Boolean(line))
+
+      if (variantID) nextLine.variant = variantID
+
+      acc.push(nextLine)
+      return acc
+    }, [])
 }
 
 export const getPurchaseTypeForConfirmationFromCart = (

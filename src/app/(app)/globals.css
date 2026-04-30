@@ -87,7 +87,7 @@
 }
 
 :root {
-  --background: oklch(100% 0 0deg);
+  --background: #FFFFFF;
   --foreground: oklch(14.5% 0 0deg);
   --card: oklch(96.5% 0.005 265deg);
   --card-foreground: oklch(14.5% 0 0deg);
@@ -244,3 +244,51 @@ button {
   animation: cart-toast-shrink 4s linear forwards;
 }
 
+/* Light-mode fallback for legacy dark-only utility classes used across the app.
+   Skip elements inside a dark island ([data-theme='dark']) so header/footer stay dark in light mode. */
+[data-theme='light'] .bg-black:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .bg-\[\#121212\]:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .bg-\[\#0f0f0f\]:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .bg-\[\#111\]:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .bg-\[\#1A1C1C\]:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .bg-\[\#0a0a0a\]:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .bg-stone-800:not(:is([data-theme='dark'], [data-theme='dark'] *)) {
+  background-color: var(--color-card) !important;
+}
+
+[data-theme='light'] .text-stone-100:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .text-white:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .text-white\/85:not(:is([data-theme='dark'], [data-theme='dark'] *)) {
+  color: var(--color-foreground) !important;
+}
+
+[data-theme='light'] .text-stone-400:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .text-stone-500:not(:is([data-theme='dark'], [data-theme='dark'] *)) {
+  color: var(--color-muted-foreground) !important;
+}
+
+[data-theme='light'] [class*='text-stone-']:not(:is([data-theme='dark'], [data-theme='dark'] *)) {
+  color: var(--color-muted-foreground) !important;
+}
+
+[data-theme='light'] .bg-black[class*='text-white']:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .bg-\[\#121212\][class*='text-white']:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .bg-\[\#0f0f0f\][class*='text-white']:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .bg-\[\#111\][class*='text-white']:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .bg-\[\#1A1C1C\][class*='text-white']:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .bg-\[\#0a0a0a\][class*='text-white']:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .bg-stone-800[class*='text-white']:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .bg-black [class*='text-white']:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .bg-\[\#121212\] [class*='text-white']:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .bg-\[\#0f0f0f\] [class*='text-white']:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .bg-\[\#111\] [class*='text-white']:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .bg-\[\#1A1C1C\] [class*='text-white']:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .bg-\[\#0a0a0a\] [class*='text-white']:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .bg-stone-800 [class*='text-white']:not(:is([data-theme='dark'], [data-theme='dark'] *)) {
+  color: var(--color-foreground) !important;
+}
+
+[data-theme='light'] .border-stone-800:not(:is([data-theme='dark'], [data-theme='dark'] *)),
+[data-theme='light'] .border-stone-700:not(:is([data-theme='dark'], [data-theme='dark'] *)) {
+  border-color: var(--color-border) !important;
+}

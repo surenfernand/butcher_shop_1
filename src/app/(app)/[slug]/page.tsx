@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
+import { getCachedGlobal } from '@/utilities/getGlobals'
 import { generateMeta } from '@/utilities/generateMeta'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
@@ -62,13 +63,14 @@ export default async function Page({ params, searchParams }: Args) {
     return notFound()
   }
 
+  const headerGlobal = await getCachedGlobal('header', 1)()
   const { hero, layout } = page
 
   return (
     <article>
       <div className="pt-20">
-        <RenderHero {...hero} />
-        <RenderBlocks blocks={layout} searchParams={resolvedSearchParams} />
+        <RenderHero {...hero} brandLogo={headerGlobal.logo} pageSlug={slug} />
+        <RenderBlocks blocks={layout} searchParams={resolvedSearchParams} slug={slug} />
       </div>
     </article>
   )

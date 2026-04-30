@@ -181,10 +181,10 @@ export function CartModal() {
 
       <SheetContent
         side="right"
-        className="w-full max-w-[410px] border-r border-[#6f5620]/50 bg-[#0a0a0a] p-0 text-white"
+        className="w-full max-w-[410px] border-border bg-card p-0 text-foreground"
       >
         <div className="flex h-full flex-col">
-          <SheetHeader className="border-b border-[#1d1d1d] px-7 py-8 text-left">
+          <SheetHeader className="border-b border-border px-7 py-8 text-left">
             <div className="flex items-start justify-between">
               <div>
                 <SheetTitle className="text-left text-[2.1rem] font-black uppercase tracking-[-0.02em] text-[#d4a63c]">
@@ -197,10 +197,10 @@ export function CartModal() {
           {!cart || cart?.items?.length === 0 ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-4 px-8 text-center">
               <ShoppingCart className="h-14 w-14 text-[#d4a63c]" />
-              <p className="text-xl font-bold uppercase tracking-wide text-white">
+              <p className="text-xl font-bold uppercase tracking-wide text-foreground">
                 Your cart is empty
               </p>
-              <p className="text-sm text-[#8a8a8a]">Add Items to view in Cart</p>
+              <p className="text-sm text-muted-foreground">Add Items to view in Cart</p>
             </div>
           ) : (
             <>
@@ -209,9 +209,6 @@ export function CartModal() {
                   {cart?.items?.map((item, i) => {
                     const product = item.product
                     const variant = item.variant
-
-                    console.log("product")
-                    console.log(product)
 
                     if (typeof product !== 'object' || !item || !product || !product.slug) {
                       return <React.Fragment key={i} />
@@ -229,9 +226,6 @@ export function CartModal() {
 
                     let image = firstGalleryImage || metaImage
                     let price = product.priceInUSD
-
-                    console.log("image");
-                    console.log(image);
 
                     const isVariant = Boolean(variant) && typeof variant === 'object'
                     const variantID = isVariant ? String(variant.id) : undefined
@@ -287,7 +281,7 @@ export function CartModal() {
                           href={`/products/${(item.product as Product)?.slug}`}
                           className="block shrink-0"
                         >
-                          <div className="relative h-[104px] w-[104px] overflow-hidden border border-[#2b2b2b] bg-[#121212]">
+                          <div className="relative h-[104px] w-[104px] overflow-hidden border border-border bg-muted">
                             {image?.url && (
                               <Image
                                 alt={image?.alt || product?.title || ''}
@@ -307,13 +301,13 @@ export function CartModal() {
                                 href={`/products/${(item.product as Product)?.slug}`}
                                 className="block"
                               >
-                                <h3 className="line-clamp-2 text-[1.05rem] font-extrabold uppercase leading-tight tracking-[0.02em] text-[#f3f0ea]">
+                                <h3 className="line-clamp-2 text-[1.05rem] font-extrabold uppercase leading-tight tracking-[0.02em] text-foreground">
                                   {product?.title}
                                 </h3>
                               </Link>
 
                               {(variantText || item.quantity) && (
-                                <p className="mt-2 text-[0.78rem] uppercase tracking-[0.08em] text-[#727272]">
+                                <p className="mt-2 text-[0.78rem] uppercase tracking-[0.08em] text-muted-foreground">
                                   {variantText ? `Weight: ${variantText}` : ''}
                                 </p>
                               )}
@@ -327,21 +321,21 @@ export function CartModal() {
                           </div>
 
                           <div className="mt-5 flex items-end justify-between gap-3">
-                            <div className="flex h-8 items-center border border-[#3a3a3a] bg-transparent">
+                            <div className="flex h-8 items-center border border-border bg-muted/40">
                               <EditItemQuantityButton
                                 item={item}
                                 type="minus"
-                                className="h-8 w-8 border-r border-[#3a3a3a] text-[#bdbdbd] hover:bg-[#161616] hover:text-white"
+                                className="h-8 w-8 border-r border-border text-muted-foreground hover:bg-muted hover:text-foreground"
                               />
 
-                              <span className="flex h-8 w-9 items-center justify-center text-sm text-[#d7d7d7]">
+                              <span className="flex h-8 w-9 items-center justify-center text-sm font-medium text-foreground">
                                 {item.quantity}
                               </span>
 
                               <EditItemQuantityButton
                                 item={item}
                                 type="plus"
-                                className="h-8 w-8 border-l border-[#3a3a3a] text-[#bdbdbd] hover:bg-[#161616] hover:text-white"
+                                className="h-8 w-8 border-l border-border text-muted-foreground hover:bg-muted hover:text-foreground"
                               />
                             </div>
 
@@ -359,17 +353,17 @@ export function CartModal() {
                 </ul>
               </div>
 
-              <div className="border-t border-[#6f5620]/40 bg-[#111414] px-7 py-6">
+              <div className="border-t border-[#6f5620]/40 bg-zinc-950 px-7 py-6 text-zinc-100">
                 <div className="space-y-3 text-sm uppercase tracking-[0.14em]">
-                  <div className="flex items-center justify-between text-[#a9a9a9]">
+                  <div className="flex items-center justify-between text-zinc-400">
                     <span>Subtotal</span>
                     {typeof cart?.subtotal === 'number' && (
-                      <Price amount={adjustedSubtotal} className="text-base text-[#bcbcbc]" />
+                      <Price amount={adjustedSubtotal} className="text-base text-zinc-300" />
                     )}
                   </div>
 
-                  <div className="mt-5 flex items-center justify-between border-t border-[#262626] pt-4">
-                    <span className="text-lg font-extrabold tracking-[0.14em] text-[#f1f1f1]">
+                  <div className="mt-5 flex items-center justify-between border-t border-zinc-800 pt-4">
+                    <span className="text-lg font-extrabold tracking-[0.14em] text-zinc-100">
                       Total
                     </span>
                     {typeof cart?.subtotal === 'number' && (
@@ -390,7 +384,7 @@ export function CartModal() {
                     Proceed to Checkout
                   </Link>
 
-                  <div className="flex items-center justify-center gap-10 border-t border-[#1f1f1f] pt-5 text-[11px] uppercase tracking-[0.14em] text-[#555]" />
+                  <div className="flex items-center justify-center gap-10 border-t border-zinc-800 pt-5 text-[11px] uppercase tracking-[0.14em] text-zinc-500" />
                 </div>
               </div>
             </>

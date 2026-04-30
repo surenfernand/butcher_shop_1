@@ -37,17 +37,17 @@ export default async function Orders() {
   } catch (error) { }
 
   return (
-    <div className="w-full space-y-12 text-white">
+    <div className="w-full space-y-12 text-foreground">
       <div className='mt-3'>
         <h1 className="text-5xl font-bold tracking-tight">
           Order History
         </h1>
-        <p className="mt-3 text-white/55">
+        <p className="mt-3 text-muted-foreground">
           Manage your order history.
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-white/10 bg-[#1A1C1C]">
+      <div className="overflow-hidden rounded-xl border border-border bg-card">
         {/* <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
           <h2 className="text-2xl font-semibold">Order History</h2>
 
@@ -55,7 +55,7 @@ export default async function Orders() {
         </div> */}
 
         {(!orders || !Array.isArray(orders) || orders.length === 0) && (
-          <div className="px-6 py-10 text-white/55">
+          <div className="px-6 py-10 text-muted-foreground">
             You have no orders.
           </div>
         )}
@@ -63,7 +63,7 @@ export default async function Orders() {
         {orders && orders.length > 0 && (
           <div className="w-full overflow-x-auto">
             <table className="w-full text-left">
-              <thead className="bg-black/[0.03] text-xs uppercase tracking-[0.15em] text-white/45">
+              <thead className="bg-muted/40 text-xs uppercase tracking-[0.15em] text-muted-foreground">
                 <tr>
                   <th className="px-6 py-4 font-medium">Order #</th>
                   <th className="px-6 py-4 font-medium">Order Date</th>
@@ -78,18 +78,18 @@ export default async function Orders() {
                 {orders.map((order: any) => (
                   <tr
                     key={order.id}
-                    className="border-t border-white/5 hover:bg-black/[0.03] transition"
+                    className="border-t border-border/40 transition hover:bg-muted/30"
                   >
                     <td className="px-6 py-5">
                       <Link
                         href={`/orders/${order.id}`}
-                        className="text-white hover:text-[#E2B84F]"
+                        className="text-foreground hover:text-[#E2B84F]"
                       >
                         #{order.id}
                       </Link>
                     </td>
 
-                    <td className="px-6 py-5 text-white/55">
+                    <td className="px-6 py-5 text-muted-foreground">
                       {order.createdAt
                         ? new Date(order.createdAt).toLocaleDateString('en-US', {
                           month: 'short',

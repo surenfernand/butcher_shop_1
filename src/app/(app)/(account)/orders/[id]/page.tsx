@@ -181,11 +181,8 @@ export default async function Order({ params, searchParams }: PageProps) {
   const computedTotal = itemsSubtotal + shippingTotal + estimatedTax
 
 
-  console.log("order");
-  console.log(order);
-
   return (
-    <div className="min-h-screen text-neutral-200 px-6 py-10">
+    <div className="min-h-screen px-6 py-10 text-foreground">
       <div className="mx-auto max-w-6xl">
         <div className="mb-10 flex items-center justify-between gap-8">
           {user ? (
@@ -207,11 +204,11 @@ export default async function Order({ params, searchParams }: PageProps) {
         </div>
 
         <div className="mb-10">
-          <h1 className="mb-3 text-5xl font-black uppercase tracking-tight text-neutral-100">
+          <h1 className="mb-3 text-5xl font-black uppercase tracking-tight text-foreground">
             Order #{order.id}
           </h1>
 
-          <p className="text-neutral-500">
+          <p className="text-muted-foreground">
             Placed on{' '}
             <time dateTime={order.createdAt}>
               {formatDateTime({ date: order.createdAt, format: 'MMMM dd, yyyy' })}
@@ -221,8 +218,8 @@ export default async function Order({ params, searchParams }: PageProps) {
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
           <div className="space-y-6">
-            <section className="border border-[#222] bg-[#111] px-6 py-6 shadow-[0_0_0_1px_rgba(255,255,255,0.03)]">
-              <h2 className="mb-6 text-2xl font-black uppercase tracking-tight text-neutral-100">
+            <section className="border border-border bg-card px-6 py-6 shadow-[0_0_0_1px_rgba(0,0,0,0.03)]">
+              <h2 className="mb-6 text-2xl font-black uppercase tracking-tight text-foreground">
                 Order Items
               </h2>
 
@@ -235,7 +232,7 @@ export default async function Order({ params, searchParams }: PageProps) {
 
                     if (!product) {
                       return (
-                        <li key={index} className="text-neutral-500">
+                        <li key={index} className="text-muted-foreground">
                           This item is no longer available.
                         </li>
                       )
@@ -257,7 +254,7 @@ export default async function Order({ params, searchParams }: PageProps) {
                     return (
                       <li
                         key={item.id}
-                        className="border-b border-[#222] pb-6 last:border-b-0 last:pb-0"
+                        className="border-b border-border pb-6 last:border-b-0 last:pb-0"
                       >
                         <ProductItem
                           product={product}
@@ -266,8 +263,8 @@ export default async function Order({ params, searchParams }: PageProps) {
                           lineSubtotalInCents={lineSubtotalInCents}
                         />
 
-                        <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-neutral-400">
-                          <span className="rounded-full border border-[#333] px-3 py-1 font-mono uppercase tracking-[0.12em] text-[#f5a400]">
+                        <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                          <span className="rounded-full border border-border px-3 py-1 font-mono uppercase tracking-[0.12em] text-[#f5a400]">
                             {getPurchaseTypeLabel(linePurchaseType)}
                           </span>
 
@@ -279,18 +276,18 @@ export default async function Order({ params, searchParams }: PageProps) {
                 </ul>
               )}
 
-              <div className="mt-8 border-t border-[#222] pt-6">
-                <div className="mb-3 flex justify-between text-neutral-400">
+              <div className="mt-8 border-t border-border pt-6">
+                <div className="mb-3 flex justify-between text-muted-foreground">
                   <span>Subtotal</span>
-                  <Price amount={itemsSubtotal} />
+                  <Price amount={itemsSubtotal} className="text-foreground" />
                 </div>
 
-                <div className="mb-5 flex justify-between text-neutral-400">
+                <div className="mb-5 flex justify-between text-muted-foreground">
                   <span>Shipping</span>
-                  <Price amount={shippingTotal} />
+                  <Price amount={shippingTotal} className="text-foreground" />
                 </div>
 
-                <div className="flex justify-between border-t border-[#222] pt-5">
+                <div className="flex justify-between border-t border-border pt-5">
                   <span className="font-mono text-2xl font-bold uppercase tracking-[0.14em] text-[#f5a400]">
                     Total
                   </span>
@@ -303,8 +300,8 @@ export default async function Order({ params, searchParams }: PageProps) {
               </div>
             </section>
 
-            <section className="border border-[#222] bg-[#111] px-6 py-6 shadow-[0_0_0_1px_rgba(255,255,255,0.03)]">
-              <h2 className="mb-6 text-2xl font-black uppercase tracking-tight text-neutral-100">
+            <section className="border border-border bg-card px-6 py-6 shadow-[0_0_0_1px_rgba(0,0,0,0.03)]">
+              <h2 className="mb-6 text-2xl font-black uppercase tracking-tight text-foreground">
                 Order Progress
               </h2>
 
@@ -316,25 +313,25 @@ export default async function Order({ params, searchParams }: PageProps) {
 
           <aside className="space-y-6">
             {order.shippingAddress && (
-              <section className="border border-[#222] bg-[#111] px-6 py-6 shadow-[0_0_0_1px_rgba(255,255,255,0.03)]">
-                <h2 className="mb-6 text-2xl font-black uppercase tracking-tight text-neutral-100">
+              <section className="border border-border bg-card px-6 py-6 shadow-[0_0_0_1px_rgba(0,0,0,0.03)]">
+                <h2 className="mb-6 text-2xl font-black uppercase tracking-tight text-foreground">
                   Shipping Address
                 </h2>
 
-                <div className="flex justify-between gap-4 border-t border-[#222] pt-3">
+                <div className="flex justify-between gap-4 border-t border-border pt-3">
                   {/* @ts-expect-error - some kind of type hell */}
                   <AddressItem address={order.shippingAddress} hideActions />
                 </div>
 
               
-                  <h2 className="mb-6 text-2xl font-black uppercase tracking-tight text-neutral-100 mt-3">
+                  <h2 className="mb-6 mt-3 text-2xl font-black uppercase tracking-tight text-foreground">
                     Fulfillment
                   </h2>
 
-                  <div className="space-y-3 text-sm text-neutral-400">
+                  <div className="space-y-3 text-sm">
                     <div className="flex justify-between gap-4">
-                      <span>Service</span>
-                      <span className="text-neutral-200">
+                      <span className="text-muted-foreground">Service</span>
+                      <span className="text-right font-medium text-foreground">
                         {fulfillment?.serviceType === 'delivery'
                           ? 'Delivery'
                           : fulfillment?.serviceType === 'pickup'
@@ -345,15 +342,19 @@ export default async function Order({ params, searchParams }: PageProps) {
 
                     {fulfillment?.branchName && (
                       <div className="flex justify-between gap-4">
-                        <span>Branch</span>
-                        <span className="text-neutral-200">{fulfillment.branchName}</span>
+                        <span className="text-muted-foreground">Branch</span>
+                        <span className="text-right font-medium text-foreground">
+                          {fulfillment.branchName}
+                        </span>
                       </div>
                     )}
 
                     {fulfillment?.date && (
                       <div className="flex justify-between gap-4">
-                        <span>Date</span>
-                        <span className="text-neutral-200">{fulfillment.date}</span>
+                        <span className="text-muted-foreground">Date</span>
+                        <span className="max-w-[200px] break-words text-right font-medium text-foreground sm:max-w-none">
+                          {fulfillment.date}
+                        </span>
                       </div>
                     )}
 
