@@ -11,12 +11,13 @@ const getRelationshipId = (value: RelationshipValue) => {
 export const reduceBranchInventory = (): CollectionAfterChangeHook => {
   return async ({ doc, operation, req, context }) => {
     if (context?.skipReduceBranchInventory) return doc
-    if (operation !== 'create' && operation !== 'update') return doc
-    if ((doc as any).inventoryReduced) return doc
+    if (req.context?.skipReduceBranchInventory) return doc
 
-    if (req.context?.skipReduceBranchInventory) {
-      return doc
-    }
+    // Stock must be deducted once when the order is placed — not on every admin edit.
+    // Running on `update` triggers a nested `payload.update` on this same order from inside
+    // `afterChange`, which can deadlock or leave the admin UI stuck on "Submitting...".
+    if (operation !== 'create') return doc
+    if ((doc as any).inventoryReduced) return doc
 
     const branchID = getRelationshipId((doc as any).fulfillment?.branch || (doc as any).branch)
     const items = (doc as any).items || (doc as any).lineItems || []

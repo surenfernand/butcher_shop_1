@@ -1,16 +1,16 @@
-import 'dotenv/config'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import {
-  BoldFeature,
-  EXPERIMENTAL_TableFeature,
-  IndentFeature,
-  ItalicFeature,
-  LinkFeature,
-  OrderedListFeature,
-  UnderlineFeature,
-  UnorderedListFeature,
-  lexicalEditor,
+    BoldFeature,
+    EXPERIMENTAL_TableFeature,
+    IndentFeature,
+    ItalicFeature,
+    LinkFeature,
+    OrderedListFeature,
+    UnderlineFeature,
+    UnorderedListFeature,
+    lexicalEditor,
 } from '@payloadcms/richtext-lexical'
+import 'dotenv/config'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
@@ -21,14 +21,14 @@ import { Pages } from '@/collections/Pages/index'
 import { Users } from '@/collections/Users'
 import { Footer } from '@/globals/Footer'
 import { Header } from '@/globals/Header'
-import { plugins } from './plugins'
 import { ShopPage } from '@/globals/ShopPage'
 import { CutTypes } from './collections/ProductCategories/CutTypes'
+import { Flavors } from './collections/ProductCategories/Flavors'
 import { MeatTypes } from './collections/ProductCategories/MeatTypes'
 import { Qualities } from './collections/ProductCategories/Qualities'
-import { Flavors } from './collections/ProductCategories/Flavors'
-import { ShopLuxuryPage } from './globals/ShopLuxuryPage'
 import { CartSettings } from './globals/CartSettings'
+import { ShopLuxuryPage } from './globals/ShopLuxuryPage'
+import { plugins } from './plugins'
 
 
 const filename = fileURLToPath(import.meta.url)

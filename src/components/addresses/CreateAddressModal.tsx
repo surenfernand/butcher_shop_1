@@ -55,8 +55,8 @@ export const CreateAddressModal: React.FC<Props> = ({
         <Button variant={'outline'}>{buttonText}</Button>
       </DialogTrigger>
  
-      <DialogContent className="max-w-[1000px] border border-[#4b4235] bg-[#080b0a] p-0 text-[#efe4cf] shadow-2xl" style={{width: "900px"}}>
-        <div className="px-20 py-20">
+      <DialogContent className="box-border w-[calc(100vw-2rem)] max-w-3xl overflow-x-hidden border border-[#4b4235] bg-[#080b0a] p-0 text-[#efe4cf] shadow-2xl sm:max-w-3xl">
+        <div className="box-border px-6 py-8 sm:px-10 sm:py-12 lg:px-14 lg:py-14">
           <DialogHeader className="mb-10">
             <DialogTitle className="text-4xl font-semibold tracking-tight text-[#f5c85b]">
               {modalTitle}

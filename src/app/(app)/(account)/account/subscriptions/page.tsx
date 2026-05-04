@@ -12,18 +12,18 @@ export const dynamic = 'force-dynamic'
 const formatMoney = (amount?: number | null) =>
   typeof amount === 'number'
     ? new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount / 100)
+        style: 'currency',
+        currency: 'USD',
+      }).format(amount / 100)
     : '—'
 
 const formatDate = (date?: string | null) =>
   date
     ? new Intl.DateTimeFormat('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    }).format(new Date(date))
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      }).format(new Date(date))
     : '—'
 
 const getProductImage = (product?: Product | null): Media | undefined => {
@@ -84,8 +84,8 @@ export default async function SubscriptionsPage() {
     },
   })
 
-  const orders = result.docs as Order[];
- 
+  const orders = result.docs as Order[]
+
   const subscriptionItems = orders.flatMap((order) =>
     (order.items || [])
       .map((item, index) => {
@@ -157,13 +157,10 @@ export default async function SubscriptionsPage() {
                         {product?.title || 'Subscription Box'}
                       </h2>
 
-                      <p className="mt-2 text-muted-foreground">
-                        Quantity: {item.quantity || 1}
-                      </p>
+                      <p className="mt-2 text-muted-foreground">Quantity: {item.quantity || 1}</p>
 
                       <p className="mt-2 text-muted-foreground">
-                        Subscription ID:{' '}
-                        {order.stripeSubscriptionID || `#${order.id}`}
+                        Subscription ID: {order.stripeSubscriptionID || `#${order.id}`}
                       </p>
                     </div>
 
@@ -211,7 +208,10 @@ export default async function SubscriptionsPage() {
                       Manage Selection
                     </Link>
 
-                    <button className="border border-border/60 px-8 py-4 text-xs font-black uppercase tracking-[0.25em] text-muted-foreground">
+                    <button
+                      type="button"
+                      className="border border-border/60 px-8 py-4 text-xs font-black uppercase tracking-[0.25em] text-muted-foreground"
+                    >
                       Pause Subscription
                     </button>
                   </div>

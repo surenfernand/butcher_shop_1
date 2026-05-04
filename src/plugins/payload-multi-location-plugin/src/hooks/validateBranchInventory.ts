@@ -3,8 +3,13 @@ import type { CollectionBeforeValidateHook } from 'payload'
 type Options = { orderSlug: string }
 
 export const validateBranchInventory = (_options: Options): CollectionBeforeValidateHook => {
-  return async ({ data, req }) => {
+  return async ({ data, req, operation }) => {
     if (!data) return data
+
+    // Inventory vs branch stock was already enforced when the order was created.
+    // Re-running on update breaks admin edits (e.g. changing order status) when
+    // branch inventory changed later or data is partially populated.
+    if (operation !== 'create') return data
 
     const branch = data.fulfillment?.branch || data.branch
     const items = data.items || data.lineItems || []

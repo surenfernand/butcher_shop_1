@@ -34,6 +34,15 @@ export const FeaturedCuts: Block = {
         { name: 'price', type: 'text' },
         { name: 'tag', type: 'text' },
         { name: 'image', type: 'upload', relationTo: 'media' },
+        {
+          name: 'product',
+          type: 'relationship',
+          relationTo: 'products',
+          admin: {
+            description:
+              'Optional. Links “View product” to this product. If empty, the button opens the shop.',
+          },
+        },
       ],
     },
   ],

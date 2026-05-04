@@ -572,15 +572,33 @@ export const seed = async ({
           {
             link: {
               type: 'custom',
-              label: 'Instagram',
-              url: 'https://instagram.com',
+              label: 'YouTube',
+              url: 'https://www.youtube.com',
+              newTab: true,
             },
           },
           {
             link: {
               type: 'custom',
               label: 'Facebook',
-              url: 'https://facebook.com',
+              url: 'https://www.facebook.com',
+              newTab: true,
+            },
+          },
+          {
+            link: {
+              type: 'custom',
+              label: 'X',
+              url: 'https://x.com',
+              newTab: true,
+            },
+          },
+          {
+            link: {
+              type: 'custom',
+              label: 'Instagram',
+              url: 'https://www.instagram.com',
+              newTab: true,
             },
           },
         ],

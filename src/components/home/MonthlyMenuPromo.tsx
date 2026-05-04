@@ -1,50 +1,70 @@
-import Link from 'next/link'
-import React from 'react'
+'use client'
+
+import Image from 'next/image'
+import React, { useState } from 'react'
 
 export const MonthlyMenuPromo: React.FC = () => {
-  return (
-    <section className=" ">
-      <div className="grid min-h-[260px] overflow-hidden border border-[#3b3422] bg-[#111] md:grid-cols-[1.05fr_0.95fr]">
-        <div className="relative flex items-end p-8 md:p-10">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(212,166,60,0.18),transparent_40%),linear-gradient(120deg,#2a2112_0%,#16110b_35%,#0f0f0f_100%)]" />
-          <div className="absolute inset-0 opacity-25 mix-blend-screen [background-image:repeating-linear-gradient(135deg,transparent,transparent_16px,rgba(255,255,255,0.07)_17px,transparent_18px)]" />
+  const [email, setEmail] = useState('')
+  const [submitted, setSubmitted] = useState(false)
 
-          <div className="relative z-10">
-            <p className="text-4xl font-bold uppercase leading-none tracking-[0.08em] text-white md:text-6xl">
-              Butcher&apos;s Selection
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email.trim()) return
+    setSubmitted(true)
+  }
+
+  return (
+    <section className="overflow-hidden bg-[#1a1a1a]">
+      <div className="grid md:min-h-[440px] md:grid-cols-2">
+        <div className="flex flex-col justify-center px-8 py-14 md:order-none md:px-12 md:py-16 lg:px-16 lg:py-20">
+          <h2 className="text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-[3.15rem] lg:leading-[1.12]">
+            Mastery In Your Inbox.
+          </h2>
+          <p className="mt-6 max-w-lg text-base leading-relaxed text-[#a0a0a0] md:text-[17px] md:leading-8">
+            Join our inner circle for exclusive access to vintage reserves, masterclass invites, and
+            seasonal provenance reports.
+          </p>
+
+          {submitted ? (
+            <p className="mt-10 text-sm font-medium text-[#d4af5f]">
+              Thank you — you&apos;re on the list.
             </p>
-            <p className="mt-2 text-base font-semibold text-[#d4a63c] md:text-lg">Chef&apos;s Monthly Offer</p>
-          </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="mt-10 max-w-md">
+              <label className="block">
+                <span className="sr-only">Your email address</span>
+                <input
+                  type="email"
+                  name="email"
+                  autoComplete="email"
+                  required
+                  placeholder="YOUR EMAIL ADDRESS"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full border-0 border-b border-[#5a5a5a] bg-transparent pb-3 pt-1 text-[11px] font-medium uppercase tracking-[0.22em] text-white placeholder:text-[#a0a0a0] focus:border-[#a0a0a0] focus:outline-none focus:ring-0"
+                />
+              </label>
+              <button
+                type="submit"
+                className="mt-9 w-full bg-[#d4af5f] px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#1a1a1a] transition hover:brightness-105 md:inline-block md:w-auto md:min-w-[300px]"
+              >
+                SUBSCRIBE TO CRAFT
+              </button>
+            </form>
+          )}
         </div>
 
-        <div className="relative flex flex-col justify-center px-8 py-10 text-center md:px-10">
-          <div className="absolute inset-0 bg-[#151719]" />
-          <div className="absolute inset-0 opacity-15 [background-image:radial-gradient(circle_at_8%_10%,#d4a63c_1px,transparent_1px)] [background-size:38px_38px]" />
-
-          <div className="relative z-10">
-            <h3 className="text-lg font-bold uppercase leading-tight tracking-[0.03em] text-[#d4a63c] md:text-3xl">
-              Exceptional Cuts At A Special Monthly Price
-            </h3>
-
-            <div className="mt-5 space-y-1 text-white">
-             
-              <p className="text-base font-semibold text-[#d4a63c] md:text-2xl">
-                Exclusive price available this month
-              </p>
+        <div className="relative flex items-center justify-center px-10 pb-14 pt-2 md:order-none md:px-12 md:pb-16 md:pt-16">
+          <div className="relative h-[min(72vw,340px)] w-[min(72vw,340px)] md:h-[min(36vw,380px)] md:w-[min(36vw,380px)] lg:h-[400px] lg:w-[400px]">
+            <div className="absolute inset-0 rotate-[-5deg] overflow-hidden rounded-[2px] shadow-[0_24px_48px_rgba(0,0,0,0.55)] ring-1 ring-white/[0.06]">
+              <Image
+                src="/images/newsletter-cleaver.png"
+                alt="Butcher's cleaver and sharpening steel on a wooden surface"
+                fill
+                className="object-cover grayscale"
+                sizes="(max-width: 768px) 72vw, 380px"
+              />
             </div>
-
-            <p className="mx-auto mt-6 max-w-[520px] text-xs leading-relaxed text-white/75 md:text-sm">
-              Every box is hand-prepared to order to ensure peak freshness and quality.
-            </p>
-
-            <p className="mt-6 text-xs uppercase tracking-[0.18em] text-white/75">Limited monthly availability</p>
-
-            <Link
-              href="/shop"
-              className="mt-3 inline-flex items-center justify-center border border-[#d4a63c] bg-[#d4a63c] px-7 py-2 text-sm font-bold uppercase tracking-[0.12em] text-black transition hover:brightness-110"
-            >
-              Shop Offer
-            </Link>
           </div>
         </div>
       </div>

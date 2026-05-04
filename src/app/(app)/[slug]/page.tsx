@@ -79,9 +79,13 @@ export default async function Page({ params, searchParams }: Args) {
 export async function generateMetadata({ params }: Args): Promise<Metadata> {
   const { slug = 'home' } = await params
 
-  const page = await queryPageBySlug({
+  let page = await queryPageBySlug({
     slug,
   })
+
+  if (!page && slug === 'home') {
+    page = homeStaticData() as Page
+  }
 
   return generateMeta({ doc: page })
 }
@@ -93,7 +97,7 @@ const queryPageBySlug = async ({ slug }: { slug: string }) => {
 
   const result = await payload.find({
     collection: 'pages',
-    depth: 2,
+    depth: 3,
     draft,
     limit: 1,
     overrideAccess: draft,

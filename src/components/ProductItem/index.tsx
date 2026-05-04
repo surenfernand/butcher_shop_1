@@ -1,6 +1,7 @@
 import { Media } from '@/components/Media'
 import { Price } from '@/components/Price'
 import { Product, Variant } from '@/payload-types'
+import { getOrderLineProductImage } from '@/utilities/getOrderLineProductImage'
 import Link from 'next/link'
 
 type Props = {
@@ -21,13 +22,8 @@ export const ProductItem: React.FC<Props> = ({
 }) => {
   const { title } = product
 
-  const firstGalleryImage =
-    typeof product.productGallery?.[0]?.image !== 'string'
-      ? product.productGallery?.[0]?.image
-      : undefined
+  const image = getOrderLineProductImage(product, variant)
 
-  const image = firstGalleryImage
- 
 
   const itemPrice = variant?.priceInUSD ?? product.priceInUSD
 
@@ -44,9 +40,9 @@ export const ProductItem: React.FC<Props> = ({
     <div className="flex items-center gap-4">
       <div className="flex items-stretch justify-stretch h-20 w-20 p-2 rounded-lg border">
         <div className="relative w-full h-full">
-          {image && typeof image !== 'number' && (
+          {image ? (
             <Media fill imgClassName="rounded-lg object-cover" resource={image} />
-          )}
+          ) : null}
         </div>
       </div>
 

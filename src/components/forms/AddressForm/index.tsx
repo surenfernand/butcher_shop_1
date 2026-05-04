@@ -88,10 +88,10 @@ export const AddressForm: React.FC<Props> = ({
     [initialData, skipSubmission, callback, addressID, updateAddress, createAddress],
   )
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="text-[#efe4cf]">
-      <div className="mb-16 grid gap-6">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-[140px_1fr_1fr]">
-          <FormItem>
+    <form onSubmit={handleSubmit(onSubmit)} className="box-border min-w-0 text-[#efe4cf]">
+      <div className="mb-8 grid gap-6 sm:mb-12">
+        <div className="grid min-w-0 grid-cols-1 gap-6 md:grid-cols-[minmax(0,8.75rem)_minmax(0,1fr)_minmax(0,1fr)] md:items-start">
+          <FormItem className="min-w-0">
             <Label htmlFor="title" className="text-sm font-semibold text-[#e7dac4]">
               Title
             </Label>
@@ -100,7 +100,10 @@ export const AddressForm: React.FC<Props> = ({
               onValueChange={(value) => setValue('title', value, { shouldValidate: true })}
               defaultValue={initialData?.title || ''}
             >
-              <SelectTrigger id="title" className="h-11 rounded-none border-[#5d5445] bg-[#252827] text-[#efe4cf]">
+              <SelectTrigger
+                id="title"
+                className="mb-0 h-11 w-full min-w-0 rounded-none border-[#5d5445] bg-[#252827] text-[#efe4cf]"
+              >
                 <SelectValue placeholder="Mr." />
               </SelectTrigger>
               <SelectContent className="border-[#5d5445] bg-[#252827] text-[#efe4cf]">
@@ -112,7 +115,7 @@ export const AddressForm: React.FC<Props> = ({
             {errors.title && <FormError message={errors.title.message} />}
           </FormItem>
 
-          <FormItem>
+          <FormItem className="min-w-0">
             <Label htmlFor="firstName" className="text-sm font-semibold text-[#e7dac4]">
               First Name
             </Label>
@@ -120,13 +123,13 @@ export const AddressForm: React.FC<Props> = ({
               id="firstName"
               placeholder="John"
               autoComplete="given-name"
-              className="h-11 rounded-none border-[#5d5445] bg-[#252827] text-[#efe4cf] placeholder:text-[#6f6a60]"
+              className="h-11 min-h-11 w-full min-w-0 rounded-none border-[#5d5445] bg-[#252827] text-[#efe4cf] placeholder:text-[#6f6a60]"
               {...register('firstName', { required: 'First name is required.' })}
             />
             {errors.firstName && <FormError message={errors.firstName.message} />}
           </FormItem>
 
-          <FormItem>
+          <FormItem className="min-w-0">
             <Label htmlFor="lastName" className="text-sm font-semibold text-[#e7dac4]">
               Last Name
             </Label>
@@ -134,15 +137,15 @@ export const AddressForm: React.FC<Props> = ({
               id="lastName"
               placeholder="Doe"
               autoComplete="family-name"
-              className="h-11 rounded-none border-[#5d5445] bg-[#252827] text-[#efe4cf] placeholder:text-[#6f6a60]"
+              className="h-11 min-h-11 w-full min-w-0 rounded-none border-[#5d5445] bg-[#252827] text-[#efe4cf] placeholder:text-[#6f6a60]"
               {...register('lastName', { required: 'Last name is required.' })}
             />
             {errors.lastName && <FormError message={errors.lastName.message} />}
           </FormItem>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <FormItem>
+        <div className="grid min-w-0 grid-cols-1 gap-6 md:grid-cols-2">
+          <FormItem className="min-w-0">
             <Label htmlFor="phone" className="text-sm font-semibold text-[#e7dac4]">
               Phone
             </Label>
@@ -151,13 +154,13 @@ export const AddressForm: React.FC<Props> = ({
               type="tel"
               placeholder="+1 (555) 000-0000"
               autoComplete="mobile tel"
-              className="h-11 rounded-none border-[#5d5445] bg-[#252827] text-[#efe4cf] placeholder:text-[#6f6a60]"
+              className="h-11 min-h-11 w-full min-w-0 rounded-none border-[#5d5445] bg-[#252827] text-[#efe4cf] placeholder:text-[#6f6a60]"
               {...register('phone')}
             />
             {errors.phone && <FormError message={errors.phone.message} />}
           </FormItem>
 
-          <FormItem>
+          <FormItem className="min-w-0">
             <Label htmlFor="company" className="text-sm font-semibold text-[#e7dac4]">
               Company Optional
             </Label>
@@ -165,14 +168,14 @@ export const AddressForm: React.FC<Props> = ({
               id="company"
               placeholder="Atelier Inc."
               autoComplete="organization"
-              className="h-11 rounded-none border-[#5d5445] bg-[#252827] text-[#efe4cf] placeholder:text-[#6f6a60]"
+              className="h-11 min-h-11 w-full min-w-0 rounded-none border-[#5d5445] bg-[#252827] text-[#efe4cf] placeholder:text-[#6f6a60]"
               {...register('company')}
             />
             {errors.company && <FormError message={errors.company.message} />}
           </FormItem>
         </div>
 
-        <FormItem>
+        <FormItem className="min-w-0">
           <Label htmlFor="addressLine1" className="text-sm font-semibold text-[#e7dac4]">
             Address Line 1
           </Label>
@@ -180,13 +183,13 @@ export const AddressForm: React.FC<Props> = ({
             id="addressLine1"
             placeholder="Street address, P.O. box"
             autoComplete="address-line1"
-            className="h-11 rounded-none border-[#5d5445] bg-[#252827] text-[#efe4cf] placeholder:text-[#6f6a60]"
+            className="h-11 min-h-11 w-full min-w-0 rounded-none border-[#5d5445] bg-[#252827] text-[#efe4cf] placeholder:text-[#6f6a60]"
             {...register('addressLine1', { required: 'Address line 1 is required.' })}
           />
           {errors.addressLine1 && <FormError message={errors.addressLine1.message} />}
         </FormItem>
 
-        <FormItem>
+        <FormItem className="min-w-0">
           <Label htmlFor="addressLine2" className="text-sm font-semibold text-[#e7dac4]">
             Address Line 2 Optional
           </Label>
@@ -194,33 +197,33 @@ export const AddressForm: React.FC<Props> = ({
             id="addressLine2"
             placeholder="Apartment, suite, unit, floor"
             autoComplete="address-line2"
-            className="h-11 rounded-none border-[#5d5445] bg-[#252827] text-[#efe4cf] placeholder:text-[#6f6a60]"
+            className="h-11 min-h-11 w-full min-w-0 rounded-none border-[#5d5445] bg-[#252827] text-[#efe4cf] placeholder:text-[#6f6a60]"
             {...register('addressLine2')}
           />
           {errors.addressLine2 && <FormError message={errors.addressLine2.message} />}
         </FormItem>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <FormItem>
+        <div className="grid min-w-0 grid-cols-1 gap-6 md:grid-cols-3">
+          <FormItem className="min-w-0">
             <Label htmlFor="city" className="text-sm font-semibold text-[#e7dac4]">City</Label>
-            <Input id="city" placeholder="New York" className="h-11 rounded-none border-[#5d5445] bg-[#252827] text-[#efe4cf] placeholder:text-[#6f6a60]" {...register('city', { required: 'City is required.' })} />
+            <Input id="city" placeholder="New York" className="h-11 min-h-11 w-full min-w-0 rounded-none border-[#5d5445] bg-[#252827] text-[#efe4cf] placeholder:text-[#6f6a60]" {...register('city', { required: 'City is required.' })} />
             {errors.city && <FormError message={errors.city.message} />}
           </FormItem>
 
-          <FormItem>
+          <FormItem className="min-w-0">
             <Label htmlFor="state" className="text-sm font-semibold text-[#e7dac4]">State / Province</Label>
-            <Input id="state" placeholder="NY" className="h-11 rounded-none border-[#5d5445] bg-[#252827] text-[#efe4cf] placeholder:text-[#6f6a60]" {...register('state')} />
+            <Input id="state" placeholder="NY" className="h-11 min-h-11 w-full min-w-0 rounded-none border-[#5d5445] bg-[#252827] text-[#efe4cf] placeholder:text-[#6f6a60]" {...register('state')} />
             {errors.state && <FormError message={errors.state.message} />}
           </FormItem>
 
-          <FormItem>
+          <FormItem className="min-w-0">
             <Label htmlFor="postalCode" className="text-sm font-semibold text-[#e7dac4]">Zip Code</Label>
-            <Input id="postalCode" placeholder="10001" className="h-11 rounded-none border-[#5d5445] bg-[#252827] text-[#efe4cf] placeholder:text-[#6f6a60]" {...register('postalCode', { required: 'Postal code is required.' })} />
+            <Input id="postalCode" placeholder="10001" className="h-11 min-h-11 w-full min-w-0 rounded-none border-[#5d5445] bg-[#252827] text-[#efe4cf] placeholder:text-[#6f6a60]" {...register('postalCode', { required: 'Postal code is required.' })} />
             {errors.postalCode && <FormError message={errors.postalCode.message} />}
           </FormItem>
         </div>
 
-        <FormItem>
+        <FormItem className="min-w-0">
           <Label htmlFor="country" className="text-sm font-semibold text-[#e7dac4]">
             Country
           </Label>
@@ -230,7 +233,10 @@ export const AddressForm: React.FC<Props> = ({
             required
             defaultValue={initialData?.country || ''}
           >
-            <SelectTrigger id="country" className="h-11 w-full rounded-none border-[#5d5445] bg-[#252827] text-[#efe4cf]">
+            <SelectTrigger
+              id="country"
+              className="mb-0 h-11 w-full min-w-0 rounded-none border-[#5d5445] bg-[#252827] text-[#efe4cf]"
+            >
               <SelectValue placeholder="United States" />
             </SelectTrigger>
             <SelectContent className="border-[#5d5445] bg-[#252827] text-[#efe4cf]">
@@ -251,7 +257,7 @@ export const AddressForm: React.FC<Props> = ({
         </FormItem>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <Button
           type="button"
           variant="ghost"
@@ -262,7 +268,7 @@ export const AddressForm: React.FC<Props> = ({
 
         <Button
           type="submit"
-          className="h-14 w-[300px] rounded-none bg-[#f3c65f] text-sm font-medium uppercase tracking-[0.18em] text-[#1a1308] hover:bg-[#ffd778]"
+          className="h-14 w-full max-w-full rounded-none bg-[#f3c65f] text-sm font-medium uppercase tracking-[0.18em] text-[#1a1308] hover:bg-[#ffd778] sm:w-auto sm:min-w-[240px] sm:max-w-[300px]"
         >
           Save Address
         </Button>

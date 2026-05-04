@@ -1,7 +1,7 @@
 // src/components/Footer/index.tsx
 
 import { FooterMenu } from '@/components/Footer/menu'
-import { CMSLink } from '@/components/Link'
+import { FooterSocialLink } from '@/components/Footer/FooterSocialLink'
 import type { Footer as FooterType } from '@/payload-types'
 // import { LogoIcon } from '@/components/icons/logo'
 import { Media } from '@/components/Media'
@@ -45,12 +45,7 @@ export async function Footer() {
             {(socialLinks?.length ?? 0) > 0 && (
               <div className="flex items-center gap-3">
                 {socialLinks.map(({ id, link }) => (
-                  <CMSLink
-                    key={id}
-                    {...link}
-                    appearance="inline"
-                    className="flex h-10 w-10 items-center justify-center border border-[#2a2a2a] text-[#bdbdbd] transition-all hover:border-[#d4a63c] hover:text-[#d4a63c]"
-                  />
+                  <FooterSocialLink key={id} link={link} />
                 ))}
               </div>
             )}

@@ -24,7 +24,7 @@ export type ResolvedOrderLine = {
 
 /**
  * Loads full product + variant docs for pricing in 2 queries (not 2×N findByID).
- * Order relation populate often omits `purchaseFrequencies` on nested products.
+ * Uses depth so nested media (galleries, meta image) resolves for order summaries.
  */
 export const batchResolveOrderLinesForPricing = async (
   payload: BasePayload,
@@ -49,7 +49,8 @@ export const batchResolveOrderLinesForPricing = async (
           where: { id: { in: [...productIds] } },
           limit: productIds.size,
           pagination: false,
-          depth: 0,
+          // Populate uploads (productGallery, gallery, meta.image) for order UI thumbnails.
+          depth: 2,
         })
       : Promise.resolve({ docs: [] as Product[] }),
     variantIds.size
@@ -58,7 +59,7 @@ export const batchResolveOrderLinesForPricing = async (
           where: { id: { in: [...variantIds] } },
           limit: variantIds.size,
           pagination: false,
-          depth: 0,
+          depth: 2,
         })
       : Promise.resolve({ docs: [] as Variant[] }),
   ])

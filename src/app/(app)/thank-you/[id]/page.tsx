@@ -1,5 +1,7 @@
-import type { Media, Order, Product } from '@/payload-types'
+import type { Order } from '@/payload-types'
 
+import { Media } from '@/components/Media'
+import { getOrderLineProductImage } from '@/utilities/getOrderLineProductImage'
 import { getPurchaseUnitPriceInCents, PurchaseType } from '@/utilities/purchasePricing'
 import { batchResolveOrderLinesForPricing } from '@/utilities/resolveOrderLinePricingDocs'
 import configPromise from '@payload-config'
@@ -38,18 +40,6 @@ const formatDate = (date?: string | null) =>
     }).format(new Date(date))
     : ''
 
-const getProductImage = (product: Product): Media | undefined => {
-  const galleryImage = product.productGallery?.[0]?.image
-
-  if (galleryImage && typeof galleryImage === 'object') {
-    return galleryImage
-  }
-
-  return undefined
-}
-
-
-
 export default async function ThankYouPage({ params, searchParams }: PageProps) {
   const headers = await getHeaders()
   const payload = await getPayload({ config: configPromise })
@@ -66,13 +56,6 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
     shippingCharge: shippingChargeFromUrl = '',
     estimatedTax: estimatedTaxFromUrl = '',
   } = await searchParams
-
-  console.log('ThankYou searchParams:', {
-    email,
-    accessToken,
-    purchaseTypeFromUrl,
-    shippingChargeFromUrl,
-  })
 
   const {
     docs: [order],
@@ -223,7 +206,7 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
               {linePricingDocs.map(({ item, product, variant }, index) => {
                 if (!product) return null
 
-                const image = getProductImage(product)
+                const image = getOrderLineProductImage(product, variant)
                 const unitPrice = getPurchaseUnitPriceInCents(
                   product,
                   variant,
@@ -234,13 +217,9 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
 
                 return (
                   <div key={item.id || index} className="flex items-center gap-5">
-                    <div className="h-24 w-24 overflow-hidden bg-[#333535]">
-                      {image?.url ? (
-                        <img
-                          src={image.url}
-                          alt={image.alt || product.title}
-                          className="h-full w-full object-cover"
-                        />
+                    <div className="relative h-24 w-24 overflow-hidden bg-[#333535]">
+                      {image ? (
+                        <Media fill imgClassName="object-cover" resource={image} />
                       ) : null}
                     </div>
 

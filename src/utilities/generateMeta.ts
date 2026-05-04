@@ -4,8 +4,20 @@ import type { Page, Product } from '../payload-types'
 
 import { mergeOpenGraph } from './mergeOpenGraph'
 
-export const generateMeta = async (args: { doc: Page | Product }): Promise<Metadata> => {
+export const generateMeta = async (args: {
+  doc: Page | Product | null | undefined
+}): Promise<Metadata> => {
   const { doc } = args || {}
+  if (!doc || typeof doc !== 'object') {
+    return {
+      openGraph: mergeOpenGraph({
+        title: 'Payload Ecommerce Template',
+        url: '/',
+      }),
+      title: 'Payload Ecommerce Template',
+    }
+  }
+
   const pageMeta = 'meta' in doc ? doc.meta : undefined
 
   const ogImage =

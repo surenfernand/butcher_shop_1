@@ -1148,6 +1148,10 @@ export interface FeaturedCutsBlock {
         price?: string | null;
         tag?: string | null;
         image?: (number | null) | Media;
+        /**
+         * Optional. Links “View product” to this product. If empty, the button opens the shop.
+         */
+        product?: (number | null) | Product;
         id?: string | null;
       }[]
     | null;
@@ -1833,6 +1837,7 @@ export interface FeaturedCutsBlockSelect<T extends boolean = true> {
         price?: T;
         tag?: T;
         image?: T;
+        product?: T;
         id?: T;
       };
   id?: T;
