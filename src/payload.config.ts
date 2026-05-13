@@ -34,6 +34,26 @@ import { plugins } from './plugins'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+/**
+ * Payload refuses an empty `secret`. Next runs `getPayload` during `next build` (e.g.
+ * `generateStaticParams`), but platforms like Render often omit env vars from the build
+ * environment. Use a placeholder only while the npm `build` script is running so CI
+ * can finish; the running server must still set `PAYLOAD_SECRET`.
+ */
+function resolvePayloadSecret(): string {
+  const secret = process.env.PAYLOAD_SECRET?.trim()
+  if (secret) return secret
+
+  const isNextBuild =
+    process.env.npm_lifecycle_event === 'build' ||
+    process.env.NEXT_PHASE === 'phase-production-build'
+
+  if (isNextBuild) {
+    return 'build-only-placeholder-not-for-production-runtime'
+  }
+
+  return ''
+}
 
 export default buildConfig({
   admin: {
@@ -103,7 +123,7 @@ export default buildConfig({
   endpoints: [],
   globals: [Header, Footer, ShopPage, ShopLuxuryPage, CartSettings],
   plugins,
-  secret: process.env.PAYLOAD_SECRET || '',
+  secret: resolvePayloadSecret(),
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
