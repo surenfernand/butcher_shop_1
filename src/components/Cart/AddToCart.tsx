@@ -137,7 +137,7 @@ export function AddToCart({
         product: product.id,
         variant: selectedVariant?.id ?? undefined,
         price: selectedPrice,
-      }).then(() => {
+      } as unknown as Parameters<typeof addItem>[0]).then(() => {
         toast.success(
           purchaseType === 'one_time'
             ? 'Item added to cart.'
