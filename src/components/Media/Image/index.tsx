@@ -9,7 +9,7 @@ import React from 'react'
 import type { Props as MediaProps } from '../types'
 
 import { cssVariables } from '@/cssVariables'
-import { placeholderFor } from '@/utilities/placeholderImage'
+import { placeholderFor, shouldUseTempPlaceholder } from '@/utilities/placeholderImage'
 
 const { breakpoints } = cssVariables
 
@@ -52,6 +52,10 @@ export const Image: React.FC<MediaProps> = (props) => {
 
     // src = `${process.env.NEXT_PUBLIC_SERVER_URL}${url}`
     src = url?.startsWith('http') ? url : url || ''
+  }
+
+  if (typeof src === 'string' && shouldUseTempPlaceholder(src)) {
+    src = ''
   }
 
   if (typeof src === 'string' && src.trim() === '') {
