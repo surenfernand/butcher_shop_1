@@ -9,7 +9,7 @@ import React from 'react'
 import type { Props as MediaProps } from '../types'
 
 import { cssVariables } from '@/cssVariables'
-import { placeholderFor, shouldUseTempPlaceholder } from '@/utilities/placeholderImage'
+import { placeholderFor, shouldBypassNextImageOptimizer, shouldUseTempPlaceholder } from '@/utilities/placeholderImage'
 
 const { breakpoints } = cssVariables
 
@@ -66,12 +66,25 @@ export const Image: React.FC<MediaProps> = (props) => {
     }
   }
 
+  // next/image requires width+height whenever `fill` is false (e.g. header logo with only `src`).
+  if (!fill && typeof src === 'string' && src.trim() !== '') {
+    const w = width ?? widthFromProps
+    const h = height ?? heightFromProps
+    if (w == null || h == null || w < 1 || h < 1) {
+      width = w != null && w > 0 ? w : 1600
+      height = h != null && h > 0 ? h : 1067
+    }
+  }
+
   // NOTE: this is used by the browser to determine which image to download at different screen sizes
   const sizes = sizeFromProps
     ? sizeFromProps
     : Object.entries(breakpoints)
       .map(([, value]) => `(max-width: ${value}px) ${value}px`)
       .join(', ')
+
+  const srcIsString = typeof src === 'string'
+  const unoptimized = srcIsString && shouldBypassNextImageOptimizer(src)
 
   return (
     <NextImage
@@ -90,6 +103,7 @@ export const Image: React.FC<MediaProps> = (props) => {
       quality={90}
       sizes={sizes}
       src={src}
+      unoptimized={unoptimized}
       width={!fill ? width || widthFromProps : undefined}
     />
   )

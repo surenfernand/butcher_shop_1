@@ -1,31 +1,28 @@
 /**
- * Temporary / fallback image URLs when CMS media has no usable `url` (e.g. S3 not wired yet).
- * Defaults use `images.unsplash.com` (allowed in `next.config.ts` → `images.remotePatterns`).
+ * Fallback image URLs when CMS media has no usable `url` (e.g. S3 not wired yet).
  *
- * **Until S3 is connected**
- * - In **development**, URLs that look like Payload media API paths or object storage are
- *   replaced with placeholders so the UI still shows relevant images.
- * - In **production**, set `NEXT_PUBLIC_TEMP_MEDIA_UNTIL_S3=true` for the same behavior, or
- *   `NEXT_PUBLIC_MEDIA_USE_TEMP_IMAGES=true` to always use placeholders for CMS `url` fields.
- * - Set `NEXT_PUBLIC_TEMP_MEDIA_UNTIL_S3=false` to turn off the dev default once uploads work.
+ * **Built-ins** use Unsplash (meat / butcher / craft). Allow `images.unsplash.com` in
+ * `next.config.ts` → `images.remotePatterns`. `next/image` uses `unoptimized` for that host
+ * (see `shouldBypassNextImageOptimizer`) so the optimizer does not block requests.
  *
- * Overrides:
- * - `NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL` — used for any area when no per-area override is set
- * - `NEXT_PUBLIC_PLACEHOLDER_<AREA>_URL` — e.g. `NEXT_PUBLIC_PLACEHOLDER_HERO_URL` (AREA uppercase)
+ * **Until S3 is connected** — see `tempMediaBypassEnabled` / `shouldUseTempPlaceholder`.
+ *
+ * Overrides: `NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL`, or `NEXT_PUBLIC_PLACEHOLDER_<AREA>_URL`
+ * (AREA uppercase, e.g. `NEXT_PUBLIC_PLACEHOLDER_HERO_URL`).
  */
 
-const u = (id: string, w: number) =>
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`
+/** Unsplash photo path (see https://unsplash.com — hotlink format). */
+const u = (photoPath: string, w: number) =>
+  `https://images.unsplash.com/${photoPath}?auto=format&fit=crop&w=${w}&q=80`
 
-/** Curated butcher / craft / venue shots (stable Unsplash photo ids). */
-const BUILT_IN = {
-  /** Generic CMS `Media` with empty URL */
+/** Curated online placeholders (meat / butcher / craft / venue). All Unsplash for one allowlisted host. */
+const ONLINE = {
   default: u('photo-1604503468506-a8da13d82791', 1600),
   product: u('photo-1604503468506-a8da13d82791', 1600),
   cart: u('photo-1567521214889-8a446d5f901a', 1200),
-  gallery: u('photo-1604503468506-a8da13d82791', 1600),
+  gallery: u('photo-1588347818038-88fda0d7f1a0', 1600),
   hero: u('photo-1544025162-d76694265947', 2400),
-  logo: u('photo-1607623813342-90543285690a', 800),
+  logo: u('photo-1607623813342-90543285690a', 1000),
   story: u('photo-1588347818038-88fda0d7f1a0', 1600),
   location: u('photo-1559339352-11d035aa65de', 1600),
   info: u('photo-1558030006-425675369496', 1600),
@@ -34,7 +31,19 @@ const BUILT_IN = {
   seo: u('photo-1604503468506-a8da13d82791', 1200),
 } as const
 
-export type PlaceholderArea = keyof typeof BUILT_IN
+export type PlaceholderArea = keyof typeof ONLINE
+
+/** Hostnames where we skip Next image optimization (avoids upstream 403 from the optimizer). */
+const PLACEHOLDER_CDN_HOSTS = new Set(['images.unsplash.com'])
+
+/** Use with `<Image unoptimized={...} />` for built-in placeholder CDNs. */
+export function shouldBypassNextImageOptimizer(url: string): boolean {
+  try {
+    return PLACEHOLDER_CDN_HOSTS.has(new URL(url).hostname)
+  } catch {
+    return false
+  }
+}
 
 const AREA_ENV_KEYS: Record<PlaceholderArea, string> = {
   default: 'NEXT_PUBLIC_PLACEHOLDER_DEFAULT_URL',
@@ -75,8 +84,8 @@ export function shouldUseTempPlaceholder(resolvedUrl: string | null | undefined)
   const s = (resolvedUrl ?? '').trim()
   if (!s) return true
   const lower = s.toLowerCase()
-  if (lower.startsWith('/') && (lower.includes('/api/media') || lower.includes('/media/')))
-    return true
+  if (lower.includes('/api/media')) return true
+  if (lower.startsWith('/') && lower.includes('/media/')) return true
   if (
     /(amazonaws\.com|digitaloceanspaces\.com|cloudflarestorage\.com|supabase\.co\/storage|r2\.dev)/i.test(
       lower,
@@ -86,7 +95,7 @@ export function shouldUseTempPlaceholder(resolvedUrl: string | null | undefined)
   return false
 }
 
-/** Resolved URL for a UI context (env overrides → global → built-in). */
+/** Resolved URL for a UI context (env overrides → global → built-in online). */
 export function placeholderFor(area: PlaceholderArea = 'default'): string {
   const perArea = readEnv(AREA_ENV_KEYS[area])
   if (perArea) return perArea
@@ -94,11 +103,11 @@ export function placeholderFor(area: PlaceholderArea = 'default'): string {
   const global = readEnv('NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL')
   if (global) return global
 
-  return BUILT_IN[area]
+  return ONLINE[area]
 }
 
 /**
- * @deprecated Prefer `placeholderFor('product')` etc. Kept for backward compatibility.
+ * @deprecated Prefer `placeholderFor('product')` etc.
  * Same resolution as `placeholderFor('default')`.
  */
 export const PLACEHOLDER_IMAGE_URL: string = placeholderFor('default')
