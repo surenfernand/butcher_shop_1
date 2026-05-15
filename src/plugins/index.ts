@@ -197,11 +197,6 @@ export const plugins: Plugin[] = [
       productsCollectionOverride: ProductsCollection,
     },
   }),
-  multiLocationPlugin({
-    productSlug: 'products',
-    orderSlug: 'orders',
-    adminGroup: 'Shop',
-  }),
 	multiLocationPlugin({
 		productSlug: "products",
 		orderSlug: "orders",
