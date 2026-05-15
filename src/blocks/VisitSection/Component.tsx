@@ -1,6 +1,6 @@
 import type { DefaultDocumentIDType } from 'payload'
 import type { Media } from '@/payload-types'
-import { mediaUrlOrPlaceholder } from '@/utilities/placeholderImage'
+import { mediaUrlOrPlaceholder, shouldBypassNextImageOptimizer } from '@/utilities/placeholderImage'
 import Image from 'next/image'
 import React from 'react'
 
@@ -29,6 +29,7 @@ export const VisitSectionBlock: React.FC<Props> = ({
 }) => {
   const media = typeof mapImage === 'object' && mapImage ? mapImage : null
   const imageUrl = media?.url
+  const mapSrc = mediaUrlOrPlaceholder(imageUrl, 'location')
 
   return (
     <section className={['py-20', className].filter(Boolean).join(' ')}>

@@ -1,6 +1,6 @@
 import type { DefaultDocumentIDType } from 'payload'
 import type { Media } from '@/payload-types'
-import { mediaUrlOrPlaceholder } from '@/utilities/placeholderImage'
+import { mediaUrlOrPlaceholder, shouldBypassNextImageOptimizer } from '@/utilities/placeholderImage'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
@@ -27,6 +27,7 @@ export const AboutStoryBlock: React.FC<Props> = ({
 }) => {
   const media = typeof image === 'object' && image ? image : null
   const imageUrl = media?.url
+  const storySrc = mediaUrlOrPlaceholder(imageUrl, 'story')
 
   return (
     <section className={['mx-auto max-w-[1280px] px-8 py-20', className].filter(Boolean).join(' ')}>
@@ -50,10 +51,11 @@ export const AboutStoryBlock: React.FC<Props> = ({
 
         <div className="relative min-h-[420px] overflow-hidden border border-[#d3a84b]/20 bg-[#1a1c1c]">
           <Image
-            src={mediaUrlOrPlaceholder(imageUrl, 'story')}
+            src={storySrc}
             alt={media?.alt || title || 'About story image'}
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
+            unoptimized={shouldBypassNextImageOptimizer(storySrc)}
             className="object-cover grayscale transition duration-700 hover:grayscale-0"
           />
         </div>

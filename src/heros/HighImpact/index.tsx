@@ -3,7 +3,7 @@
 import type { Header, Page } from '@/payload-types'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { cn } from '@/utilities/cn'
-import { placeholderFor } from '@/utilities/placeholderImage'
+import { placeholderFor, shouldBypassNextImageOptimizer } from '@/utilities/placeholderImage'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { useEffect } from 'react'
@@ -71,6 +71,7 @@ export const HighImpactHero: React.FC<HighImpactHeroProps> = ({
               fill
               sizes="100vw"
               priority
+              unoptimized={shouldBypassNextImageOptimizer(imageSrc)}
               className="object-cover object-center"
             />
           )}
