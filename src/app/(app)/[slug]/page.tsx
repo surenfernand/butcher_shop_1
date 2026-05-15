@@ -14,25 +14,35 @@ import type { Page } from '@/payload-types'
 import { notFound } from 'next/navigation'
 
 export async function generateStaticParams() {
-  const payload = await getPayload({ config: configPromise })
+  try {
+    const payload = await getPayload({ config: configPromise })
 
-  const pages = await payload.find({
-    collection: 'pages',
-    limit: 1000,
-    depth: 0,
-    pagination: false,
-    where: {
-      _status: {
-        equals: 'published',
+    const pages = await payload.find({
+      collection: 'pages',
+      limit: 1000,
+      depth: 0,
+      pagination: false,
+      where: {
+        _status: {
+          equals: 'published',
+        },
       },
-    },
-  })
+    })
 
-  return pages.docs
-    .filter((doc) => doc.slug && doc.slug !== 'home')
-    .map((doc) => ({
-      slug: doc.slug,
-    }))
+    return pages.docs
+      .filter((doc) => doc.slug && doc.slug !== 'home')
+      .map((doc) => ({
+        slug: doc.slug,
+      }))
+  } catch (err) {
+    // e.g. Render build before `payload migrate` — schema missing tables like
+    // `pages_blocks_contact_page_cards`. Skip SSG paths; pages still render on demand once DB matches code.
+    console.warn(
+      '[generateStaticParams] Skipping static paths (database query failed). Run migrations against DATABASE_URL, then redeploy.',
+      err,
+    )
+    return []
+  }
 }
 
 type SearchParams = { [key: string]: string | string[] | undefined }

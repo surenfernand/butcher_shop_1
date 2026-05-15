@@ -83,6 +83,8 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },
+    // Keep migration SQL in-repo; run `pnpm payload migrate` on deploy before `next build`.
+    migrationDir: path.resolve(dirname, 'migrations'),
   }),
   editor: lexicalEditor({
     features: () => {
