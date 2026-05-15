@@ -5,6 +5,7 @@ import { FooterSocialLink } from '@/components/Footer/FooterSocialLink'
 import type { Footer as FooterType } from '@/payload-types'
 // import { LogoIcon } from '@/components/icons/logo'
 import { Media } from '@/components/Media'
+import { PLACEHOLDER_IMAGE_URL } from '@/utilities/placeholderImage'
 import { getCachedGlobal } from '@/utilities/getGlobals'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -24,16 +25,18 @@ export async function Footer() {
               href="/"
               className="mb-6 flex items-center gap-3 text-[#d4a63c] transition-opacity hover:opacity-80"
             >
-              {footer.logo && typeof footer.logo === 'object' ? (
-                <Media
-                  resource={footer.logo}
-                  imgClassName="h-16 w-auto object-contain"
-                />
-              ) : (
-                <span className="text-xl font-semibold uppercase tracking-wide">
-                  {footer.brandName || 'The Butcher’s Craft'}
-                </span>
-              )}
+              <Media
+                resource={
+                  footer.logo && typeof footer.logo === 'object' ? footer.logo : undefined
+                }
+                src={
+                  !footer.logo || typeof footer.logo !== 'object'
+                    ? PLACEHOLDER_IMAGE_URL
+                    : undefined
+                }
+                alt={footer.brandName || 'The Butcher’s Craft'}
+                imgClassName="h-16 w-auto object-contain"
+              />
             </Link>
 
             {footer.description && (

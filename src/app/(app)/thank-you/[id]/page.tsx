@@ -2,6 +2,7 @@ import type { Order } from '@/payload-types'
 
 import { Media } from '@/components/Media'
 import { getOrderLineProductImage } from '@/utilities/getOrderLineProductImage'
+import { PLACEHOLDER_IMAGE_URL } from '@/utilities/placeholderImage'
 import { getPurchaseUnitPriceInCents, PurchaseType } from '@/utilities/purchasePricing'
 import { batchResolveOrderLinesForPricing } from '@/utilities/resolveOrderLinePricingDocs'
 import configPromise from '@payload-config'
@@ -218,9 +219,13 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
                 return (
                   <div key={item.id || index} className="flex items-center gap-5">
                     <div className="relative h-24 w-24 overflow-hidden bg-[#333535]">
-                      {image ? (
-                        <Media fill imgClassName="object-cover" resource={image} />
-                      ) : null}
+                      <Media
+                        fill
+                        imgClassName="object-cover"
+                        resource={image}
+                        src={!image ? PLACEHOLDER_IMAGE_URL : undefined}
+                        alt={product.title || ''}
+                      />
                     </div>
 
                     <div className="flex-1">

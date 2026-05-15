@@ -27,6 +27,7 @@ import {
   getPurchaseUnitPriceInCents,
   type PurchaseType,
 } from '@/utilities/purchasePricing'
+import { PLACEHOLDER_IMAGE_URL } from '@/utilities/placeholderImage'
 import { useAddresses, useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { DayPicker } from 'react-day-picker'
 import 'react-day-picker/dist/style.css'
@@ -758,10 +759,20 @@ export const CheckoutPage: React.FC = () => {
                 return (
                   <div className="grid grid-cols-[80px_1fr_auto] items-center gap-4" key={index}>
                     <div className="relative h-20 w-20 border border-border bg-muted">
-                      {image && typeof image !== 'string' && (
-                        <Media className="" fill imgClassName="object-cover" resource={image} />
-                      )}
-
+                      <Media
+                        className=""
+                        fill
+                        imgClassName="object-cover"
+                        resource={
+                          image && typeof image !== 'string' ? image : undefined
+                        }
+                        src={
+                          !image || typeof image === 'string'
+                            ? PLACEHOLDER_IMAGE_URL
+                            : undefined
+                        }
+                        alt={title || ''}
+                      />
                     </div>
                     <div>
                       <p className="font-sans text-base font-black uppercase text-foreground">{title}</p>

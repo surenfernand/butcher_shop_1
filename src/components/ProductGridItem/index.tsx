@@ -31,36 +31,25 @@ export const ProductGridItem: React.FC<Props> = ({ product }) => {
   }
 
   const image =
-    productGallery?.[0]?.image && typeof productGallery[0]?.image !== 'string' ? productGallery[0]?.image : false
+    productGallery?.[0]?.image && typeof productGallery[0]?.image !== 'string'
+      ? productGallery[0]?.image
+      : undefined
 
   return (
     <Link className="relative inline-block h-full w-full group" href={`/products/${product.slug}`}>
-      {image ? (
-        <Media
-          className={clsx(
-            'relative aspect-square object-cover border rounded-2xl p-8 bg-primary-foreground',
-          )}
-          height={80}
-          imgClassName={clsx('h-full w-full object-cover rounded-2xl', {
-            'transition duration-300 ease-in-out group-hover:scale-102': true,
-          })}
-          resource={image}
-          width={80}
-        />
-      ) : (
-        <Media
-          className={clsx(
-            'relative aspect-square object-cover border rounded-2xl p-8 bg-primary-foreground',
-          )}
-          height={80}
-          imgClassName={clsx('h-full w-full object-cover rounded-2xl', {
-            'transition duration-300 ease-in-out group-hover:scale-102': true,
-          })}
-          src={PLACEHOLDER_IMAGE_URL}
-          alt={product.title || 'Product'}
-          width={80}
-        />
-      )}
+      <Media
+        className={clsx(
+          'relative aspect-square object-cover border rounded-2xl p-8 bg-primary-foreground',
+        )}
+        height={80}
+        imgClassName={clsx('h-full w-full object-cover rounded-2xl', {
+          'transition duration-300 ease-in-out group-hover:scale-102': true,
+        })}
+        resource={image}
+        src={!image ? PLACEHOLDER_IMAGE_URL : undefined}
+        alt={product.title || 'Product'}
+        width={80}
+      />
 
       <div className="font-mono text-primary/50 group-hover:text-primary flex justify-between items-center mt-4">
         <div>{title}</div>

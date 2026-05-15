@@ -14,6 +14,7 @@ import { MobileMenu } from './MobileMenu'
 import { Moon, Search, Sun, User } from 'lucide-react'
 
 import { Media } from '@/components/Media'
+import { PLACEHOLDER_IMAGE_URL } from '@/utilities/placeholderImage'
 
 type Props = {
   header: Header
@@ -51,7 +52,15 @@ export function HeaderClient({ header }: Props) {
           <Link href="/" className="flex items-center">
 
             <Media
-              resource={header.logo ?? undefined}
+              resource={
+                header.logo && typeof header.logo === 'object' ? header.logo : undefined
+              }
+              src={
+                !header.logo || typeof header.logo !== 'object'
+                  ? PLACEHOLDER_IMAGE_URL
+                  : undefined
+              }
+              alt="Home"
               imgClassName="h-20 w-auto object-contain"
             />
 

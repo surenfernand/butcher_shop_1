@@ -41,11 +41,13 @@ export const ProductItem: React.FC<Props> = ({
     <div className="flex items-center gap-4">
       <div className="flex items-stretch justify-stretch h-20 w-20 p-2 rounded-lg border">
         <div className="relative w-full h-full">
-          {image ? (
-            <Media fill imgClassName="rounded-lg object-cover" resource={image} />
-          ) : (
-            <Media fill imgClassName="rounded-lg object-cover" alt="" src={PLACEHOLDER_IMAGE_URL} />
-          )}
+          <Media
+            fill
+            imgClassName="rounded-lg object-cover"
+            resource={image}
+            src={!image ? PLACEHOLDER_IMAGE_URL : undefined}
+            alt=""
+          />
         </div>
       </div>
 
