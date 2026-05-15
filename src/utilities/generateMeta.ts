@@ -20,11 +20,16 @@ export const generateMeta = async (args: {
 
   const pageMeta = 'meta' in doc ? doc.meta : undefined
 
+  const imageUrl =
+    typeof pageMeta?.image === 'object' && pageMeta.image !== null && 'url' in pageMeta.image
+      ? pageMeta.image.url
+      : null
+
   const ogImage =
-    typeof pageMeta?.image === 'object' &&
-    pageMeta.image !== null &&
-    'url' in pageMeta.image &&
-    `${process.env.NEXT_PUBLIC_SERVER_URL}${pageMeta.image.url}`
+    imageUrl &&
+    (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')
+      ? imageUrl
+      : `${process.env.NEXT_PUBLIC_SERVER_URL}${imageUrl}`)
 
   return {
     description: pageMeta?.description,
