@@ -34,28 +34,23 @@ export function getOrderLineProductImage(
     })
 
     const img = matched?.image
-    if (img && typeof img === 'object' && img !== null && 'url' in img) {
+    if (img && typeof img === 'object' && img !== null) {
       return img as Media
     }
   }
 
   const pg = product.productGallery?.[0]?.image
-  if (pg && typeof pg === 'object' && pg !== null && 'url' in pg) {
+  if (pg && typeof pg === 'object' && pg !== null) {
     return pg as Media
   }
 
   const metaImg = p.meta?.image
-  if (metaImg && typeof metaImg === 'object' && metaImg !== null && 'url' in metaImg) {
+  if (metaImg && typeof metaImg === 'object' && metaImg !== null) {
     return metaImg as Media
   }
 
   const firstGallery = p.gallery?.[0]?.image
-  if (
-    firstGallery &&
-    typeof firstGallery === 'object' &&
-    firstGallery !== null &&
-    'url' in firstGallery
-  ) {
+  if (firstGallery && typeof firstGallery === 'object' && firstGallery !== null) {
     return firstGallery as Media
   }
 

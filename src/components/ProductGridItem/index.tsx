@@ -5,6 +5,7 @@ import React from 'react'
 import clsx from 'clsx'
 import { Media } from '@/components/Media'
 import { Price } from '@/components/Price'
+import { PLACEHOLDER_IMAGE_URL } from '@/utilities/placeholderImage'
 
 type Props = {
   product: Partial<Product>
@@ -46,7 +47,20 @@ export const ProductGridItem: React.FC<Props> = ({ product }) => {
           resource={image}
           width={80}
         />
-      ) : null}
+      ) : (
+        <Media
+          className={clsx(
+            'relative aspect-square object-cover border rounded-2xl p-8 bg-primary-foreground',
+          )}
+          height={80}
+          imgClassName={clsx('h-full w-full object-cover rounded-2xl', {
+            'transition duration-300 ease-in-out group-hover:scale-102': true,
+          })}
+          src={PLACEHOLDER_IMAGE_URL}
+          alt={product.title || 'Product'}
+          width={80}
+        />
+      )}
 
       <div className="font-mono text-primary/50 group-hover:text-primary flex justify-between items-center mt-4">
         <div>{title}</div>

@@ -1,5 +1,5 @@
 'use client'
-import type { Media, Product } from '@/payload-types'
+import type { Product } from '@/payload-types'
 
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel'
 import AutoScroll from 'embla-carousel-auto-scroll'
@@ -7,7 +7,7 @@ import Link from 'next/link'
 import React from 'react'
 import { GridTileImage } from '@/components/Grid/tile'
 
-export const CarouselClient: React.FC<{ products: Product[] }> = async ({ products }) => {
+export const CarouselClient: React.FC<{ products: Product[] }> = ({ products }) => {
   if (!products?.length) return null
 
   // Purposefully duplicating products to make the carousel loop and not run out of products on wide screens.
@@ -37,15 +37,15 @@ export const CarouselClient: React.FC<{ products: Product[] }> = async ({ produc
               const media = image && typeof image === 'object' ? image : undefined
 
               return (
-            <Link className="relative h-full w-full" href={`/products/${product.slug}`}>
-              <GridTileImage
-                label={{
-                  amount: product.priceInUSD!,
-                  title: product.title,
-                }}
-                media={media as Media}
-              />
-            </Link>
+                <Link className="relative h-full w-full" href={`/products/${product.slug}`}>
+                  <GridTileImage
+                    label={{
+                      amount: product.priceInUSD!,
+                      title: product.title,
+                    }}
+                    media={media}
+                  />
+                </Link>
               )
             })()}
           </CarouselItem>

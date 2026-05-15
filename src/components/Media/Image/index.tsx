@@ -9,6 +9,7 @@ import React from 'react'
 import type { Props as MediaProps } from '../types'
 
 import { cssVariables } from '@/cssVariables'
+import { PLACEHOLDER_IMAGE_URL } from '@/utilities/placeholderImage'
 
 const { breakpoints } = cssVariables
 
@@ -51,6 +52,14 @@ export const Image: React.FC<MediaProps> = (props) => {
 
     // src = `${process.env.NEXT_PUBLIC_SERVER_URL}${url}`
     src = url?.startsWith('http') ? url : url || ''
+  }
+
+  if (typeof src === 'string' && src.trim() === '') {
+    src = PLACEHOLDER_IMAGE_URL
+    if (!fill) {
+      width = width ?? 1600
+      height = height ?? 1067
+    }
   }
 
   // NOTE: this is used by the browser to determine which image to download at different screen sizes

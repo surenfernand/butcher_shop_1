@@ -1,6 +1,7 @@
 'use client'
 
 import type { Media, Product } from '@/payload-types'
+import { mediaUrlOrPlaceholder } from '@/utilities/placeholderImage'
 import Image from 'next/image'
 import { useState } from 'react'
 
@@ -21,20 +22,14 @@ export default function ProductGallery({ product }: Props) {
   return (
     <div className="flex flex-col gap-3 md:gap-4">
       <div className="relative aspect-[4/3] w-full max-h-[420px] overflow-hidden border border-white/10 bg-[#111] md:max-h-[480px]">
-        {mainImage?.url ? (
-          <Image
-            src={mainImage.url}
-            alt={mainImage.alt || 'Product image'}
-            fill
-            sizes="(max-width: 1024px) 100vw, 58vw"
-            priority
-            className="object-cover"
-          />
-        ) : (
-          <div className="flex h-full min-h-[200px] items-center justify-center text-sm text-white/40">
-            No image
-          </div>
-        )}
+        <Image
+          src={mediaUrlOrPlaceholder(mainImage?.url)}
+          alt={mainImage?.alt || 'Product image'}
+          fill
+          sizes="(max-width: 1024px) 100vw, 58vw"
+          priority
+          className="object-cover"
+        />
       </div>
 
       <div className="grid grid-cols-3 gap-2 sm:gap-3">
@@ -46,26 +41,22 @@ export default function ProductGallery({ product }: Props) {
             <button
               key={slotIndex}
               type="button"
-              disabled={!img?.url}
-              onClick={() => img?.url && setActiveIndex(slotIndex)}
+              disabled={!img}
+              onClick={() => img && setActiveIndex(slotIndex)}
               className={[
                 'relative aspect-square w-full overflow-hidden border bg-[#111] transition',
-                img?.url ? 'cursor-pointer hover:opacity-95' : 'cursor-default',
+                img ? 'cursor-pointer hover:opacity-95' : 'cursor-default',
                 isActive ? 'border-[#d4af5f]/80 ring-1 ring-[#d4af5f]/40' : 'border-white/10',
               ].join(' ')}
-              aria-label={img?.url ? `View image ${slotIndex + 1}` : 'Empty gallery slot'}
+              aria-label={img ? `View image ${slotIndex + 1}` : 'Empty gallery slot'}
             >
-              {img?.url ? (
-                <Image
-                  src={img.url}
-                  alt={img.alt || `Product image ${slotIndex + 1}`}
-                  fill
-                  sizes="(max-width: 1024px) 33vw, 20vw"
-                  className="object-cover"
-                />
-              ) : (
-                <div className="h-full w-full bg-[#1a1a1a]" aria-hidden />
-              )}
+              <Image
+                src={mediaUrlOrPlaceholder(img?.url)}
+                alt={img?.alt || `Product image ${slotIndex + 1}`}
+                fill
+                sizes="(max-width: 1024px) 33vw, 20vw"
+                className="object-cover"
+              />
             </button>
           )
         })}

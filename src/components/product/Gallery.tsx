@@ -1,9 +1,10 @@
 'use client'
 
-import type { Media as MediaType, Product } from '@/payload-types'
+import type { Product } from '@/payload-types'
 
 import { Media } from '@/components/Media'
 import { GridTileImage } from '@/components/Grid/tile'
+import { PLACEHOLDER_IMAGE_URL } from '@/utilities/placeholderImage'
 import { useSearchParams } from 'next/navigation'
 import React, { useEffect } from 'react'
 
@@ -39,11 +40,17 @@ export const Gallery: React.FC<Props> = ({ gallery }) => {
     }
   }, [searchParams, api, gallery])
 
+  const currentItem = gallery[current]
+  const currentImage = currentItem?.image
+  const currentMedia =
+    typeof currentImage === 'object' && currentImage !== null ? currentImage : undefined
+
   return (
     <div>
       <div className="relative w-full overflow-hidden mb-8">
         <Media
-          resource={gallery[current].image}
+          resource={currentMedia}
+          src={!currentMedia ? PLACEHOLDER_IMAGE_URL : undefined}
           className="w-full"
           imgClassName="w-full rounded-lg"
         />
@@ -52,15 +59,13 @@ export const Gallery: React.FC<Props> = ({ gallery }) => {
       <Carousel setApi={setApi} className="w-full" opts={{ align: 'start', loop: false }}>
         <CarouselContent>
           {gallery.map((item: NonNullable<Product['productGallery']>[number], i: number) => {
-            if (typeof item.image !== 'object') return null
+            const thumb =
+              typeof item.image === 'object' && item.image !== null ? item.image : undefined
+            const key = thumb?.id != null ? String(thumb.id) : `slot-${i}`
 
             return (
-              <CarouselItem
-                className="basis-1/5"
-                key={`${item.image.id}-${i}`}
-                onClick={() => setCurrent(i)}
-              >
-                <GridTileImage active={i === current} media={item.image} />
+              <CarouselItem className="basis-1/5" key={key} onClick={() => setCurrent(i)}>
+                <GridTileImage active={i === current} media={thumb} />
               </CarouselItem>
             )
           })}

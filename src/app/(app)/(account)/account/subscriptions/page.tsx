@@ -1,5 +1,6 @@
 import type { Media, Order, Product } from '@/payload-types'
 
+import { mediaUrlOrPlaceholder } from '@/utilities/placeholderImage'
 import { getPurchaseUnitPriceInCents } from '@/utilities/purchasePricing'
 import configPromise from '@payload-config'
 import { headers as getHeaders } from 'next/headers'
@@ -138,15 +139,11 @@ export default async function SubscriptionsPage() {
               >
                 <div className="relative bg-muted">
                   <div className="flex h-full min-h-[300px] items-center justify-center">
-                    {image?.url ? (
-                      <img
-                        src={image.url}
-                        alt={image.alt || product?.title || 'Subscription product'}
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="text-center text-muted-foreground">No product image</div>
-                    )}
+                    <img
+                      src={mediaUrlOrPlaceholder(image?.url)}
+                      alt={image?.alt || product?.title || 'Subscription product'}
+                      className="h-full w-full min-h-[300px] object-cover"
+                    />
                   </div>
                 </div>
 

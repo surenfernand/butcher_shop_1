@@ -1,5 +1,6 @@
 import type { DefaultDocumentIDType } from 'payload'
 import type { Media } from '@/payload-types'
+import { mediaUrlOrPlaceholder } from '@/utilities/placeholderImage'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
@@ -48,19 +49,13 @@ export const AboutStoryBlock: React.FC<Props> = ({
         </div>
 
         <div className="relative min-h-[420px] overflow-hidden border border-[#d3a84b]/20 bg-[#1a1c1c]">
-          {imageUrl ? (
-            <Image
-              src={imageUrl}
-              alt={media?.alt || title || 'About story image'}
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover grayscale transition duration-700 hover:grayscale-0"
-            />
-          ) : (
-            <div className="flex h-full min-h-[420px] items-center justify-center px-10 text-center text-sm uppercase tracking-[0.2em] text-[#9a8f7e]">
-              Upload a story image from the admin panel
-            </div>
-          )}
+          <Image
+            src={mediaUrlOrPlaceholder(imageUrl)}
+            alt={media?.alt || title || 'About story image'}
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover grayscale transition duration-700 hover:grayscale-0"
+          />
         </div>
       </div>
     </section>

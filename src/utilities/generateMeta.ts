@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import type { Page, Product } from '../payload-types'
 
 import { mergeOpenGraph } from './mergeOpenGraph'
+import { PLACEHOLDER_IMAGE_URL } from './placeholderImage'
 
 export const generateMeta = async (args: {
   doc: Page | Product | null | undefined
@@ -31,6 +32,10 @@ export const generateMeta = async (args: {
       ? imageUrl
       : `${process.env.NEXT_PUBLIC_SERVER_URL}${imageUrl}`)
 
+  const ogImages = ogImage
+    ? [{ url: ogImage }]
+    : [{ url: PLACEHOLDER_IMAGE_URL }]
+
   return {
     description: pageMeta?.description,
     openGraph: mergeOpenGraph({
@@ -39,13 +44,7 @@ export const generateMeta = async (args: {
             description: pageMeta.description,
           }
         : {}),
-      images: ogImage
-        ? [
-            {
-              url: ogImage,
-            },
-          ]
-        : undefined,
+      images: ogImages,
       title: pageMeta?.title || doc?.title || 'Payload Ecommerce Template',
       url: Array.isArray(doc?.slug) ? doc?.slug.join('/') : '/',
     }),

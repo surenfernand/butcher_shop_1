@@ -2,6 +2,7 @@ import type { Product } from '@/payload-types'
 
 import { Media } from '@/components/Media'
 import { Price } from '@/components/Price'
+import { PLACEHOLDER_IMAGE_URL } from '@/utilities/placeholderImage'
 import clsx from 'clsx'
 import Link from 'next/link'
 import React from 'react'
@@ -26,8 +27,6 @@ export const LuxuryProductCard: React.FC<Props> = ({ product }) => {
   const firstImage = product.productGallery?.[0]?.image
   const image = typeof firstImage === 'object' && firstImage !== null ? firstImage : null
 
-  console.log(image);
-
   const originText = product.origin ? originLabels[product.origin] || product.origin : ''
 
   return (
@@ -40,17 +39,16 @@ export const LuxuryProductCard: React.FC<Props> = ({ product }) => {
             </div>
           ) : null}
 
-          {image ? (
-            <Media
-              className="relative aspect-[4/4.4] w-full bg-[#111]"
-              imgClassName={clsx(
-                'h-full w-full object-cover h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]',
-              )}
-              resource={image as never}
-            />
-          ) : (
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-          )}
+          <Media
+            fill
+            className="relative aspect-[4/4.4] w-full bg-[#111]"
+            imgClassName={clsx(
+              'h-full w-full object-cover h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]',
+            )}
+            resource={image as never}
+            src={!image ? PLACEHOLDER_IMAGE_URL : undefined}
+          />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
         </div>
 
         <div className="space-y-3 p-6">

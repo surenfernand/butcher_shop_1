@@ -1,6 +1,7 @@
 import { Media } from '@/components/Media'
 import { Price } from '@/components/Price'
 import config from '@payload-config'
+import { PLACEHOLDER_IMAGE_URL } from '@/utilities/placeholderImage'
 import Link from 'next/link'
 import { getPayload } from 'payload'
 import { Suspense } from 'react'
@@ -92,11 +93,12 @@ export const ProductGridBlock = async ({
                     className="group block overflow-hidden border border-white/5 bg-[#121414] transition-all duration-300 ease-out hover:-translate-y-1 hover:border-[#d3a84b]/40 hover:shadow-2xl hover:shadow-black/40"
                   >
                     <div className="relative h-[300px] overflow-hidden bg-black">
-                      {image ? <Media
-                        resource={image}
+                      <Media
+                        resource={image ?? undefined}
                         fill
                         imgClassName="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                      /> : null}
+                        src={!image ? PLACEHOLDER_IMAGE_URL : undefined}
+                      />
 
                       {product.eyebrow ? (
                         <span className="absolute left-3 top-3 bg-black px-2 py-1 text-xs text-yellow-400 transition-all duration-300 ease-out group-hover:-translate-y-0.5 group-hover:bg-yellow-500 group-hover:text-black">
