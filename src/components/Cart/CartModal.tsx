@@ -16,7 +16,7 @@ import { usePathname } from 'next/navigation'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { Product } from '@/payload-types'
-import { mediaUrlOrPlaceholder } from '@/utilities/placeholderImage'
+import { mediaUrlOrPlaceholder, shouldBypassNextImageOptimizer } from '@/utilities/placeholderImage'
 import { getPurchaseUnitPriceInCents } from '@/utilities/purchasePricing'
 import { CartTimerModal } from './CartTimerModal'
 import { DeleteItemButton } from './DeleteItemButton'
@@ -276,6 +276,8 @@ export function CartModal() {
                         .join(' ')
                       : ''
 
+                    const thumbSrc = mediaUrlOrPlaceholder(image?.url, 'cart')
+
                     return (
                       <li key={i} className="flex items-start gap-4">
                         <Link
@@ -287,8 +289,9 @@ export function CartModal() {
                               alt={image?.alt || product?.title || ''}
                               className="h-full w-full object-cover"
                               height={120}
-                              src={mediaUrlOrPlaceholder(image?.url, 'cart')}
+                              src={thumbSrc}
                               width={120}
+                              unoptimized={shouldBypassNextImageOptimizer(thumbSrc)}
                             />
                           </div>
                         </Link>

@@ -1,7 +1,7 @@
 'use client'
 
 import type { Media, Product } from '@/payload-types'
-import { mediaUrlOrPlaceholder } from '@/utilities/placeholderImage'
+import { mediaUrlOrPlaceholder, shouldBypassNextImageOptimizer } from '@/utilities/placeholderImage'
 import Image from 'next/image'
 import { useState } from 'react'
 
@@ -18,16 +18,18 @@ export default function ProductGallery({ product }: Props) {
 
   const mainImage = gallery[activeIndex] ?? gallery[0]
   const thumbSlots = [1, 2, 3] as const
+  const mainSrc = mediaUrlOrPlaceholder(mainImage?.url, 'gallery')
 
   return (
     <div className="flex flex-col gap-3 md:gap-4">
       <div className="relative aspect-[4/3] w-full max-h-[420px] overflow-hidden border border-white/10 bg-[#111] md:max-h-[480px]">
         <Image
-          src={mediaUrlOrPlaceholder(mainImage?.url, 'gallery')}
+          src={mainSrc}
           alt={mainImage?.alt || 'Product image'}
           fill
           sizes="(max-width: 1024px) 100vw, 58vw"
           priority
+          unoptimized={shouldBypassNextImageOptimizer(mainSrc)}
           className="object-cover"
         />
       </div>
@@ -36,6 +38,8 @@ export default function ProductGallery({ product }: Props) {
         {thumbSlots.map((slotIndex) => {
           const img = gallery[slotIndex]
           const isActive = activeIndex === slotIndex
+
+          const thumbSrc = mediaUrlOrPlaceholder(img?.url, 'gallery')
 
           return (
             <button
@@ -51,10 +55,11 @@ export default function ProductGallery({ product }: Props) {
               aria-label={img ? `View image ${slotIndex + 1}` : 'Empty gallery slot'}
             >
               <Image
-                src={mediaUrlOrPlaceholder(img?.url, 'gallery')}
+                src={thumbSrc}
                 alt={img?.alt || `Product image ${slotIndex + 1}`}
                 fill
                 sizes="(max-width: 1024px) 33vw, 20vw"
+                unoptimized={shouldBypassNextImageOptimizer(thumbSrc)}
                 className="object-cover"
               />
             </button>

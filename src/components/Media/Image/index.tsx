@@ -83,8 +83,7 @@ export const Image: React.FC<MediaProps> = (props) => {
       .map(([, value]) => `(max-width: ${value}px) ${value}px`)
       .join(', ')
 
-  const srcIsString = typeof src === 'string'
-  const unoptimized = srcIsString && shouldBypassNextImageOptimizer(src)
+  const unoptimized = typeof src === 'string' && shouldBypassNextImageOptimizer(src)
 
   return (
     <NextImage

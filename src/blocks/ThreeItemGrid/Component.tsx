@@ -1,5 +1,5 @@
 import type { Media, Product, ThreeItemGridBlock as ThreeItemGridBlockProps } from '@/payload-types'
-import { mediaUrlOrPlaceholder } from '@/utilities/placeholderImage'
+import { mediaUrlOrPlaceholder, shouldBypassNextImageOptimizer } from '@/utilities/placeholderImage'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { DefaultDocumentIDType } from 'payload'
@@ -22,6 +22,7 @@ const ProductCard: React.FC<CardProps> = ({ item }) => {
   const image = item.productGallery?.[0]?.image
   const media = typeof image === 'object' && image !== null ? image : undefined
   const imageUrl = media?.url
+  const cardSrc = mediaUrlOrPlaceholder(imageUrl, 'editorial')
 
   if (!item || !item.slug) return null
 
@@ -32,10 +33,11 @@ const ProductCard: React.FC<CardProps> = ({ item }) => {
     >
       <div className="relative aspect-[4/4] w-full">
         <Image
-          src={mediaUrlOrPlaceholder(imageUrl, 'editorial')}
+          src={cardSrc}
           alt={media?.alt || item.title || 'Product'}
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
+          unoptimized={shouldBypassNextImageOptimizer(cardSrc)}
           className="object-cover transition duration-500 group-hover:scale-105"
         />
 

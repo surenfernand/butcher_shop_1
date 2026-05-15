@@ -1,6 +1,6 @@
 import type { InfoSectionBlock as InfoSectionBlockProps, Media } from '@/payload-types'
 import type { DefaultDocumentIDType } from 'payload'
-import { mediaUrlOrPlaceholder } from '@/utilities/placeholderImage'
+import { mediaUrlOrPlaceholder, shouldBypassNextImageOptimizer } from '@/utilities/placeholderImage'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
@@ -22,6 +22,7 @@ export const InfoSectionBlock: React.FC<Props> = ({
 }) => {
   const media = image as Media | undefined
   const imageUrl = media?.url
+  const infoSrc = mediaUrlOrPlaceholder(imageUrl, 'info')
 
   return (
     <section className={['py-20', className].filter(Boolean).join(' ')}>
@@ -29,10 +30,11 @@ export const InfoSectionBlock: React.FC<Props> = ({
         <div className="grid items-center gap-10 md:grid-cols-[1.35fr_0.95fr]">
           <div className="relative aspect-[4/3] w-full overflow-hidden bg-black">
             <Image
-              src={mediaUrlOrPlaceholder(imageUrl, 'info')}
+              src={infoSrc}
               alt={media?.alt || title || 'Info section image'}
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
+              unoptimized={shouldBypassNextImageOptimizer(infoSrc)}
               className="object-cover"
             />
           </div>
