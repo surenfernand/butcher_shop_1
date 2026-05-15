@@ -4,7 +4,7 @@ import type { Product } from '@/payload-types'
 
 import { Media } from '@/components/Media'
 import { GridTileImage } from '@/components/Grid/tile'
-import { PLACEHOLDER_IMAGE_URL } from '@/utilities/placeholderImage'
+import { placeholderFor } from '@/utilities/placeholderImage'
 import { useSearchParams } from 'next/navigation'
 import React, { useEffect } from 'react'
 
@@ -50,7 +50,7 @@ export const Gallery: React.FC<Props> = ({ gallery }) => {
       <div className="relative w-full overflow-hidden mb-8">
         <Media
           resource={currentMedia}
-          src={!currentMedia ? PLACEHOLDER_IMAGE_URL : undefined}
+          src={!currentMedia ? placeholderFor('gallery') : undefined}
           className="w-full"
           imgClassName="w-full rounded-lg"
         />
@@ -65,7 +65,11 @@ export const Gallery: React.FC<Props> = ({ gallery }) => {
 
             return (
               <CarouselItem className="basis-1/5" key={key} onClick={() => setCurrent(i)}>
-                <GridTileImage active={i === current} media={thumb} />
+                <GridTileImage
+                  active={i === current}
+                  media={thumb}
+                  placeholderArea="gallery"
+                />
               </CarouselItem>
             )
           })}

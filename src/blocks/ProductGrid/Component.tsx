@@ -1,7 +1,7 @@
 import { Media } from '@/components/Media'
 import { Price } from '@/components/Price'
 import config from '@payload-config'
-import { PLACEHOLDER_IMAGE_URL } from '@/utilities/placeholderImage'
+import { placeholderFor } from '@/utilities/placeholderImage'
 import Link from 'next/link'
 import { getPayload } from 'payload'
 import { Suspense } from 'react'
@@ -97,7 +97,7 @@ export const ProductGridBlock = async ({
                         resource={image ?? undefined}
                         fill
                         imgClassName="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                        src={!image ? PLACEHOLDER_IMAGE_URL : undefined}
+                        src={!image ? placeholderFor('product') : undefined}
                       />
 
                       {product.eyebrow ? (

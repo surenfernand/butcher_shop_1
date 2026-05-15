@@ -2,7 +2,8 @@ import type { Media as MediaType } from '@/payload-types'
 
 import { Label } from '@/components/Grid/Label'
 import { Media } from '@/components/Media'
-import { PLACEHOLDER_IMAGE_URL } from '@/utilities/placeholderImage'
+import type { PlaceholderArea } from '@/utilities/placeholderImage'
+import { placeholderFor } from '@/utilities/placeholderImage'
 import clsx from 'clsx'
 import React from 'react'
 
@@ -15,12 +16,15 @@ type Props = {
     title: string
   }
   media?: MediaType | null
+  /** When `media` is missing, which built-in / env placeholder to use */
+  placeholderArea?: PlaceholderArea
 }
 
 export const GridTileImage: React.FC<Props> = ({
   active,
   isInteractive = true,
   label,
+  placeholderArea = 'product',
   ...props
 }) => {
   return (
@@ -41,7 +45,7 @@ export const GridTileImage: React.FC<Props> = ({
         height={80}
         imgClassName="h-full w-full object-cover"
         resource={props.media ?? undefined}
-        src={!props.media ? PLACEHOLDER_IMAGE_URL : undefined}
+        src={!props.media ? placeholderFor(placeholderArea) : undefined}
         width={80}
       />
       {label ? <Label amount={label.amount} position={label.position} title={label.title} /> : null}

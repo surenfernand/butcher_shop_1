@@ -14,7 +14,7 @@ import { MobileMenu } from './MobileMenu'
 import { Moon, Search, Sun, User } from 'lucide-react'
 
 import { Media } from '@/components/Media'
-import { PLACEHOLDER_IMAGE_URL } from '@/utilities/placeholderImage'
+import { placeholderFor } from '@/utilities/placeholderImage'
 
 type Props = {
   header: Header
@@ -57,7 +57,7 @@ export function HeaderClient({ header }: Props) {
               }
               src={
                 !header.logo || typeof header.logo !== 'object'
-                  ? PLACEHOLDER_IMAGE_URL
+                  ? placeholderFor('logo')
                   : undefined
               }
               alt="Home"

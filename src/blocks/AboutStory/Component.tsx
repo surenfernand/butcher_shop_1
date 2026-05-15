@@ -50,7 +50,7 @@ export const AboutStoryBlock: React.FC<Props> = ({
 
         <div className="relative min-h-[420px] overflow-hidden border border-[#d3a84b]/20 bg-[#1a1c1c]">
           <Image
-            src={mediaUrlOrPlaceholder(imageUrl)}
+            src={mediaUrlOrPlaceholder(imageUrl, 'story')}
             alt={media?.alt || title || 'About story image'}
             fill
             sizes="(max-width: 768px) 100vw, 50vw"

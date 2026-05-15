@@ -5,7 +5,7 @@ import type { Page } from '@/payload-types'
 import { CMSLink } from '@/components/Link'
 import { Media } from '@/components/Media'
 import { RichText } from '@/components/RichText'
-import { PLACEHOLDER_IMAGE_URL } from '@/utilities/placeholderImage'
+import { placeholderFor } from '@/utilities/placeholderImage'
 
 export const MediumImpactHero: React.FC<Page['hero']> = ({ links, media, richText }) => {
   return (
@@ -33,7 +33,7 @@ export const MediumImpactHero: React.FC<Page['hero']> = ({ links, media, richTex
             priority
             resource={media && typeof media === 'object' ? media : undefined}
             src={
-              !media || typeof media !== 'object' ? PLACEHOLDER_IMAGE_URL : undefined
+              !media || typeof media !== 'object' ? placeholderFor('hero') : undefined
             }
           />
           {media && typeof media === 'object' && media?.caption && (

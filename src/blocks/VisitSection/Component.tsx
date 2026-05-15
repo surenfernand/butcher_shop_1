@@ -49,7 +49,7 @@ export const VisitSectionBlock: React.FC<Props> = ({
 
         <div className="relative min-h-[420px] overflow-hidden bg-[#1a1c1c] md:col-span-8">
           <Image
-            src={mediaUrlOrPlaceholder(imageUrl)}
+            src={mediaUrlOrPlaceholder(imageUrl, 'location')}
             alt={media?.alt || locationLabel || 'Location image'}
             fill
             sizes="(max-width: 768px) 100vw, 50vw"

@@ -9,7 +9,7 @@ import React from 'react'
 import type { Props as MediaProps } from '../types'
 
 import { cssVariables } from '@/cssVariables'
-import { PLACEHOLDER_IMAGE_URL } from '@/utilities/placeholderImage'
+import { placeholderFor } from '@/utilities/placeholderImage'
 
 const { breakpoints } = cssVariables
 
@@ -55,7 +55,7 @@ export const Image: React.FC<MediaProps> = (props) => {
   }
 
   if (typeof src === 'string' && src.trim() === '') {
-    src = PLACEHOLDER_IMAGE_URL
+    src = placeholderFor('default')
     if (!fill) {
       width = width ?? 1600
       height = height ?? 1067

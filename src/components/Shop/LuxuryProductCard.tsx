@@ -2,7 +2,7 @@ import type { Media as MediaType, Product } from '@/payload-types'
 
 import { Media } from '@/components/Media'
 import { Price } from '@/components/Price'
-import { PLACEHOLDER_IMAGE_URL } from '@/utilities/placeholderImage'
+import { placeholderFor } from '@/utilities/placeholderImage'
 import clsx from 'clsx'
 import Link from 'next/link'
 import React from 'react'
@@ -47,7 +47,7 @@ export const LuxuryProductCard: React.FC<Props> = ({ product }) => {
               'h-full w-full object-cover h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]',
             )}
             resource={image ?? undefined}
-            src={!image ? PLACEHOLDER_IMAGE_URL : undefined}
+            src={!image ? placeholderFor('product') : undefined}
           />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
         </div>

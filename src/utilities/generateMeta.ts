@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import type { Page, Product } from '../payload-types'
 
 import { mergeOpenGraph } from './mergeOpenGraph'
-import { PLACEHOLDER_IMAGE_URL } from './placeholderImage'
+import { placeholderFor } from './placeholderImage'
 
 export const generateMeta = async (args: {
   doc: Page | Product | null | undefined
@@ -34,7 +34,7 @@ export const generateMeta = async (args: {
 
   const ogImages = ogImage
     ? [{ url: ogImage }]
-    : [{ url: PLACEHOLDER_IMAGE_URL }]
+    : [{ url: placeholderFor('seo') }]
 
   return {
     description: pageMeta?.description,

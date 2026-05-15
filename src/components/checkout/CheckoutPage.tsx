@@ -27,7 +27,7 @@ import {
   getPurchaseUnitPriceInCents,
   type PurchaseType,
 } from '@/utilities/purchasePricing'
-import { PLACEHOLDER_IMAGE_URL } from '@/utilities/placeholderImage'
+import { placeholderFor } from '@/utilities/placeholderImage'
 import { useAddresses, useCart, usePayments } from '@payloadcms/plugin-ecommerce/client/react'
 import { DayPicker } from 'react-day-picker'
 import 'react-day-picker/dist/style.css'
@@ -768,7 +768,7 @@ export const CheckoutPage: React.FC = () => {
                         }
                         src={
                           !image || typeof image === 'string'
-                            ? PLACEHOLDER_IMAGE_URL
+                            ? placeholderFor('cart')
                             : undefined
                         }
                         alt={title || ''}

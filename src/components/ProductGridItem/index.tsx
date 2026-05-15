@@ -5,7 +5,7 @@ import React from 'react'
 import clsx from 'clsx'
 import { Media } from '@/components/Media'
 import { Price } from '@/components/Price'
-import { PLACEHOLDER_IMAGE_URL } from '@/utilities/placeholderImage'
+import { placeholderFor } from '@/utilities/placeholderImage'
 
 type Props = {
   product: Partial<Product>
@@ -46,7 +46,7 @@ export const ProductGridItem: React.FC<Props> = ({ product }) => {
           'transition duration-300 ease-in-out group-hover:scale-102': true,
         })}
         resource={image}
-        src={!image ? PLACEHOLDER_IMAGE_URL : undefined}
+        src={!image ? placeholderFor('product') : undefined}
         alt={product.title || 'Product'}
         width={80}
       />

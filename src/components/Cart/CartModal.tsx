@@ -287,7 +287,7 @@ export function CartModal() {
                               alt={image?.alt || product?.title || ''}
                               className="h-full w-full object-cover"
                               height={120}
-                              src={mediaUrlOrPlaceholder(image?.url)}
+                              src={mediaUrlOrPlaceholder(image?.url, 'cart')}
                               width={120}
                             />
                           </div>

@@ -5,7 +5,7 @@ import { FooterSocialLink } from '@/components/Footer/FooterSocialLink'
 import type { Footer as FooterType } from '@/payload-types'
 // import { LogoIcon } from '@/components/icons/logo'
 import { Media } from '@/components/Media'
-import { PLACEHOLDER_IMAGE_URL } from '@/utilities/placeholderImage'
+import { placeholderFor } from '@/utilities/placeholderImage'
 import { getCachedGlobal } from '@/utilities/getGlobals'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -31,7 +31,7 @@ export async function Footer() {
                 }
                 src={
                   !footer.logo || typeof footer.logo !== 'object'
-                    ? PLACEHOLDER_IMAGE_URL
+                    ? placeholderFor('logo')
                     : undefined
                 }
                 alt={footer.brandName || 'The Butcher’s Craft'}

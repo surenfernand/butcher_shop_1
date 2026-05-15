@@ -140,7 +140,7 @@ export default async function SubscriptionsPage() {
                 <div className="relative bg-muted">
                   <div className="flex h-full min-h-[300px] items-center justify-center">
                     <img
-                      src={mediaUrlOrPlaceholder(image?.url)}
+                      src={mediaUrlOrPlaceholder(image?.url, 'product')}
                       alt={image?.alt || product?.title || 'Subscription product'}
                       className="h-full w-full min-h-[300px] object-cover"
                     />

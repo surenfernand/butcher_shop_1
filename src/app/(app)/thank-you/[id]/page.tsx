@@ -2,7 +2,7 @@ import type { Order } from '@/payload-types'
 
 import { Media } from '@/components/Media'
 import { getOrderLineProductImage } from '@/utilities/getOrderLineProductImage'
-import { PLACEHOLDER_IMAGE_URL } from '@/utilities/placeholderImage'
+import { placeholderFor } from '@/utilities/placeholderImage'
 import { getPurchaseUnitPriceInCents, PurchaseType } from '@/utilities/purchasePricing'
 import { batchResolveOrderLinesForPricing } from '@/utilities/resolveOrderLinePricingDocs'
 import configPromise from '@payload-config'
@@ -223,7 +223,7 @@ export default async function ThankYouPage({ params, searchParams }: PageProps) 
                         fill
                         imgClassName="object-cover"
                         resource={image}
-                        src={!image ? PLACEHOLDER_IMAGE_URL : undefined}
+                        src={!image ? placeholderFor('cart') : undefined}
                         alt={product.title || ''}
                       />
                     </div>

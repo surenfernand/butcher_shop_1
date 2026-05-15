@@ -32,7 +32,7 @@ const ProductCard: React.FC<CardProps> = ({ item }) => {
     >
       <div className="relative aspect-[4/4] w-full">
         <Image
-          src={mediaUrlOrPlaceholder(imageUrl)}
+          src={mediaUrlOrPlaceholder(imageUrl, 'editorial')}
           alt={media?.alt || item.title || 'Product'}
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
