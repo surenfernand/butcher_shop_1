@@ -50,8 +50,12 @@ export const Image: React.FC<MediaProps> = (props) => {
 
     const filename = fullFilename
 
-    // src = `${process.env.NEXT_PUBLIC_SERVER_URL}${url}`
-    src = url?.startsWith('http') ? url : url || ''
+    const raw = url?.startsWith('http') ? url : url || ''
+    const base =
+      typeof process !== 'undefined'
+        ? process.env.NEXT_PUBLIC_SERVER_URL?.replace(/\/$/, '') || ''
+        : ''
+    src = raw.startsWith('/') && base ? `${base}${raw}` : raw
   }
 
   if (typeof src === 'string' && shouldUseTempPlaceholder(src)) {

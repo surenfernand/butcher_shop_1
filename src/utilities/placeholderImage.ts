@@ -5,7 +5,12 @@
  * `next.config.ts` → `images.remotePatterns`. `next/image` uses `unoptimized` for that host
  * (see `shouldBypassNextImageOptimizer`) so the optimizer does not block requests.
  *
- * **Until S3 is connected** — see `tempMediaBypassEnabled` / `shouldUseTempPlaceholder`.
+ * **Until S3 is connected**
+ * - `tempMediaBypassEnabled()` is **on in production** by default (so [Render](https://render.com)
+ *   without S3 swaps broken `/api/media/…` for Unsplash). It is **off in `next dev`** for local uploads.
+ * - Set **`NEXT_PUBLIC_TEMP_MEDIA_UNTIL_S3=false`** in production when S3 (or disk) URLs are valid.
+ * - Set **`NEXT_PUBLIC_SERVER_URL`** to your public site URL at **build** time so `next.config`
+ *   `remotePatterns` matches your host for absolute media URLs.
  *
  * Overrides: `NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL`, or `NEXT_PUBLIC_PLACEHOLDER_<AREA>_URL`
  * (AREA uppercase, e.g. `NEXT_PUBLIC_PLACEHOLDER_HERO_URL`).
@@ -66,13 +71,20 @@ function readEnv(key: string): string | undefined {
   return v || undefined
 }
 
-/** When true, CMS `url` values that point at storage/API are ignored in favor of placeholders. */
+/**
+ * When true, `shouldUseTempPlaceholder` replaces Payload `/api/media` and common cloud URLs
+ * with Unsplash placeholders.
+ *
+ * Defaults **on in production** (e.g. [Render](https://render.com) without S3) and **off in
+ * `next dev`** so local disk uploads still load. Override with `NEXT_PUBLIC_TEMP_MEDIA_UNTIL_S3`
+ * (`true` / `false`).
+ */
 export function tempMediaBypassEnabled(): boolean {
   if (readEnv('NEXT_PUBLIC_MEDIA_USE_TEMP_IMAGES') === 'true') return true
   const flag = readEnv('NEXT_PUBLIC_TEMP_MEDIA_UNTIL_S3')
-  if (flag === 'true') return true
   if (flag === 'false') return false
-  return process.env.NODE_ENV === 'development'
+  if (flag === 'true') return true
+  return process.env.NODE_ENV === 'production'
 }
 
 /**
