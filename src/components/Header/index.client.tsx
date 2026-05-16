@@ -51,7 +51,7 @@ export function HeaderClient({ header }: Props) {
         <div className="flex flex-1 items-center">
           <Link href="/" className="flex items-center">
 
-            <Media
+            {/* <Media
               resource={
                 header.logo && typeof header.logo === 'object' ? header.logo : undefined
               }
@@ -62,11 +62,11 @@ export function HeaderClient({ header }: Props) {
               }
               alt="Home"
               imgClassName="h-20 w-auto object-contain"
-            />
+            /> */}
 
-            {/* <span className="text-md font-black uppercase tracking-wide text-[#d4a63c]">
+            <span className="text-md font-black uppercase tracking-wide text-[#d4a63c]">
               The Butcher’s Craft
-            </span> */}
+            </span>
 
           </Link>
         </div>
