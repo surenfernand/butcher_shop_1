@@ -43,8 +43,17 @@ const PLACEHOLDER_CDN_HOSTS = new Set(['images.unsplash.com'])
 
 /** Use with `<Image unoptimized={...} />` for built-in placeholder CDNs. */
 export function shouldBypassNextImageOptimizer(url: string): boolean {
+  if (url.startsWith('/api/media/')) return true
   try {
-    return PLACEHOLDER_CDN_HOSTS.has(new URL(url).hostname)
+    const { hostname } = new URL(url)
+    if (PLACEHOLDER_CDN_HOSTS.has(hostname)) return true
+    if (
+      process.env.NODE_ENV === 'development' &&
+      (hostname === 'localhost' || hostname === '127.0.0.1')
+    ) {
+      return true
+    }
+    return false
   } catch {
     return false
   }

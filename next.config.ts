@@ -36,6 +36,8 @@ const nextConfig: NextConfig = {
     loadPaths: ['./node_modules/@payloadcms/ui/dist/scss/'],
   },
   images: {
+    // Next.js 16 blocks optimizing images that resolve to 127.0.0.1 / ::1 (localhost media URLs).
+    dangerouslyAllowLocalIP: process.env.NODE_ENV === 'development',
     localPatterns: [
       {
         pathname: '/api/media/file/**',

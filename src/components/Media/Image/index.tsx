@@ -51,11 +51,9 @@ export const Image: React.FC<MediaProps> = (props) => {
     const filename = fullFilename
 
     const raw = url?.startsWith('http') ? url : url || ''
-    const base =
-      typeof process !== 'undefined'
-        ? process.env.NEXT_PUBLIC_SERVER_URL?.replace(/\/$/, '') || ''
-        : ''
-    src = raw.startsWith('/') && base ? `${base}${raw}` : raw
+    // Same-origin media: use relative paths so next/image matches `localPatterns` in next.config.
+    // Absolute http://localhost:… URLs fail with "url parameter is not allowed" / private IP errors.
+    src = raw.startsWith('/') ? raw : raw
   }
 
   if (typeof src === 'string' && shouldUseTempPlaceholder(src)) {
