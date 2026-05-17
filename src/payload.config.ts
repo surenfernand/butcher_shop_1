@@ -83,8 +83,10 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },
-    // Keep migration SQL in-repo; run `pnpm payload migrate` on deploy before `next build`.
+    // Keep migration SQL in-repo; run `pnpm run migrate:ci` on deploy before `next build`.
     migrationDir: path.resolve(dirname, 'migrations'),
+    // Avoid Drizzle push on production; dev push against prod DB breaks `payload migrate` on Render.
+    push: process.env.NODE_ENV !== 'production',
   }),
   editor: lexicalEditor({
     features: () => {
