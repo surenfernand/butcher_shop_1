@@ -1,51 +1,38 @@
 /**
- * Fallback image URLs when CMS media has no usable `url` (e.g. S3 not wired yet).
+ * Fallback images when CMS media has no usable `url`.
  *
- * **Built-ins** use Unsplash (meat / butcher / craft). Allow `images.unsplash.com` in
- * `next.config.ts` → `images.remotePatterns`. `next/image` uses `unoptimized` for that host
- * (see `shouldBypassNextImageOptimizer`) so the optimizer does not block requests.
+ * Built-ins are **local** assets under `/public/images/placeholders/` (no external CDN).
+ * Override per area with `NEXT_PUBLIC_PLACEHOLDER_<AREA>_URL` or globally with
+ * `NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL`.
  *
- * **Temp Unsplash swap (off by default)**
- * - Set **`NEXT_PUBLIC_TEMP_MEDIA_UNTIL_S3=true`** (or `NEXT_PUBLIC_MEDIA_USE_TEMP_IMAGES=true`)
- *   only when uploads are broken and you want `/api/media` / S3 URLs replaced with placeholders.
- * - Set **`NEXT_PUBLIC_SERVER_URL`** to your public site URL at **build** time so `next.config`
- *   `remotePatterns` matches your host for absolute media URLs.
- *
- * Overrides: `NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL`, or `NEXT_PUBLIC_PLACEHOLDER_<AREA>_URL`
- * (AREA uppercase, e.g. `NEXT_PUBLIC_PLACEHOLDER_HERO_URL`).
+ * Temp swap (off by default): set `NEXT_PUBLIC_TEMP_MEDIA_UNTIL_S3=true` only if you want
+ * `/api/media` / S3 URLs replaced with these local fallbacks until storage is fixed.
  */
 
-/** Unsplash photo path (see https://unsplash.com — hotlink format). */
-const u = (photoPath: string, w: number) =>
-  `https://images.unsplash.com/${photoPath}?auto=format&fit=crop&w=${w}&q=80`
-
-/** Curated online placeholders (meat / butcher / craft / venue). All Unsplash for one allowlisted host. */
-const ONLINE = {
-  default: u('photo-1604503468506-a8da13d82791', 1600),
-  product: u('photo-1604503468506-a8da13d82791', 1600),
-  cart: u('photo-1567521214889-8a446d5f901a', 1200),
-  gallery: u('photo-1588347818038-88fda0d7f1a0', 1600),
-  hero: u('photo-1544025162-d76694265947', 2400),
-  logo: u('photo-1607623813342-90543285690a', 1000),
-  story: u('photo-1588347818038-88fda0d7f1a0', 1600),
-  location: u('photo-1559339352-11d035aa65de', 1600),
-  info: u('photo-1558030006-425675369496', 1600),
-  editorial: u('photo-1567521214889-8a446d5f901a', 1600),
-  featured: u('photo-1599488615731-7e0c95d66f58', 1600),
-  seo: u('photo-1604503468506-a8da13d82791', 1200),
+/** Local static placeholders (served from `public/`). */
+const LOCAL = {
+  default: '/images/placeholders/product.png',
+  product: '/images/placeholders/product.png',
+  cart: '/images/placeholders/product.png',
+  gallery: '/images/placeholders/product.png',
+  hero: '/images/placeholders/hero.png',
+  logo: '/images/placeholders/logo.png',
+  story: '/images/placeholders/product.png',
+  location: '/images/placeholders/product.png',
+  info: '/images/placeholders/product.png',
+  editorial: '/images/placeholders/product.png',
+  featured: '/images/placeholders/product.png',
+  seo: '/images/placeholders/product.png',
 } as const
 
-export type PlaceholderArea = keyof typeof ONLINE
+export type PlaceholderArea = keyof typeof LOCAL
 
-/** Hostnames where we skip Next image optimization (avoids upstream 403 from the optimizer). */
-const PLACEHOLDER_CDN_HOSTS = new Set(['images.unsplash.com'])
-
-/** Use with `<Image unoptimized={...} />` for built-in placeholder CDNs. */
+/** Use with `<Image unoptimized={...} />` when the optimizer cannot fetch the source. */
 export function shouldBypassNextImageOptimizer(url: string): boolean {
   if (url.startsWith('/api/media/')) return true
+  if (url.startsWith('/images/')) return false
   try {
     const { hostname } = new URL(url)
-    if (PLACEHOLDER_CDN_HOSTS.has(hostname)) return true
     if (
       process.env.NODE_ENV === 'development' &&
       (hostname === 'localhost' || hostname === '127.0.0.1')
@@ -79,23 +66,13 @@ function readEnv(key: string): string | undefined {
   return v || undefined
 }
 
-/**
- * When true, `shouldUseTempPlaceholder` replaces Payload `/api/media` and common cloud URLs
- * with Unsplash placeholders.
- *
- * **Off by default** so CMS uploads (`/api/media`, S3, etc.) render as stored. Opt in with
- * `NEXT_PUBLIC_TEMP_MEDIA_UNTIL_S3=true` or `NEXT_PUBLIC_MEDIA_USE_TEMP_IMAGES=true`.
- */
+/** Off by default — CMS uploads render as stored unless explicitly opted in. */
 export function tempMediaBypassEnabled(): boolean {
   if (readEnv('NEXT_PUBLIC_MEDIA_USE_TEMP_IMAGES') === 'true') return true
   if (readEnv('NEXT_PUBLIC_TEMP_MEDIA_UNTIL_S3') === 'true') return true
   return false
 }
 
-/**
- * True → treat URL as unusable (empty, local Payload media route, or object storage host)
- * and show a placeholder instead. Used without S3 / broken uploads.
- */
 export function shouldUseTempPlaceholder(resolvedUrl: string | null | undefined): boolean {
   if (!tempMediaBypassEnabled()) return false
   const s = (resolvedUrl ?? '').trim()
@@ -112,7 +89,6 @@ export function shouldUseTempPlaceholder(resolvedUrl: string | null | undefined)
   return false
 }
 
-/** Resolved URL for a UI context (env overrides → global → built-in online). */
 export function placeholderFor(area: PlaceholderArea = 'default'): string {
   const perArea = readEnv(AREA_ENV_KEYS[area])
   if (perArea) return perArea
@@ -120,16 +96,14 @@ export function placeholderFor(area: PlaceholderArea = 'default'): string {
   const global = readEnv('NEXT_PUBLIC_PLACEHOLDER_IMAGE_URL')
   if (global) return global
 
-  return ONLINE[area]
+  return LOCAL[area]
 }
 
 /**
  * @deprecated Prefer `placeholderFor('product')` etc.
- * Same resolution as `placeholderFor('default')`.
  */
 export const PLACEHOLDER_IMAGE_URL: string = placeholderFor('default')
 
-/** Returns the media URL when present and usable; otherwise the placeholder for that area. */
 export function mediaUrlOrPlaceholder(
   url: string | null | undefined,
   area: PlaceholderArea = 'product',
