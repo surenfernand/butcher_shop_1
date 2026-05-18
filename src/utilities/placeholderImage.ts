@@ -5,10 +5,9 @@
  * `next.config.ts` → `images.remotePatterns`. `next/image` uses `unoptimized` for that host
  * (see `shouldBypassNextImageOptimizer`) so the optimizer does not block requests.
  *
- * **Until S3 is connected**
- * - `tempMediaBypassEnabled()` is **on in production** by default (so [Render](https://render.com)
- *   without S3 swaps broken `/api/media/…` for Unsplash). It is **off in `next dev`** for local uploads.
- * - Set **`NEXT_PUBLIC_TEMP_MEDIA_UNTIL_S3=false`** in production when S3 (or disk) URLs are valid.
+ * **Temp Unsplash swap (off by default)**
+ * - Set **`NEXT_PUBLIC_TEMP_MEDIA_UNTIL_S3=true`** (or `NEXT_PUBLIC_MEDIA_USE_TEMP_IMAGES=true`)
+ *   only when uploads are broken and you want `/api/media` / S3 URLs replaced with placeholders.
  * - Set **`NEXT_PUBLIC_SERVER_URL`** to your public site URL at **build** time so `next.config`
  *   `remotePatterns` matches your host for absolute media URLs.
  *
@@ -43,9 +42,16 @@ const PLACEHOLDER_CDN_HOSTS = new Set(['images.unsplash.com'])
 
 /** Use with `<Image unoptimized={...} />` for built-in placeholder CDNs. */
 export function shouldBypassNextImageOptimizer(url: string): boolean {
-   
+  if (url.startsWith('/api/media/')) return true
   try {
-    
+    const { hostname } = new URL(url)
+    if (PLACEHOLDER_CDN_HOSTS.has(hostname)) return true
+    if (
+      process.env.NODE_ENV === 'development' &&
+      (hostname === 'localhost' || hostname === '127.0.0.1')
+    ) {
+      return true
+    }
     return false
   } catch {
     return false
@@ -77,16 +83,13 @@ function readEnv(key: string): string | undefined {
  * When true, `shouldUseTempPlaceholder` replaces Payload `/api/media` and common cloud URLs
  * with Unsplash placeholders.
  *
- * Defaults **on in production** (e.g. [Render](https://render.com) without S3) and **off in
- * `next dev`** so local disk uploads still load. Override with `NEXT_PUBLIC_TEMP_MEDIA_UNTIL_S3`
- * (`true` / `false`).
+ * **Off by default** so CMS uploads (`/api/media`, S3, etc.) render as stored. Opt in with
+ * `NEXT_PUBLIC_TEMP_MEDIA_UNTIL_S3=true` or `NEXT_PUBLIC_MEDIA_USE_TEMP_IMAGES=true`.
  */
 export function tempMediaBypassEnabled(): boolean {
   if (readEnv('NEXT_PUBLIC_MEDIA_USE_TEMP_IMAGES') === 'true') return true
-  const flag = readEnv('NEXT_PUBLIC_TEMP_MEDIA_UNTIL_S3')
-  if (flag === 'false') return false
-  if (flag === 'true') return true
-  return process.env.NODE_ENV === 'production'
+  if (readEnv('NEXT_PUBLIC_TEMP_MEDIA_UNTIL_S3') === 'true') return true
+  return false
 }
 
 /**
