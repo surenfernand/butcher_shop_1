@@ -86,7 +86,8 @@ export default buildConfig({
     // Keep migration SQL in-repo; run `pnpm run migrate:ci` on deploy before `next build`.
     migrationDir: path.resolve(dirname, 'migrations'),
     // Avoid Drizzle push on production; dev push against prod DB breaks `payload migrate` on Render.
-    push: process.env.NODE_ENV !== 'production',
+    // Set PAYLOAD_DB_PUSH=false to stop dev from altering a DB whose schema is ahead of this code.
+    push: process.env.NODE_ENV !== 'production' && process.env.PAYLOAD_DB_PUSH !== 'false',
   }),
   editor: lexicalEditor({
     features: () => {
